@@ -1,0 +1,15 @@
+.content {
+  padding: 22px 24px 36px;
+  background: var(--bg);
+  flex: 1;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 16px 14px 28px;
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
+  }
+}

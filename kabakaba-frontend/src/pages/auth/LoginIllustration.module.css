@@ -1,0 +1,156 @@
+.wrap {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+}
+
+.svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.glowDot {
+  fill: var(--orange, #f07840);
+  opacity: 0.3;
+  filter: blur(14px);
+  animation: breathe 4s ease-in-out infinite;
+  transform-origin: 120px 120px;
+}
+
+.ringOuter {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+  stroke-dasharray: 3 6;
+  animation: spin 70s linear infinite;
+  transform-origin: 120px 120px;
+}
+
+.ringInner {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 1;
+  animation: spin 45s linear infinite reverse;
+  transform-origin: 120px 120px;
+}
+
+.orbit {
+  animation: spin 100s linear infinite;
+  transform-origin: 120px 120px;
+}
+
+.spoke {
+  stroke: rgba(240, 120, 64, 0.22);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.node {
+  fill: var(--orange, #f07840);
+  opacity: 0.75;
+  animation: pulse 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.packet {
+  r: 2.4;
+  fill: #fff;
+  filter: drop-shadow(0 0 4px rgba(240, 120, 64, 0.9));
+  offset-rotate: 0deg;
+  animation-name: travel;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+}
+
+.hub {
+  fill: #0d1438;
+  stroke: var(--orange, #f07840);
+  stroke-width: 1.5;
+}
+
+.hubPulse {
+  fill: none;
+  stroke: rgba(240, 120, 64, 0.45);
+  stroke-width: 1.5;
+  animation: ripple 2.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    r: 4;
+  }
+  50% {
+    opacity: 0.9;
+    r: 5.5;
+  }
+}
+
+@keyframes travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  88% {
+    offset-distance: 100%;
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    r: 14;
+    opacity: 0.7;
+  }
+  100% {
+    r: 34;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .wrap {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ringOuter,
+  .ringInner,
+  .orbit,
+  .node,
+  .hubPulse,
+  .glowDot,
+  .packet {
+    animation: none;
+  }
+}

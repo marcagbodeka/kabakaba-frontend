@@ -1,0 +1,2243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nésso!! — Supervision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --indigo:#1B2A6B;--indigo-dark:#0D1438;--orange:#F07840;--peach:#FFE8DC;
+  --bg:#F0F3FA;--surface:#fff;--border:#E2E8F4;--text:#0D1438;--muted:#64748B;
+  --sidebar-w:272px;--radius:14px;--shadow:0 4px 24px rgba(13,20,56,.06);
+  --font:'Plus Jakarta Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.5}
+.page{display:none;width:100%;min-height:100vh}
+.page.active{display:flex;flex-direction:column}
+
+/* ICONS */
+.ico{width:20px;height:20px;flex-shrink:0;display:inline-block;vertical-align:middle}
+.ico-sm{width:16px;height:16px}
+.ico-lg{width:24px;height:24px}
+.ico-xl{width:32px;height:32px}
+.nav-icon .ico,.topbar-icon-wrap .ico{width:18px;height:18px}
+.sidebar .ico{color:rgba(255,255,255,.75)}
+.nav-item.active .ico,.nav-item.parent-active .ico{color:#fff}
+.topbar-icon-wrap{color:var(--indigo);display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:#EEF1FA;border-radius:10px;flex-shrink:0}
+.rank-medal{display:inline-flex;align-items:center;gap:6px;color:var(--orange);font-weight:700}
+
+/* LOGIN */
+.login-wrap{display:flex;min-height:100vh}
+.login-left{background:linear-gradient(160deg,#1B2A6B 0%,#0D1438 100%);width:min(48%,520px);padding:56px 48px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.login-left::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:rgba(240,120,64,.12)}
+.login-illustration{margin-top:40px;opacity:.95}
+.login-right{flex:1;background:var(--surface);display:flex;align-items:center;justify-content:center;padding:56px 40px}
+.login-form{width:100%;max-width:420px}
+.logo{font-size:28px;font-weight:700;color:#fff;letter-spacing:-.02em}.logo span{color:var(--orange)}
+.logo-sub{font-size:15px;color:rgba(255,255,255,.55);margin-top:6px;font-weight:400}
+.steps-list{display:flex;flex-direction:column;gap:16px}
+.step-row{display:flex;align-items:center;gap:14px}
+.step-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
+.step-num.active{background:var(--orange);color:#fff;box-shadow:0 4px 16px rgba(240,120,64,.4)}
+.step-num.done{background:rgba(255,255,255,.18);color:rgba(255,255,255,.85)}
+.step-num.idle{background:rgba(255,255,255,.08);color:rgba(255,255,255,.35)}
+.step-label{font-size:15px;color:#fff;font-weight:500}
+.step-label.done{color:rgba(255,255,255,.45);text-decoration:line-through}
+.step-label.idle{color:rgba(255,255,255,.35)}
+.form-title{font-size:26px;font-weight:700;color:var(--text);margin-bottom:6px;letter-spacing:-.02em}
+.form-sub{font-size:15px;color:var(--muted);margin-bottom:28px}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:14px;font-weight:500;color:#475569;margin-bottom:8px}
+.field input{width:100%;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 16px;font-size:15px;color:var(--text);outline:none;transition:border .2s,box-shadow .2s;font-family:inherit}
+.field input:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(27,42,107,.12)}
+.btn-primary{width:100%;height:48px;background:var(--orange);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;transition:transform .15s,box-shadow .15s;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(240,120,64,.35)}
+.link-small{font-size:14px;color:var(--indigo);text-align:right;display:block;cursor:pointer;margin-top:6px;text-decoration:none;font-weight:500}
+.link-small:hover{text-decoration:underline}
+.link-center{font-size:14px;color:var(--indigo);text-align:center;display:block;cursor:pointer;margin-top:16px;text-decoration:none;font-weight:500}
+.link-center:hover{text-decoration:underline}
+.otp-row{display:flex;gap:10px;justify-content:center;margin:24px 0}
+.otp-box{width:52px;height:60px;border:1.5px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--text)}
+.otp-box.filled{border-color:var(--indigo);background:#EEF1FA}
+.otp-box.cursor{border-color:var(--orange);border-width:2px;box-shadow:0 0 0 3px rgba(240,120,64,.15)}
+.hint-box{background:var(--peach);border-radius:12px;padding:14px 18px;font-size:14px;color:var(--indigo);display:flex;gap:12px;margin-bottom:18px;line-height:1.6;align-items:flex-start}
+.timer{text-align:center;font-size:14px;color:var(--muted);margin-bottom:16px}
+.timer span{color:var(--orange);font-weight:700}
+.success-center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.success-icon{width:88px;height:88px;border-radius:50%;background:var(--peach);display:flex;align-items:center;justify-content:center;color:var(--orange)}
+.success-icon .ico{stroke-width:2.5}
+.progress-bar-wrap{width:100%;max-width:320px;height:5px;background:#E2E8F0;border-radius:4px;overflow:hidden;margin-top:8px}
+.progress-bar-fill{height:100%;background:var(--indigo);border-radius:4px;animation:fill 2s linear forwards}
+@keyframes fill{from{width:0}to{width:100%}}
+
+/* DASHBOARD LAYOUT */
+.dash-layout{display:flex;min-height:100vh;width:100%}
+.sidebar{width:var(--sidebar-w);height:100vh;background:var(--indigo-dark);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;z-index:100;border-right:1px solid rgba(255,255,255,.06)}
+.sidebar-nav{flex:1;overflow-y:auto;min-height:0;padding-bottom:8px}
+.sidebar-logo{padding:24px 24px 20px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.sidebar-logo-text{font-size:20px;font-weight:700;color:#fff;letter-spacing:-.02em}.sidebar-logo-text span{color:var(--orange)}
+.sidebar-logo-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:4px;font-weight:500}
+.nav-section{padding-top:20px}
+.nav-section-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.32);letter-spacing:.1em;text-transform:uppercase;padding:0 24px;margin-bottom:8px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 24px;cursor:pointer;font-size:15px;color:rgba(255,255,255,.65);position:relative;user-select:none;transition:background .15s}
+.nav-item:hover{background:rgba(255,255,255,.06)}
+.nav-item.active{background:rgba(240,120,64,.14);color:#fff;font-weight:500}
+.nav-item.active::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--orange);border-radius:0 3px 3px 0}
+.nav-item.parent-active{color:#fff;font-weight:500}
+.nav-item.parent-active::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--orange);border-radius:0 3px 3px 0}
+.nav-chevron{margin-left:auto;transition:transform .2s;display:flex;align-items:center;color:rgba(255,255,255,.35)}
+.nav-chevron.open{transform:rotate(180deg);color:rgba(255,255,255,.6)}
+.nav-sub{background:rgba(0,0,0,.18);overflow:hidden;max-height:0;transition:max-height .3s ease}
+.nav-sub.open{max-height:240px}
+.nav-sub-item{display:flex;align-items:center;gap:10px;padding:9px 24px 9px 52px;font-size:14px;color:rgba(255,255,255,.45);cursor:pointer;transition:color .15s,background .15s}
+.nav-sub-item:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.04)}
+.nav-sub-item.active{color:#FFE8DC;font-weight:500}
+.nav-sub-item::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.sidebar-bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding:18px 24px;display:flex;align-items:center;gap:12px;flex-shrink:0;background:rgba(0,0,0,.12)}
+.avatar{width:40px;height:40px;border-radius:12px;background:var(--indigo);border:1.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.user-name{font-size:14px;color:rgba(255,255,255,.9);font-weight:600}
+.user-role{font-size:12px;color:rgba(255,255,255,.4);margin-top:1px}
+.logout-btn{margin-left:auto;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);cursor:pointer;transition:background .15s,color .15s;border:none;background:transparent}
+.logout-btn:hover{background:rgba(240,120,64,.15);color:var(--orange)}
+.main-area{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;width:calc(100% - var(--sidebar-w))}
+
+/* TOPBAR */
+.topbar{min-height:64px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:12px 28px;gap:14px;flex-shrink:0;position:sticky;top:0;z-index:50;box-shadow:0 1px 0 rgba(13,20,56,.04)}
+.breadcrumb{font-size:15px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.breadcrumb span{color:var(--text);font-weight:600}
+.breadcrumb .bc-sep{color:var(--border);font-weight:400}
+.breadcrumb .bc-link{cursor:pointer;color:var(--indigo);text-decoration:none;font-weight:500}
+.breadcrumb .bc-link:hover{text-decoration:underline}
+.topbar-badge{background:var(--peach);color:var(--indigo);font-size:13px;font-weight:600;padding:6px 14px;border-radius:20px;display:inline-flex;align-items:center;gap:6px}
+.topbar-badge.red{background:#FEE2E2;color:#B91C1C}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.topbar-btn{width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;color:#64748B;cursor:pointer;transition:background .15s,border-color .15s}
+.topbar-btn:hover{background:#F8FAFC;border-color:#CBD5E1}
+.topbar-select{height:40px;border:1px solid var(--border);border-radius:10px;padding:0 12px;font-size:14px;color:var(--text);background:var(--surface);cursor:pointer;font-family:inherit}
+.back-btn{height:38px;padding:0 16px;border:1px solid var(--indigo);border-radius:10px;background:var(--surface);color:var(--indigo);font-size:14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;transition:background .15s}
+.back-btn:hover{background:#EEF1FA}
+
+/* CONTENT */
+.content{padding:28px 32px 40px;background:var(--bg);flex:1;width:100%;max-width:1440px;margin:0 auto}
+.page-header{margin-bottom:24px}
+.page-header h1{font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--text);margin-bottom:4px}
+.page-header p{font-size:15px;color:var(--muted)}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(13,20,56,.08)}
+.kpi-label{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
+.kpi-value{font-size:28px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap;letter-spacing:-.02em}
+.kpi-value-sm{font-size:22px}
+.kpi-value.orange{color:var(--orange)}
+.kpi-sub{font-size:14px;color:#94A3B8;margin-top:6px}
+.badge-green{background:#DCFCE7;color:#166534;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px}
+.badge-orange{background:#FFEDD5;color:#C2410C;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
+.badge-red{background:#FEE2E2;color:#B91C1C;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
+.badge-gray{background:#F1F5F9;color:#475569;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px}
+.badge-blue{background:#E0E7FF;color:var(--indigo);font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
+.badge-peach{background:var(--peach);color:var(--indigo);font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
+.badge-amber{background:#FEF3C7;color:#92400E;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.card-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-.01em}
+.card-sub{font-size:14px;color:var(--muted);margin-bottom:18px}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-bottom:20px}
+.three-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-bottom:20px}
+
+/* TABLE */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+th{background:#F8FAFC;padding:12px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+td{padding:14px 16px;border-bottom:1px solid #F1F5F9;color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#FAFBFD}
+.rank1 td:first-child{border-left:3px solid var(--orange)}
+.alert-row td:first-child{border-left:3px solid #DC2626}
+
+/* CHARTS — responsive */
+.chart-wrap{width:100%;margin-top:16px}
+.chart-bars{display:flex;align-items:flex-end;gap:clamp(6px,1.2vw,12px);height:clamp(160px,22vh,240px);width:100%;min-height:160px;padding-top:8px}
+.bar{border-radius:6px 6px 0 0;flex:1;min-width:0;transition:opacity .2s}
+.bar-labels{display:flex;justify-content:space-between;gap:4px;margin-top:10px}
+.bar-label{font-size:13px;color:#94A3B8;text-align:center;flex:1;font-weight:500}
+.bar-label.active{color:var(--orange);font-weight:700}
+.chart-stacked{display:flex;gap:clamp(8px,1.5vw,16px);align-items:flex-end;height:clamp(160px,22vh,220px);width:100%;margin:16px 0 8px}
+.chart-stacked-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:6px;height:100%;justify-content:flex-end}
+.chart-stacked-val{font-size:14px;font-weight:700;color:var(--text)}
+.chart-stacked-bar{width:100%;border-radius:6px 6px 0 0;min-height:4px}
+.chart-grouped{display:flex;align-items:flex-end;gap:clamp(4px,1vw,8px);height:clamp(160px,22vh,240px);width:100%;min-height:160px}
+.chart-grouped-item{flex:1;display:flex;flex-direction:column;gap:3px;height:100%;justify-content:flex-end;min-width:0}
+.h-bars{display:flex;flex-direction:column;gap:14px}
+.h-bar-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.h-bar-label{font-size:14px;font-weight:600;color:#475569;width:36px;text-align:right;flex-shrink:0}
+.h-bar-wrap{flex:1;min-width:120px;height:12px;background:#E2E8F0;border-radius:6px;overflow:hidden}
+.h-bar-fill{height:100%;border-radius:6px;transition:width .3s}
+.h-bar-val{font-size:14px;color:var(--text);font-weight:600;min-width:100px}
+.legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:500}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* FILTERS */
+.filter-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.pill{padding:8px 16px;border-radius:20px;border:1px solid var(--border);font-size:14px;font-weight:500;color:#64748B;cursor:pointer;background:var(--surface);transition:all .15s;font-family:inherit}
+.pill:hover{border-color:var(--indigo);color:var(--indigo)}
+.pill.active{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+
+/* MISC */
+.initials{border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0}
+.init-indigo{background:var(--indigo)}
+.init-orange{background:var(--orange)}
+.init-gray{background:#94A3B8}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}
+.dot-green{background:#22C55E}
+.dot-orange{background:var(--orange)}
+.dot-red{background:#EF4444;animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.alert-card{border-left:4px solid var(--orange)!important}
+.alert-card-red{border-left:4px solid #DC2626!important}
+.alert-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.info-banner{background:var(--peach);border-radius:12px;padding:14px 18px;font-size:14px;color:var(--indigo);margin-bottom:18px;display:flex;gap:12px;align-items:flex-start;line-height:1.6}
+.action-btn{padding:8px 16px;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--indigo);color:var(--indigo);background:var(--surface);font-family:inherit;transition:all .15s;white-space:nowrap}
+.action-btn:hover{background:var(--indigo);color:#fff}
+.action-btn.orange{background:var(--orange);color:#fff;border-color:var(--orange)}
+.action-btn.orange:hover{opacity:.92;transform:translateY(-1px)}
+.flex-1{flex:1;min-width:0}
+.campus-card{background:#F8FAFC;border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:box-shadow .15s}
+.campus-card:hover{box-shadow:var(--shadow)}
+.progress-wrap{width:100%;height:8px;background:#E2E8F0;border-radius:4px;overflow:hidden;margin:12px 0 8px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--indigo),#3B4FA0);border-radius:4px}
+.star-row{color:var(--orange);font-size:14px;letter-spacing:2px}
+.comment-card{background:#F8FAFC;border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px}
+.comment-card.negative{border-left:4px solid #DC2626}
+.comment-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.comment-text{font-size:15px;color:#475569;line-height:1.6}
+.tag{display:inline-block;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:500;margin:3px}
+.tag-peach{background:var(--peach);color:var(--indigo)}
+.tag-red{background:#FEE2E2;color:#B91C1C}
+.projection-pills{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+.proj-pill{padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600}
+.proj-pill.peach{background:var(--peach);color:var(--indigo)}
+.proj-pill.indigo{background:var(--indigo);color:#fff}
+.level-card{background:#F8FAFC;border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+
+.detail-row td{font-size:13px;color:#475569;line-height:1.7}
+.detail-row td strong{color:#0D1438}
+
+/* ── PARAMÈTRES ─────────────────────────────────────── */
+.settings-layout{display:flex;gap:24px;align-items:flex-start}
+.settings-sidebar{width:240px;flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px;box-shadow:var(--shadow)}
+.settings-tab-btn{display:flex;align-items:center;gap:12px;width:100%;padding:12px 16px;border-radius:10px;border:none;background:transparent;font-size:15px;font-weight:500;color:var(--muted);cursor:pointer;font-family:inherit;text-align:left;transition:all .15s}
+.settings-tab-btn:hover{background:#F8FAFC;color:var(--text)}
+.settings-tab-btn.active{background:rgba(27,42,107,.08);color:var(--indigo);font-weight:600}
+.settings-tab-btn .ico{color:var(--muted);flex-shrink:0}
+.settings-tab-btn.active .ico{color:var(--indigo)}
+.settings-tab-content{display:none}
+.settings-tab-content:first-of-type{}
+.settings-main{flex:1;min-width:0}
+.field-group{margin-bottom:20px}
+.field-group label{display:block;font-size:14px;font-weight:600;color:#475569;margin-bottom:8px}
+.field-group input,.field-group select{width:100%;height:46px;border:1.5px solid var(--border);border-radius:12px;padding:0 16px;font-size:15px;color:var(--text);outline:none;transition:border .2s,box-shadow .2s;font-family:inherit;background:var(--surface)}
+.field-group input:focus,.field-group select:focus{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(27,42,107,.1)}
+.field-group input[readonly]{background:#F8FAFC;color:var(--muted);cursor:not-allowed}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.save-btn{height:46px;padding:0 28px;background:var(--indigo);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:8px}
+.save-btn:hover{background:#142058;transform:translateY(-1px)}
+.cancel-btn{height:46px;padding:0 24px;background:var(--surface);color:var(--muted);border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.cancel-btn:hover{border-color:#94A3B8;color:var(--text)}
+.btn-row{display:flex;gap:12px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid #F1F5F9}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:15px;font-weight:500;color:var(--text)}
+.toggle-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.toggle{width:48px;height:26px;border-radius:13px;background:#E2E8F0;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none}
+.toggle.on{background:var(--indigo)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.toggle.on::after{left:25px}
+.section-label{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:20px 0 12px}
+.danger-zone{border:1.5px solid #FEE2E2;border-radius:var(--radius);padding:20px 24px;margin-top:8px}
+.danger-zone .card-title{color:#B91C1C}
+.danger-btn{height:40px;padding:0 20px;background:#FEE2E2;color:#B91C1C;border:1.5px solid #FECACA;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.danger-btn:hover{background:#B91C1C;color:#fff}
+.access-card{background:#F8FAFC;border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.access-card:hover{box-shadow:var(--shadow)}
+.role-badge{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.03em}
+.role-supervision{background:rgba(27,42,107,.1);color:var(--indigo)}
+.role-admin{background:rgba(240,120,64,.12);color:#C2410C}
+.qr-placeholder{width:140px;height:140px;background:#F1F5F9;border:2px dashed var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:13px;flex-shrink:0}
+.session-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #F1F5F9}
+.session-row:last-child{border-bottom:none}
+.session-current{background:rgba(27,42,107,.06);border-radius:10px;padding:12px 16px;margin-bottom:2px}
+.add-user-btn{height:46px;padding:0 24px;background:var(--orange);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px;transition:all .15s}
+.add-user-btn:hover{opacity:.92;transform:translateY(-1px)}
+
+/* MOBILE NAV */
+.mobile-menu-btn{display:none;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--indigo);cursor:pointer;flex-shrink:0;transition:background .15s}
+.mobile-menu-btn:hover{background:#F8FAFC}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(13,20,56,.5);z-index:99;opacity:0;transition:opacity .28s ease;backdrop-filter:blur(2px)}
+.sidebar-overlay.visible{display:block;opacity:1}
+.sidebar-close{display:none;position:absolute;top:18px;right:16px;width:36px;height:36px;border-radius:10px;border:none;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);cursor:pointer;align-items:center;justify-content:center;transition:background .15s}
+.sidebar-close:hover{background:rgba(255,255,255,.18);color:#fff}
+body.sidebar-open{overflow:hidden}
+
+@media(max-width:1024px){
+  :root{--sidebar-w:240px}
+  .content{padding:20px 20px 32px}
+  .kpi-value{font-size:24px}
+  .settings-layout{gap:20px}
+  .settings-sidebar{width:200px}
+}
+
+@media(max-width:768px){
+  html{font-size:15px}
+  .login-wrap{flex-direction:column}
+  .login-left{width:100%;padding:36px 24px 32px;min-height:auto}
+  .login-right{padding:32px 24px 40px}
+  .login-illustration{display:none}
+  .logo{font-size:24px}
+  .form-title{font-size:22px}
+  .otp-box{width:44px;height:52px;font-size:20px}
+  .otp-row{gap:8px}
+
+  .mobile-menu-btn{display:flex}
+  .sidebar{
+    width:min(88vw,300px);
+    transform:translateX(-100%);
+    transition:transform .3s cubic-bezier(.4,0,.2,1);
+    z-index:101;
+    box-shadow:4px 0 32px rgba(0,0,0,.2);
+  }
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-close{display:flex}
+  .sidebar-logo{position:relative;padding-right:48px}
+  .main-area{margin-left:0;width:100%}
+
+  .topbar{
+    padding:10px 14px;
+    padding-top:max(10px, env(safe-area-inset-top));
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .topbar-icon-wrap{width:32px;height:32px;border-radius:8px}
+  .topbar-icon-wrap .ico{width:16px;height:16px}
+  .breadcrumb{font-size:13px;flex:1;min-width:0;line-height:1.35}
+  .topbar-badge{font-size:11px;padding:4px 10px;white-space:nowrap}
+  .topbar-right{margin-left:0;gap:6px;flex-wrap:wrap}
+  .topbar-btn,.topbar-select{width:36px;height:36px;font-size:13px;padding:0 8px}
+  .topbar-select{width:auto;min-width:0;max-width:120px}
+  .back-btn{height:34px;padding:0 12px;font-size:13px;flex-shrink:0}
+
+  .content{padding:16px 14px 28px;padding-bottom:max(28px, env(safe-area-inset-bottom))}
+  .page-header{margin-bottom:18px}
+  .page-header h1{font-size:22px}
+  .page-header p{font-size:14px}
+  .kpi-grid{grid-template-columns:1fr;gap:12px;margin-bottom:18px}
+  .kpi-card{padding:16px 18px}
+  .kpi-value{font-size:24px}
+  .kpi-value-sm{font-size:20px}
+  .two-col,.three-col{grid-template-columns:1fr;gap:14px}
+  .card{padding:16px 18px;margin-bottom:14px}
+  .card-title{font-size:16px}
+  .field-row{grid-template-columns:1fr}
+
+  table{min-width:520px;font-size:13px}
+  th,td{padding:10px 12px}
+  .action-btn{padding:6px 12px;font-size:13px}
+  .h-bar-label{width:100px;font-size:13px}
+  .h-bar-val{font-size:12px;min-width:72px}
+  .chart-bars,.chart-stacked,.chart-grouped{min-height:140px;height:clamp(130px,28vh,180px)}
+  .filter-pills{gap:6px}
+  .pill{padding:6px 12px;font-size:13px}
+  .proj-pill{padding:10px 14px;font-size:13px}
+  .projection-pills{gap:8px}
+  .info-banner{font-size:13px;padding:12px 14px}
+  .comment-text{font-size:14px}
+  .btn-row{flex-direction:column}
+  .btn-row .save-btn,.btn-row .cancel-btn{width:100%;justify-content:center}
+
+  .settings-layout{flex-direction:column}
+  .settings-sidebar{width:100%;display:flex;flex-direction:row;overflow-x:auto;gap:4px;padding:6px;-webkit-overflow-scrolling:touch}
+  .settings-tab-btn{flex-shrink:0;padding:10px 14px;font-size:14px;white-space:nowrap}
+  .settings-main{width:100%}
+  .access-card{flex-wrap:wrap}
+  .qr-placeholder{width:120px;height:120px}
+}
+
+@media(max-width:480px){
+  .topbar-badge:not(.red){display:none}
+  .breadcrumb .bc-sep{display:none}
+  .user-name,.user-role{display:none}
+  .sidebar-bottom .avatar{margin:0 auto}
+  .otp-box{width:40px;height:48px;font-size:18px}
+  .login-left{padding:28px 20px}
+  .login-right{padding:28px 20px}
+}
+</style>
+</head>
+<body>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol>
+  <symbol id="i-campus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/><path d="M9 9h.01M15 9h.01M9 13h.01M15 13h.01"/></symbol>
+  <symbol id="i-cantine" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-notif" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M2 8c0-2.2.7-4.3 2-6"/><path d="M22 8a10 10 0 0 0-2-6"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+  <symbol id="i-users-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-medal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></symbol>
+  <symbol id="i-trend-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></symbol>
+  <symbol id="i-trend-flat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="14 7 19 12 14 17"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+</svg>
+<div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+<!-- ═══════════════════════════════════════ -->
+<!-- PAGE 1: LOGIN STEP 1 -->
+<!-- ═══════════════════════════════════════ -->
+<div class="page active" id="p-login1">
+<div class="login-wrap">
+  <div class="login-left">
+    <div>
+      <div class="logo">Nésso<span>!!</span></div>
+      <div class="logo-sub">Interface de supervision — Équipe dirigeante</div>
+    </div>
+    <div>
+      <div style="font-size:12px;color:rgba(255,255,255,.28);margin-bottom:14px">Connexion sécurisée en 3 étapes</div>
+      <div class="steps-list">
+        <div class="step-row"><div class="step-num active">1</div><div class="step-label">Identifiants</div></div>
+        <div class="step-row"><div class="step-num idle">2</div><div class="step-label idle">Code 2FA</div></div>
+        <div class="step-row"><div class="step-num idle">3</div><div class="step-label idle">Accès tableau de bord</div></div>
+      </div>
+    </div>
+
+<div class="login-illustration">
+<svg width="100%" height="180" viewBox="0 0 360 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="40" width="320" height="120" rx="16" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.12)"/>
+  <rect x="40" y="60" width="80" height="60" rx="8" fill="rgba(240,120,64,.25)"/>
+  <rect x="140" y="70" width="180" height="8" rx="4" fill="rgba(255,255,255,.2)"/>
+  <rect x="140" y="90" width="140" height="8" rx="4" fill="rgba(255,255,255,.15)"/>
+  <rect x="140" y="110" width="100" height="8" rx="4" fill="rgba(255,255,255,.1)"/>
+  <circle cx="80" cy="90" r="16" fill="rgba(240,120,64,.6)"/>
+  <path d="M260 130 L280 110 L300 120 L320 95" stroke="#F07840" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="320" cy="95" r="4" fill="#F07840"/>
+</svg>
+</div>
+  </div>
+  <div class="login-right">
+    <div class="login-form">
+      <div class="form-title">Connexion</div>
+      <div class="form-sub">Entrez vos identifiants</div>
+      <div class="field">
+        <label>Adresse e-mail</label>
+        <input type="email" value="direction@nesso.app">
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" value="••••••••••">
+      </div>
+      <a class="link-small">Mot de passe oublié ?</a>
+      <button class="btn-primary" onclick="showPage('p-login2')">Continuer →</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- PAGE 2: LOGIN STEP 2 (2FA) -->
+<!-- ═══════════════════════════════════════ -->
+<div class="page" id="p-login2">
+<div class="login-wrap">
+  <div class="login-left">
+    <div>
+      <div class="logo">Nésso<span>!!</span></div>
+      <div class="logo-sub">Interface de supervision</div>
+    </div>
+    <div class="steps-list">
+      <div class="step-row"><div class="step-num done">✓</div><div class="step-label done">Identifiants</div></div>
+      <div class="step-row"><div class="step-num active">2</div><div class="step-label">Code 2FA</div></div>
+      <div class="step-row"><div class="step-num idle">3</div><div class="step-label idle">Accès tableau de bord</div></div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-form">
+      <div class="form-title">Vérification 2FA</div>
+      <div class="form-sub">Code à 6 chiffres — Google Authenticator</div>
+      <div class="hint-box"><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg> Ouvrez Google Authenticator sur votre téléphone et entrez le code affiché pour <strong>Nésso!!</strong></div>
+      <div class="otp-row">
+        <div class="otp-box filled">3</div>
+        <div class="otp-box filled">8</div>
+        <div class="otp-box filled">4</div>
+        <div class="otp-box cursor"></div>
+        <div class="otp-box"></div>
+        <div class="otp-box"></div>
+      </div>
+      <div class="timer">Code valide encore <span>22 s</span></div>
+      <button class="btn-primary" onclick="showPage('p-login3')"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-shield"/></svg> Vérifier</button>
+      <a class="link-center" onclick="showPage('p-login1')">← Retour aux identifiants</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- PAGE 3: LOGIN STEP 3 (SUCCESS) -->
+<!-- ═══════════════════════════════════════ -->
+<div class="page" id="p-login3">
+<div class="login-wrap">
+  <div class="login-left">
+    <div>
+      <div class="logo">Nésso<span>!!</span></div>
+      <div class="logo-sub">Interface de supervision</div>
+    </div>
+    <div class="steps-list">
+      <div class="step-row"><div class="step-num done">✓</div><div class="step-label done">Identifiants</div></div>
+      <div class="step-row"><div class="step-num done">✓</div><div class="step-label done">Code 2FA</div></div>
+      <div class="step-row"><div class="step-num active">3</div><div class="step-label">Accès tableau de bord</div></div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-form">
+      <div class="success-center">
+        <div class="success-icon"><svg class="ico-xl" aria-hidden="true"><use href="#i-check"/></svg></div>
+        <div class="form-title" style="text-align:center">Accès autorisé</div>
+        <div class="form-sub" style="text-align:center">Redirection en cours vers le tableau de bord...</div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill"></div></div>
+        <div style="font-size:15px;color:var(--muted);margin-top:4px">Bonjour, Directeur général</div>
+        <button class="btn-primary" style="margin-top:16px" onclick="showPage('p-dashboard')">Accéder au tableau de bord →</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- PAGES DASHBOARD (4-14) -->
+<!-- ═══════════════════════════════════════ -->
+
+<!-- PAGE 4: DASHBOARD -->
+<div class="page" id="p-dashboard">
+<div class="dash-layout">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-text">Nésso<span>!!</span></div>
+      <div class="sidebar-logo-sub">Supervision · v1.0</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Tableau de bord</div>
+        <div class="nav-item active" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Analyse</div>
+        <div class="nav-item" onclick="toggleNav('campus')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus<span class="nav-chevron" id="chev-campus"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub" id="sub-campus">
+          <div class="nav-sub-item" onclick="showPage('p-campus')">Comparaison campus</div>
+          <div class="nav-sub-item" onclick="showPage('p-revenus')">Volume & revenus</div>
+        </div>
+        <div class="nav-item" onclick="toggleNav('cantine')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine<span class="nav-chevron" id="chev-cantine"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub" id="sub-cantine">
+          <div class="nav-sub-item" onclick="showPage('p-perf')">Performance vendeurs</div>
+          <div class="nav-sub-item" onclick="showPage('p-solde')">Solde & créances</div>
+        </div>
+        <div class="nav-item" onclick="toggleNav('etud')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants<span class="nav-chevron" id="chev-etud"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub" id="sub-etud">
+          <div class="nav-sub-item" onclick="showPage('p-etud')">Comportement étudiants</div>
+          <div class="nav-sub-item" onclick="showPage('p-suspend')">Comptes suspendus</div>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Qualité</div>
+        <div class="nav-item" onclick="toggleNav('qualite')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité<span class="nav-chevron" id="chev-qualite"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub" id="sub-qualite">
+          <div class="nav-sub-item" onclick="showPage('p-notes')">Notes & alertes</div>
+          <div class="nav-sub-item" onclick="showPage('p-comments')">Commentaires</div>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Programme</div>
+        <div class="nav-item" onclick="toggleNav('ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs<span class="nav-chevron" id="chev-ambass"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub" id="sub-ambass">
+          <div class="nav-sub-item" onclick="showPage('p-ambass')">Supervision ambassadeurs</div>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Compte</div>
+        <div class="nav-item" onclick="showPage('p-settings');showSettingsTab('profil')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></span>Paramètres</div>
+      </div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="avatar">DG</div>
+      <div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div>
+      <button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button>
+    </div>
+  </div>
+  <div class="main-area">
+    <div class="topbar">
+      <span class="topbar-icon-wrap"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>
+      <span class="breadcrumb"><span>Vue générale</span></span>
+      <span class="topbar-badge">Aujourd'hui</span>
+      <div class="topbar-right">
+        <select class="topbar-select"><option>Aujourd'hui</option><option>7 jours</option><option>30 jours</option></select>
+        <button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button>
+        <button class="topbar-btn" title="Paramètres"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <h1>Vue générale</h1>
+        <p>Synthèse de l'activité Nésso sur l'ensemble des campus</p>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Commandes aujourd'hui</div><div class="kpi-value">248 <span class="badge-green"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trend-up"/></svg> 12%</span></div><div class="kpi-sub">vs hier : 221</div></div>
+        <div class="kpi-card"><div class="kpi-label">CA brut plateforme</div><div class="kpi-value kpi-value-sm">159 200 FCFA <span class="badge-green"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trend-up"/></svg> 11%</span></div><div class="kpi-sub">volume transactionnel du jour</div></div>
+        <div class="kpi-card"><div class="kpi-label">Revenus nets aujourd'hui</div><div class="kpi-value kpi-value-sm">6 606 FCFA <span class="badge-green"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trend-up"/></svg> 8%</span></div><div class="kpi-sub">surplus − frais couverts − commissions</div></div>
+        <div class="kpi-card"><div class="kpi-label">Tickets en circulation</div><div class="kpi-value kpi-value-sm">284 500</div><div class="kpi-sub">dont 12 000 en séquestre</div></div>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Décomposition des revenus — aujourd'hui</div>
+        <div class="card-sub">Ventilation par source · chiffres journaliers</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:4px">
+          <div style="padding:18px 22px;border-right:1px solid var(--border)">
+            <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Surplus recharges</div>
+            <div style="font-size:22px;font-weight:700;color:#0D1438">7 056 FCFA</div>
+            <div style="font-size:13px;color:#64748B;margin-top:4px">revenu principal</div>
+          </div>
+          <div style="padding:18px 22px;border-right:1px solid var(--border)">
+            <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Frais retrait non couverts</div>
+            <div style="font-size:22px;font-weight:700;color:#0D1438">450 FCFA</div>
+            <div style="font-size:13px;color:#64748B;margin-top:4px">vendeurs sous seuil 10k</div>
+          </div>
+          <div style="padding:18px 22px;border-right:1px solid var(--border)">
+            <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Commissions ambassadeurs</div>
+            <div style="font-size:22px;font-weight:700;color:var(--orange)">− 900 FCFA</div>
+            <div style="font-size:13px;color:#64748B;margin-top:4px">déduit du surplus</div>
+          </div>
+          <div style="padding:18px 22px;background:#F8FAFC">
+            <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Revenus nets</div>
+            <div style="font-size:22px;font-weight:700;color:#1B2A6B">6 606 FCFA</div>
+            <div style="font-size:13px;color:#64748B;margin-top:4px">après déductions</div>
+          </div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Commandes / 7 jours</div>
+          <div class="chart-wrap"><div class="chart-bars" style="margin-top:12px">
+            <div class="bar" style="height:45%;background:#1B2A6B;opacity:.5"></div>
+            <div class="bar" style="height:62%;background:#1B2A6B;opacity:.6"></div>
+            <div class="bar" style="height:54%;background:#1B2A6B;opacity:.55"></div>
+            <div class="bar" style="height:80%;background:#1B2A6B;opacity:.75"></div>
+            <div class="bar" style="height:70%;background:#1B2A6B;opacity:.7"></div>
+            <div class="bar" style="height:95%;background:#F07840"></div>
+            <div class="bar" style="height:78%;background:#1B2A6B;opacity:.8"></div>
+          </div></div>
+          <div class="bar-labels">
+            <div class="bar-label">Lun</div><div class="bar-label">Mar</div><div class="bar-label">Mer</div>
+            <div class="bar-label">Jeu</div><div class="bar-label">Ven</div><div class="bar-label active">Sam</div><div class="bar-label">Dim</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Répartition statuts</div>
+          <div class="chart-stacked">
+            <div class="chart-stacked-col"><span class="chart-stacked-val">82%</span><div class="chart-stacked-bar" style="height:82%;background:#1B2A6B;opacity:.88"></div></div>
+            <div class="chart-stacked-col"><span class="chart-stacked-val">11%</span><div class="chart-stacked-bar" style="height:11%;background:#F07840;opacity:.85"></div></div>
+            <div class="chart-stacked-col"><span class="chart-stacked-val">7%</span><div class="chart-stacked-bar" style="height:7%;background:#CBD5E1"></div></div>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#1B2A6B"></div>Complétées</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#F07840"></div>Annulées</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ccc"></div>Refusées</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 5: COMPARAISON CAMPUS -->
+<div class="page" id="p-campus">
+<div class="dash-layout">
+  <div class="sidebar" id="sidebar2">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section">
+        <div class="nav-section-label">Analyse</div>
+        <div class="nav-item parent-active" onclick="toggleNav('campus2')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus<span class="nav-chevron open" id="chev-campus2"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub open" id="sub-campus2">
+          <div class="nav-sub-item active" onclick="showPage('p-campus')">Comparaison campus</div>
+          <div class="nav-sub-item" onclick="showPage('p-revenus')">Volume & revenus</div>
+        </div>
+        <div class="nav-item" onclick="toggleNav('cantine2')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine<span class="nav-chevron" id="chev-cantine2"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub" id="sub-cantine2">
+          <div class="nav-sub-item" onclick="showPage('p-perf')">Performance vendeurs</div>
+          <div class="nav-sub-item" onclick="showPage('p-solde')">Solde & créances</div>
+        </div>
+        <div class="nav-item" onclick="toggleNav('etud2')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants<span class="nav-chevron" id="chev-etud2"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub" id="sub-etud2">
+          <div class="nav-sub-item" onclick="showPage('p-etud')">Comportement étudiants</div>
+          <div class="nav-sub-item" onclick="showPage('p-suspend')">Comptes suspendus</div>
+        </div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div><div class="nav-item" onclick="toggleNav('qualite2')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité<span class="nav-chevron" id="chev-qualite2"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div><div class="nav-sub" id="sub-qualite2"><div class="nav-sub-item" onclick="showPage('p-notes')">Notes & alertes</div><div class="nav-sub-item" onclick="showPage('p-comments')">Commentaires</div></div></div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="toggleNav('ambass2')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs<span class="nav-chevron" id="chev-ambass2"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div><div class="nav-sub" id="sub-ambass2"><div class="nav-sub-item" onclick="showPage('p-ambass')">Supervision ambassadeurs</div></div></div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar">
+      <span class="topbar-icon-wrap"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>
+      <span class="breadcrumb">Par campus <span class="bc-sep">/</span> <span>Comparaison campus</span></span>
+      <span class="topbar-badge">30 derniers jours</span>
+      <div class="topbar-right"><select class="topbar-select"><option>30 jours</option><option>7 jours</option><option>3 mois</option></select><button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button><button class="topbar-btn" title="Paramètres"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></button></div>
+    </div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Campus actifs</div><div class="kpi-value">2</div><div class="kpi-sub">sur 2 enregistrés</div></div>
+        <div class="kpi-card"><div class="kpi-label">Commandes totales</div><div class="kpi-value">5 456 <span class="badge-green"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trend-up"/></svg> 18%</span></div><div class="kpi-sub">sur 30 jours</div></div>
+        <div class="kpi-card"><div class="kpi-label">Revenus générés</div><div class="kpi-value kpi-value-sm">290 682 FCFA <span class="badge-green"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trend-up"/></svg> 11%</span></div></div>
+        <div class="kpi-card"><div class="kpi-label">Étudiants inscrits</div><div class="kpi-value">2 840</div><div class="kpi-sub">actifs : 1 980</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Tous les campus</div>
+        <div class="card-sub">Cliquez sur "Voir détail" pour analyser un campus</div>
+        <div class="table-scroll"><table>
+          <tr><th>Campus</th><th>Cantines</th><th>Commandes</th><th>Taux complétion</th><th>Revenus (FCFA)</th><th>Inscrits</th><th>Actifs</th><th>Statut</th><th>Action</th></tr>
+          <tr><td><strong>UCAO · Lomé</strong></td><td>2</td><td>3 120</td><td>84%</td><td>168 450</td><td>1 540</td><td>1 120</td><td><span class="badge-green">Actif</span></td><td><button class="action-btn" onclick="showPage('p-detail-campus')">Voir détail →</button></td></tr>
+          <tr><td><strong>Université de Lomé</strong></td><td>2</td><td>2 336</td><td>79%</td><td>122 232</td><td>1 300</td><td>860</td><td><span class="badge-green">Actif</span></td><td><button class="action-btn" onclick="showPage('p-detail-campus')">Voir détail →</button></td></tr>
+        </table></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Volume commandes / 7 jours</div>
+          <div class="chart-wrap"><div class="chart-bars" style="margin-top:12px">
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:60%;background:#1B2A6B;opacity:.8"></div><div class="bar" style="height:40%;background:#F07840;opacity:.7"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:75%;background:#1B2A6B;opacity:.8"></div><div class="bar" style="height:50%;background:#F07840;opacity:.7"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:65%;background:#1B2A6B;opacity:.8"></div><div class="bar" style="height:45%;background:#F07840;opacity:.7"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:90%;background:#1B2A6B"></div><div class="bar" style="height:65%;background:#F07840;opacity:.8"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:80%;background:#1B2A6B;opacity:.9"></div><div class="bar" style="height:55%;background:#F07840;opacity:.7"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:95%;background:#1B2A6B"></div><div class="bar" style="height:72%;background:#F07840;opacity:.85"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:70%;background:#1B2A6B;opacity:.8"></div><div class="bar" style="height:48%;background:#F07840;opacity:.7"></div></div>
+          </div></div>
+          <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#1B2A6B"></div>UCAO</div><div class="legend-item"><div class="legend-dot" style="background:#F07840"></div>UL</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Part des revenus par campus</div>
+          <div class="h-bars" style="margin-top:16px">
+            <div class="h-bar-row"><div class="h-bar-label">UCAO · Lomé</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:58%;background:#1B2A6B"></div></div><div class="h-bar-val">58% · 168 450 F</div></div>
+            <div class="h-bar-row"><div class="h-bar-label">Université de Lomé</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:42%;background:#F07840;opacity:.8"></div></div><div class="h-bar-val">42% · 122 232 F</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top cantines — tous campus</div>
+        <div class="table-scroll"><table>
+          <tr><th>Rang</th><th>Cantine</th><th>Campus</th><th>Commandes</th><th>Note moy.</th></tr>
+          <tr class="rank1"><td><span class="rank-medal"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-medal"/></svg> 1</span></td><td>Resto UL Central</td><td><span class="badge-peach">UL</span></td><td>1 620</td><td><span class="star-row">★★★★★</span> 4.6</td></tr>
+          <tr><td><strong>2</strong></td><td>Cantine Centrale UCAO</td><td><span class="badge-peach">UCAO</span></td><td>1 840</td><td><span class="star-row">★★★★☆</span> 4.2</td></tr>
+          <tr><td><strong>3</strong></td><td>Snack du Campus</td><td><span class="badge-peach">UCAO</span></td><td>1 280</td><td><span class="star-row">★★★★☆</span> 3.8</td></tr>
+          <tr><td><strong>4</strong></td><td>Kiosque UL Nord</td><td><span class="badge-peach">UL</span></td><td>716</td><td><span class="star-row">★★★☆☆</span> 3.2</td></tr>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 6: DETAIL CAMPUS -->
+<div class="page" id="p-detail-campus">
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item parent-active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus<span class="nav-chevron open"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub open"><div class="nav-sub-item active" onclick="showPage('p-campus')">Comparaison campus</div><div class="nav-sub-item" onclick="showPage('p-revenus')">Volume & revenus</div></div>
+        <div class="nav-item" onclick="showPage('p-perf')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine</div>
+        <div class="nav-item" onclick="showPage('p-etud')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants</div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div><div class="nav-item" onclick="showPage('p-notes')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité</div></div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="showPage('p-ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs</div></div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar">
+      <button class="back-btn" onclick="showPage('p-campus')">← Tous les campus</button>
+      <span class="breadcrumb">Par campus <span class="bc-sep">/</span> <span class="bc-link" onclick="showPage('p-campus')">Comparaison campus</span> → <span>UCAO · Lomé</span></span>
+      <span class="topbar-badge">30 derniers jours</span>
+      <div class="topbar-right"><select class="topbar-select"><option>30 jours</option><option>7 jours</option><option>3 mois</option></select><button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button><button class="topbar-btn" title="Paramètres"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></button></div>
+    </div>
+    <div class="content">
+      <div class="card" style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        <div class="initials init-indigo" style="width:52px;height:52px;font-size:18px">UC</div>
+        <div class="flex-1">
+          <div style="font-size:18px;font-weight:600;color:#0D1438">UCAO · Lomé</div>
+          <div style="font-size:13px;color:#888;margin-top:2px">Université Catholique de l'Afrique de l'Ouest</div>
+          <span class="badge-peach" style="margin-top:4px;display:inline-block">Lomé</span>
+        </div>
+        <div style="text-align:right"><span class="badge-green" style="font-size:13px;padding:4px 12px">Actif</span><div style="font-size:12px;color:#aaa;margin-top:4px">2 cantines affiliées</div></div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Commandes (30j)</div><div class="kpi-value">3 120 <span class="badge-green"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trend-up"/></svg> 14%</span></div></div>
+        <div class="kpi-card"><div class="kpi-label">Revenus générés</div><div class="kpi-value kpi-value-sm">168 450 FCFA <span class="badge-green"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trend-up"/></svg> 9%</span></div></div>
+        <div class="kpi-card"><div class="kpi-label">Étudiants inscrits</div><div class="kpi-value">1 540</div><div class="kpi-sub">actifs : 1 120 (73%)</div></div>
+        <div class="kpi-card"><div class="kpi-label">Tickets en circulation</div><div class="kpi-value kpi-value-sm">142 300</div><div class="kpi-sub">dont 6 200 en séquestre</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cantines affiliées — UCAO</div>
+        <div class="two-col" style="margin-top:14px;margin-bottom:0">
+          <div class="campus-card">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span class="status-dot dot-green"></span><strong style="font-size:13px">Cantine Centrale UCAO</strong><span class="badge-green" style="margin-left:auto">Ouverte</span></div>
+            <div style="font-size:12px;color:#666;margin-bottom:8px">1 840 commandes · 86% acceptation · ★★★★☆ 4.2/5</div>
+            <div style="font-size:12px;color:#666">Taux refus : <span class="badge-orange">8%</span> · Taux annulation : 6%</div>
+            <div style="font-size:12px;color:#888;margin-top:8px;border-top:1px solid #e8eaf0;padding-top:8px">Solde : <strong>84 200 FCFA</strong> · Créance : —</div>
+          </div>
+          <div class="campus-card">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span class="status-dot dot-orange"></span><strong style="font-size:13px">Snack du Campus</strong><span class="badge-orange" style="margin-left:auto">Fermée</span></div>
+            <div style="font-size:12px;color:#666;margin-bottom:8px">1 280 commandes · 81% acceptation · ★★★★☆ 3.8/5</div>
+            <div style="font-size:12px;color:#666">Taux refus : <span class="badge-orange">12%</span> · Taux annulation : 7%</div>
+            <div style="font-size:12px;color:#888;margin-top:8px;border-top:1px solid #e8eaf0;padding-top:8px">Solde : <strong>52 100 FCFA</strong> · Créance : <span style="color:#e53935">3 500 FCFA</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Évolution des inscrits (30 jours)</div>
+          <div class="chart-wrap"><div class="chart-bars" style="margin-top:12px">
+            <div class="bar" style="height:40%;background:#1B2A6B;opacity:.5"></div>
+            <div class="bar" style="height:50%;background:#1B2A6B;opacity:.55"></div>
+            <div class="bar" style="height:55%;background:#1B2A6B;opacity:.6"></div>
+            <div class="bar" style="height:62%;background:#1B2A6B;opacity:.65"></div>
+            <div class="bar" style="height:70%;background:#1B2A6B;opacity:.7"></div>
+            <div class="bar" style="height:78%;background:#1B2A6B;opacity:.75"></div>
+            <div class="bar" style="height:88%;background:#1B2A6B;opacity:.85"></div>
+            <div class="bar" style="height:95%;background:#1B2A6B"></div>
+          </div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:10px;color:#aaa">S-7</span><span style="font-size:10px;color:#aaa">Cette semaine</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Commandes par jour (7 jours)</div>
+          <div class="chart-wrap"><div class="chart-bars" style="margin-top:12px">
+            <div class="bar" style="height:55%;background:#1B2A6B;opacity:.6"></div>
+            <div class="bar" style="height:70%;background:#1B2A6B;opacity:.7"></div>
+            <div class="bar" style="height:60%;background:#1B2A6B;opacity:.65"></div>
+            <div class="bar" style="height:85%;background:#1B2A6B;opacity:.8"></div>
+            <div class="bar" style="height:75%;background:#1B2A6B;opacity:.75"></div>
+            <div class="bar" style="height:100%;background:#F07840"></div>
+            <div class="bar" style="height:80%;background:#1B2A6B;opacity:.8"></div>
+          </div></div>
+          <div class="bar-labels"><div class="bar-label">Lun</div><div class="bar-label">Mar</div><div class="bar-label">Mer</div><div class="bar-label">Jeu</div><div class="bar-label">Ven</div><div class="bar-label active">Sam</div><div class="bar-label">Dim</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top ambassadeurs — UCAO</div>
+        <div class="table-scroll"><table>
+          <tr><th>Rang</th><th>Ambassadeur</th><th>Niveau</th><th>Affiliés actifs</th><th>Volume parrainage</th><th>Commissions</th></tr>
+          <tr class="rank1"><td><span class="rank-medal"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-medal"/></svg> 1</span></td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-indigo" style="width:28px;height:28px;font-size:11px">KA</div>Koffi A.</div></td><td><span class="badge-amber">Or</span></td><td>24</td><td>48 000 FCFA</td><td>576 FCFA</td></tr>
+          <tr><td><strong>2</strong></td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-indigo" style="width:28px;height:28px;font-size:11px">AB</div>Ama B.</div></td><td><span class="badge-gray">Argent</span></td><td>18</td><td>31 500 FCFA</td><td>252 FCFA</td></tr>
+          <tr><td><strong>3</strong></td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-orange" style="width:28px;height:28px;font-size:11px">EC</div>Edem C.</div></td><td><span class="badge-peach">Bronze</span></td><td>11</td><td>14 200 FCFA</td><td>71 FCFA</td></tr>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 7: VOLUME & REVENUS -->
+<div class="page" id="p-revenus">
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item parent-active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus<span class="nav-chevron open"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub open"><div class="nav-sub-item" onclick="showPage('p-campus')">Comparaison campus</div><div class="nav-sub-item active">Volume & revenus</div></div>
+        <div class="nav-item" onclick="showPage('p-perf')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine</div>
+        <div class="nav-item" onclick="showPage('p-etud')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants</div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div><div class="nav-item" onclick="showPage('p-notes')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité</div></div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="showPage('p-ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs</div></div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar"><span class="topbar-icon-wrap"><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg></span><span class="breadcrumb">Par campus <span class="bc-sep">/</span> <span>Volume & revenus</span></span><span class="topbar-badge">6 derniers mois</span><div class="topbar-right"><select class="topbar-select"><option>6 mois</option><option>3 mois</option><option>12 mois</option></select><button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button><button class="topbar-btn" title="Paramètres"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></button></div></div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Revenus nets (6 mois)</div><div class="kpi-value kpi-value-sm">874 230 FCFA <span class="badge-green"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trend-up"/></svg> 14%</span></div></div>
+        <div class="kpi-card"><div class="kpi-label">Surplus recharges</div><div class="kpi-value kpi-value-sm">912 500 FCFA</div><div class="kpi-sub">revenu principal</div></div>
+        <div class="kpi-card"><div class="kpi-label">Frais retrait couverts</div><div class="kpi-value orange kpi-value-sm">− 38 270 FCFA</div><div class="kpi-sub">charges plateforme</div></div>
+        <div class="kpi-card"><div class="kpi-label">Commissions ambassadeurs</div><div class="kpi-value orange kpi-value-sm">− 8 640 FCFA</div><div class="kpi-sub">déduit du surplus</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Décomposition des revenus par source</div>
+        <div class="h-bars" style="margin-top:14px">
+          <div class="h-bar-row"><div class="h-bar-label">Surplus recharges</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:95%;background:#1B2A6B"></div></div><div class="h-bar-val">912 500 FCFA · 95%</div></div>
+          <div class="h-bar-row"><div class="h-bar-label">Frais retrait non couverts</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:5%;background:#F07840;opacity:.8"></div></div><div class="h-bar-val">47 370 FCFA · 5%</div></div>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:#0D1438;margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0">Total brut : 959 870 FCFA</div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Commandes par campus / 6 mois</div>
+          <div class="chart-wrap"><div class="chart-bars" style="margin-top:12px">
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:55%;background:#1B2A6B;opacity:.7"></div><div class="bar" style="height:38%;background:#F07840;opacity:.6"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:65%;background:#1B2A6B;opacity:.75"></div><div class="bar" style="height:45%;background:#F07840;opacity:.65"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:72%;background:#1B2A6B;opacity:.8"></div><div class="bar" style="height:52%;background:#F07840;opacity:.7"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:80%;background:#1B2A6B;opacity:.85"></div><div class="bar" style="height:58%;background:#F07840;opacity:.72"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:88%;background:#1B2A6B;opacity:.9"></div><div class="bar" style="height:64%;background:#F07840;opacity:.75"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:95%;background:#1B2A6B"></div><div class="bar" style="height:72%;background:#F07840;opacity:.8"></div></div>
+          </div></div>
+          <div class="bar-labels"><div class="bar-label">Jan</div><div class="bar-label">Fév</div><div class="bar-label">Mar</div><div class="bar-label">Avr</div><div class="bar-label">Mai</div><div class="bar-label">Jun</div></div>
+          <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#1B2A6B"></div>UCAO</div><div class="legend-item"><div class="legend-dot" style="background:#F07840"></div>UL</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Croissance inscriptions</div>
+          <div class="chart-wrap"><div class="chart-bars" style="margin-top:12px">
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:40%;background:#1B2A6B;opacity:.6"></div><div class="bar" style="height:30%;background:#F07840;opacity:.6"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:52%;background:#1B2A6B;opacity:.65"></div><div class="bar" style="height:40%;background:#F07840;opacity:.65"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:65%;background:#1B2A6B;opacity:.7"></div><div class="bar" style="height:50%;background:#F07840;opacity:.7"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:75%;background:#1B2A6B;opacity:.75"></div><div class="bar" style="height:58%;background:#F07840;opacity:.72"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:85%;background:#1B2A6B;opacity:.85"></div><div class="bar" style="height:68%;background:#F07840;opacity:.75"></div></div>
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1"><div class="bar" style="height:95%;background:#1B2A6B"></div><div class="bar" style="height:78%;background:#F07840;opacity:.8"></div></div>
+          </div></div>
+          <div class="bar-labels"><div class="bar-label">Jan</div><div class="bar-label">Fév</div><div class="bar-label">Mar</div><div class="bar-label">Avr</div><div class="bar-label">Mai</div><div class="bar-label">Jun</div></div>
+          <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#1B2A6B"></div>UCAO +340</div><div class="legend-item"><div class="legend-dot" style="background:#F07840"></div>UL +280</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 8: PERFORMANCE VENDEURS -->
+<div class="page" id="p-perf">
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item" onclick="showPage('p-campus')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus</div>
+        <div class="nav-item parent-active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine<span class="nav-chevron open"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub open"><div class="nav-sub-item active">Performance vendeurs</div><div class="nav-sub-item" onclick="showPage('p-solde')">Solde & créances</div></div>
+        <div class="nav-item" onclick="showPage('p-etud')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants</div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div><div class="nav-item" onclick="showPage('p-notes')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité</div></div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="showPage('p-ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs</div></div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar"><span class="topbar-icon-wrap"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span><span class="breadcrumb">Par cantine <span class="bc-sep">/</span> <span>Performance vendeurs</span></span><span class="topbar-badge">30 derniers jours</span><div class="topbar-right"><select class="topbar-select"><option>30 jours</option><option>7 jours</option></select><select class="topbar-select"><option>Tous les campus</option><option>UCAO</option><option>UL</option></select><button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button><button class="topbar-btn" title="Paramètres"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></button></div></div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Cantines actives</div><div class="kpi-value">4</div><div class="kpi-sub">sur 4 enregistrées</div></div>
+        <div class="kpi-card"><div class="kpi-label">Taux acceptation moyen</div><div class="kpi-value">83% <span class="badge-green"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trend-up"/></svg> 4%</span></div><div class="kpi-sub">tous vendeurs</div></div>
+        <div class="kpi-card"><div class="kpi-label">Temps de réponse moyen</div><div class="kpi-value">2 min 14 s <span class="badge-green">réactif</span></div><div class="kpi-sub">objectif &lt; 5 min</div></div>
+        <div class="kpi-card"><div class="kpi-label">Commandes traitées</div><div class="kpi-value">5 456</div><div class="kpi-sub">sur 30 jours</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Performance par vendeur</div>
+        <div class="filter-pills" data-filter-target="perf-table" data-filter-col="1"><div class="pill active" data-filter="all">Tous</div><div class="pill" data-filter="UCAO">UCAO</div><div class="pill" data-filter="UL">UL</div></div>
+        <div class="table-scroll"><table id="perf-table">
+          <tr><th>Cantine</th><th>Campus</th><th>Statut</th><th>Commandes</th><th>Acceptation</th><th>Refus</th><th>Annulation</th><th>Tps réponse</th><th>Note</th><th></th></tr>
+          <tr data-campus="UCAO"><td>Cantine Centrale UCAO</td><td><span class="badge-peach">UCAO</span></td><td><span class="status-dot dot-green"></span>Ouverte</td><td>1 840</td><td><span style="color:#2e7d32;font-weight:600">86%</span></td><td><span class="badge-orange">8%</span></td><td>6%</td><td>1 min 52 s</td><td><span class="star-row">★★★★☆</span> 4.2</td><td><button class="expand-btn action-btn" data-content="<strong>Cantine Centrale UCAO</strong> · UCAO<br><br>Commandes complétées : 1 586 · Annulées par vendeur : 110 · Auto-reçues : 144<br>Temps de réponse médian : 1 min 48 s · Pic d'activité : 12h–14h<br>Créance : aucune · Dernier retrait : 12 juin 2026 · 45 000 FCFA">Voir →</button></td></tr>
+          <tr data-campus="UCAO"><td>Snack du Campus</td><td><span class="badge-peach">UCAO</span></td><td><span class="status-dot dot-orange"></span>Fermée</td><td>1 280</td><td>81%</td><td><span class="badge-orange">12%</span></td><td>7%</td><td>2 min 40 s</td><td><span class="star-row">★★★★☆</span> 3.8</td><td><button class="expand-btn action-btn" data-content="<strong>Snack du Campus</strong> · UCAO<br><br>Commandes complétées : 1 036 · Annulées par vendeur : 154 · Auto-reçues : 90<br>Temps de réponse médian : 2 min 35 s · Pic d'activité : 11h–13h<br>Créance active : <span style='color:#e53935;font-weight:600'>3 500 FCFA</span> · Retrait bloqué">Voir →</button></td></tr>
+          <tr data-campus="UL"><td>Resto UL Central</td><td><span class="badge-peach">UL</span></td><td><span class="status-dot dot-green"></span>Ouverte</td><td>1 620</td><td><span style="color:#2e7d32;font-weight:600">88%</span></td><td><span class="badge-orange">6%</span></td><td>6%</td><td>1 min 38 s</td><td><span class="star-row">★★★★★</span> 4.6</td><td><button class="expand-btn action-btn" data-content="<strong>Resto UL Central</strong> · UL<br><br>Commandes complétées : 1 427 · Annulées par vendeur : 97 · Auto-reçues : 96<br>Temps de réponse médian : 1 min 32 s · Meilleur taux d'acceptation du réseau<br>Créance : aucune · Dernier retrait : 14 juin 2026 · 60 000 FCFA">Voir →</button></td></tr>
+          <tr class="alert-row" data-campus="UL"><td>Kiosque UL Nord</td><td><span class="badge-peach">UL</span></td><td><span class="status-dot dot-green"></span>Ouverte</td><td>716</td><td><span style="color:#F07840;font-weight:600">74%</span></td><td><span class="badge-red">18%</span></td><td>8%</td><td>3 min 55 s</td><td><span class="star-row">★★★☆☆</span> 3.2</td><td><button class="expand-btn action-btn" data-content="<strong>Kiosque UL Nord</strong> · UL ⚠️ Alerte qualité<br><br>Commandes complétées : 529 · Annulées par vendeur : 129 · Refusées : 58<br>Taux refus 18% — objectif &lt; 10% · Temps de réponse dégradé<br>14 avis négatifs sur 7 jours · Note en baisse depuis 2 semaines">Voir →</button></td></tr>
+        </table></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Taux d'acceptation par vendeur</div>
+          <div class="h-bars" style="margin-top:14px">
+            <div class="h-bar-row"><div class="h-bar-label" style="width:160px">Resto UL Central</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:88%;background:#1B2A6B"></div></div><div class="h-bar-val">88%</div></div>
+            <div class="h-bar-row"><div class="h-bar-label" style="width:160px">Cantine Centrale UCAO</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:86%;background:#1B2A6B"></div></div><div class="h-bar-val">86%</div></div>
+            <div class="h-bar-row"><div class="h-bar-label" style="width:160px">Snack du Campus</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:81%;background:#1B2A6B;opacity:.8"></div></div><div class="h-bar-val">81%</div></div>
+            <div class="h-bar-row"><div class="h-bar-label" style="width:160px">Kiosque UL Nord</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:74%;background:#F07840"></div></div><div class="h-bar-val">74%</div></div>
+          </div>
+          <div style="font-size:11px;color:#aaa;margin-top:10px">— Objectif 80%</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Temps de réponse moyen</div>
+          <div class="h-bars" style="margin-top:14px">
+            <div class="h-bar-row"><div class="h-bar-label" style="width:160px">Resto UL Central</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:33%;background:#1B2A6B"></div></div><div class="h-bar-val">1 min 38 s</div></div>
+            <div class="h-bar-row"><div class="h-bar-label" style="width:160px">Cantine Centrale</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:37%;background:#1B2A6B"></div></div><div class="h-bar-val">1 min 52 s</div></div>
+            <div class="h-bar-row"><div class="h-bar-label" style="width:160px">Snack du Campus</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:53%;background:#1B2A6B;opacity:.8"></div></div><div class="h-bar-val">2 min 40 s</div></div>
+            <div class="h-bar-row"><div class="h-bar-label" style="width:160px">Kiosque UL Nord</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:79%;background:#F07840"></div></div><div class="h-bar-val">3 min 55 s</div></div>
+          </div>
+          <div style="font-size:11px;color:#aaa;margin-top:10px">— Limite 5 min</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 9: SOLDE & CRÉANCES -->
+<div class="page" id="p-solde">
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item" onclick="showPage('p-campus')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus</div>
+        <div class="nav-item parent-active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine<span class="nav-chevron open"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub open"><div class="nav-sub-item" onclick="showPage('p-perf')">Performance vendeurs</div><div class="nav-sub-item active">Solde & créances</div></div>
+        <div class="nav-item" onclick="showPage('p-etud')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants</div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div><div class="nav-item" onclick="showPage('p-notes')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité</div></div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="showPage('p-ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs</div></div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar"><span class="topbar-icon-wrap"><svg class="ico" aria-hidden="true"><use href="#i-wallet"/></svg></span><span class="breadcrumb">Par cantine <span class="bc-sep">/</span> <span>Solde & créances</span></span><span class="topbar-badge"><span class="status-dot dot-red"></span>En temps réel</span><div class="topbar-right"><select class="topbar-select"><option>Tous les campus</option><option>UCAO</option><option>UL</option></select><button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button><button class="topbar-btn" title="Paramètres"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></button></div></div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Solde total vendeurs</div><div class="kpi-value kpi-value-sm">312 450 FCFA</div><div class="kpi-sub">tous campus confondus</div></div>
+        <div class="kpi-card"><div class="kpi-label">Créances actives</div><div class="kpi-value orange">3 500 FCFA</div><div class="kpi-sub">1 vendeur concerné</div></div>
+        <div class="kpi-card"><div class="kpi-label">Retraits ce mois</div><div class="kpi-value kpi-value-sm">148 200 FCFA</div><div class="kpi-sub">6 retraits effectués</div></div>
+        <div class="kpi-card"><div class="kpi-label">Frais retrait couverts</div><div class="kpi-value kpi-value-sm">12 400 FCFA</div><div class="kpi-sub">vendeurs ≥ 30 000 FCFA</div></div>
+      </div>
+      <div class="card alert-card">
+        <div class="alert-header"><span style="color:#F07840"><svg class="ico-lg" aria-hidden="true"><use href="#i-warning"/></svg></span><div class="card-title" style="color:#F07840;margin-bottom:0">Créance active détectée</div></div>
+        <div style="font-size:13px;color:#444;margin-bottom:10px">Snack du Campus · UCAO doit <strong>3 500 FCFA</strong> à la plateforme. Le retrait est bloqué jusqu'au remboursement intégral.</div>
+        <div style="font-size:12px;color:#888">Avancé le : 8 juin 2026 · Montant restant : 3 500 FCFA · Recouvrement automatique à la prochaine commande</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Soldes & créances par vendeur</div>
+        <div class="filter-pills" data-filter-target="solde-table" data-filter-col="1"><div class="pill active" data-filter="all">Tous</div><div class="pill" data-filter="créance">Créances actives</div><div class="pill" data-filter="Bloqué">Retrait bloqué</div></div>
+        <div class="table-scroll"><table id="solde-table">
+          <tr><th>Cantine</th><th>Campus</th><th>Solde actuel</th><th>Créance</th><th>Statut retrait</th><th>Dernier retrait</th><th>Montant</th><th></th></tr>
+          <tr data-campus="UCAO"><td>Cantine Centrale UCAO</td><td><span class="badge-peach">UCAO</span></td><td><strong>84 200 FCFA</strong></td><td>—</td><td><span class="badge-green">Disponible</span></td><td>12 juin 2026</td><td>45 000 FCFA</td><td><button class="expand-btn action-btn" data-content="<strong>Historique retraits — Cantine Centrale UCAO</strong><br><br>12/06/2026 · 45 000 FCFA · Couvert plateforme (≥30k)<br>28/05/2026 · 38 000 FCFA · Couvert plateforme (≥30k)<br>10/05/2026 · 22 000 FCFA · À charge vendeur (&lt;30k)">Historique →</button></td></tr>
+          <tr class="alert-row" data-campus="UCAO" data-creance="créance"><td>Snack du Campus</td><td><span class="badge-peach">UCAO</span></td><td><strong>52 100 FCFA</strong></td><td><span style="color:#e53935;font-weight:600">3 500 FCFA</span></td><td><span class="badge-orange">Bloqué</span></td><td>5 juin 2026</td><td>28 000 FCFA</td><td><button class="expand-btn action-btn" data-content="<strong>Créance active — Snack du Campus</strong><br><br>Avancé par la plateforme le 8 juin 2026<br>Montant restant : <strong style='color:#e53935'>3 500 FCFA</strong><br>Recouvrement automatique dès la prochaine commande complétée<br><br>Dernier retrait : 5 juin 2026 · 28 000 FCFA · Frais à charge vendeur (&lt;30k)">Historique →</button></td></tr>
+          <tr data-campus="UL"><td>Resto UL Central</td><td><span class="badge-peach">UL</span></td><td><strong>98 750 FCFA</strong></td><td>—</td><td><span class="badge-green">Disponible</span></td><td>14 juin 2026</td><td>60 000 FCFA</td><td><button class="expand-btn action-btn" data-content="<strong>Historique retraits — Resto UL Central</strong><br><br>14/06/2026 · 60 000 FCFA · Couvert plateforme (≥30k)<br>30/05/2026 · 48 000 FCFA · Couvert plateforme (≥30k)<br>15/05/2026 · 35 000 FCFA · Couvert plateforme (≥30k)">Historique →</button></td></tr>
+          <tr data-campus="UL"><td>Kiosque UL Nord</td><td><span class="badge-peach">UL</span></td><td><strong>77 400 FCFA</strong></td><td>—</td><td><span class="badge-green">Disponible</span></td><td>10 juin 2026</td><td>15 200 FCFA</td><td><button class="expand-btn action-btn" data-content="<strong>Historique retraits — Kiosque UL Nord</strong><br><br>10/06/2026 · 15 200 FCFA · Frais à charge vendeur (&lt;10k)<br>25/05/2026 · 12 400 FCFA · Frais à charge vendeur (&lt;10k)<br>08/05/2026 · 9 800 FCFA · Frais à charge vendeur (&lt;10k)">Historique →</button></td></tr>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 10: COMPORTEMENT ÉTUDIANTS -->
+<div class="page" id="p-etud">
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item" onclick="showPage('p-campus')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus</div>
+        <div class="nav-item" onclick="showPage('p-perf')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine</div>
+        <div class="nav-item parent-active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants<span class="nav-chevron open"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub open"><div class="nav-sub-item active">Comportement étudiants</div><div class="nav-sub-item" onclick="showPage('p-suspend')">Comptes suspendus</div></div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div><div class="nav-item" onclick="showPage('p-notes')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité</div></div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="showPage('p-ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs</div></div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar"><span class="topbar-icon-wrap"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span><span class="breadcrumb">Étudiants <span class="bc-sep">/</span> <span>Comportement étudiants</span></span><span class="topbar-badge">30 derniers jours</span><div class="topbar-right"><select class="topbar-select"><option>30 jours</option><option>7 jours</option><option>3 mois</option></select><select class="topbar-select"><option>Tous les campus</option><option>UCAO</option><option>UL</option></select><button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button><button class="topbar-btn" title="Paramètres"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></button></div></div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Étudiants inscrits</div><div class="kpi-value">2 840</div><div class="kpi-sub">tous campus confondus</div></div>
+        <div class="kpi-card"><div class="kpi-label">Étudiants actifs (30j)</div><div class="kpi-value">1 980 <span class="badge-green">70%</span></div><div class="kpi-sub">ont commandé au moins 1 fois</div></div>
+        <div class="kpi-card"><div class="kpi-label">Fréquence moyenne</div><div class="kpi-value">3,2 cmd/sem</div><div class="kpi-sub">par étudiant actif</div></div>
+        <div class="kpi-card"><div class="kpi-label">Recharge moyenne</div><div class="kpi-value kpi-value-sm">1 840 FCFA</div><div class="kpi-sub">par recharge effectuée</div></div>
+      </div>
+      <div class="two-col">
+        <div class="campus-card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="initials init-indigo" style="width:40px;height:40px;font-size:14px">UC</div><div><div style="font-size:14px;font-weight:600">UCAO · Lomé</div><div style="font-size:11px;color:#888">1 540 inscrits</div></div></div>
+          <div style="font-size:12px;color:#666">1 120 actifs (73%) · ↑ 340 nouveaux / 6 mois</div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:73%"></div></div>
+          <div style="font-size:12px;color:#888">Fréquence moy. : 3,5 cmd/sem · Recharge moy. : 1 920 FCFA</div>
+        </div>
+        <div class="campus-card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="initials init-orange" style="width:40px;height:40px;font-size:14px">UL</div><div><div style="font-size:14px;font-weight:600">Université de Lomé</div><div style="font-size:11px;color:#888">1 300 inscrits</div></div></div>
+          <div style="font-size:12px;color:#666">860 actifs (66%) · ↑ 280 nouveaux / 6 mois</div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:66%"></div></div>
+          <div style="font-size:12px;color:#888">Fréquence moy. : 2,9 cmd/sem · Recharge moy. : 1 760 FCFA</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top étudiants actifs</div>
+        <div class="card-sub">Par volume de commandes sur 30 jours</div>
+        <div class="table-scroll"><table>
+          <tr><th>Rang</th><th>Étudiant</th><th>Campus</th><th>Commandes (30j)</th><th>Montant total</th><th>Recharge moy.</th><th>Dernière cmd</th></tr>
+          <tr class="rank1"><td><span class="rank-medal"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-medal"/></svg></span></td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-indigo" style="width:28px;height:28px;font-size:11px">KA</div>KA ···</div></td><td><span class="badge-peach">UCAO</span></td><td>28</td><td>42 600 FCFA</td><td>2 200 FCFA</td><td>Aujourd'hui</td></tr>
+          <tr><td><strong>2</strong></td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-indigo" style="width:28px;height:28px;font-size:11px">AB</div>AB ···</div></td><td><span class="badge-peach">UL</span></td><td>24</td><td>36 800 FCFA</td><td>1 200 FCFA</td><td>Hier</td></tr>
+          <tr><td><strong>3</strong></td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-orange" style="width:28px;height:28px;font-size:11px">ED</div>ED ···</div></td><td><span class="badge-peach">UCAO</span></td><td>22</td><td>31 200 FCFA</td><td>2 200 FCFA</td><td>Aujourd'hui</td></tr>
+          <tr><td><strong>4</strong></td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-indigo" style="width:28px;height:28px;font-size:11px">MK</div>MK ···</div></td><td><span class="badge-peach">UL</span></td><td>19</td><td>24 700 FCFA</td><td>1 200 FCFA</td><td>Il y a 2 jours</td></tr>
+          <tr><td><strong>5</strong></td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-orange" style="width:28px;height:28px;font-size:11px">YA</div>YA ···</div></td><td><span class="badge-peach">UCAO</span></td><td>17</td><td>22 100 FCFA</td><td>600 FCFA</td><td>Aujourd'hui</td></tr>
+        </table></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 11: COMPTES SUSPENDUS -->
+<div class="page" id="p-suspend">
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item" onclick="showPage('p-campus')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus</div>
+        <div class="nav-item" onclick="showPage('p-perf')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine</div>
+        <div class="nav-item parent-active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants<span class="nav-chevron open"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub open"><div class="nav-sub-item" onclick="showPage('p-etud')">Comportement étudiants</div><div class="nav-sub-item active">Comptes suspendus</div></div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div><div class="nav-item" onclick="showPage('p-notes')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité</div></div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="showPage('p-ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs</div></div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar"><span class="topbar-icon-wrap"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg></span><span class="breadcrumb">Étudiants <span class="bc-sep">/</span> <span>Comptes suspendus</span></span><span class="topbar-badge red"><span class="status-dot dot-red"></span>3 suspensions actives</span><div class="topbar-right"><select class="topbar-select"><option>Tous les campus</option><option>UCAO</option><option>UL</option></select><button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button><button class="topbar-btn" title="Paramètres"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></button></div></div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Suspensions actives</div><div class="kpi-value orange">3</div><div class="kpi-sub">en cours actuellement</div></div>
+        <div class="kpi-card"><div class="kpi-label">Suspensions ce mois</div><div class="kpi-value">8</div><div class="kpi-sub">sur 30 jours</div></div>
+        <div class="kpi-card"><div class="kpi-label">Durée systématique</div><div class="kpi-value">24 h</div><div class="kpi-sub">suspension automatique</div></div>
+        <div class="kpi-card"><div class="kpi-label">Campus le plus touché</div><div class="kpi-value kpi-value-sm">UCAO</div><div class="kpi-sub">5 suspensions sur 8</div></div>
+      </div>
+      <div class="card alert-card">
+        <div class="alert-header"><span style="color:#F07840"><svg class="ico" aria-hidden="true"><use href="#i-warning"/></svg></span><div class="card-title" style="color:#F07840;margin-bottom:0">Suspensions en cours</div></div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid #f0f0f0">
+            <div class="initials init-indigo" style="width:32px;height:32px;font-size:12px">ET</div>
+            <div class="flex-1"><div style="font-size:13px;font-weight:500">ET ··· · <span class="badge-peach">UCAO</span></div><div style="font-size:12px;color:#888">Suspendu jusqu'au 19/06/2026 14:32</div></div>
+            <span class="badge-red">Annulations répétées</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid #f0f0f0">
+            <div class="initials init-orange" style="width:32px;height:32px;font-size:12px">MK</div>
+            <div class="flex-1"><div style="font-size:13px;font-weight:500">MK ··· · <span class="badge-peach">UL</span></div><div style="font-size:12px;color:#888">Suspendu jusqu'au 19/06/2026 09:15</div></div>
+            <span class="badge-red">Annulations répétées</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="initials init-indigo" style="width:32px;height:32px;font-size:12px">YB</div>
+            <div class="flex-1"><div style="font-size:13px;font-weight:500">YB ··· · <span class="badge-peach">UCAO</span></div><div style="font-size:12px;color:#888">Suspendu jusqu'au 20/06/2026 11:00</div></div>
+            <span class="badge-red">Annulations répétées</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Historique des suspensions — 30 jours</div>
+        <div class="filter-pills" data-filter-target="suspend-table"><div class="pill active" data-filter="all">Tous</div><div class="pill" data-filter="active">Actives</div><div class="pill" data-filter="expired">Expirées</div></div>
+        <div class="table-scroll"><table id="suspend-table">
+          <tr><th>Étudiant</th><th>Campus</th><th>Date</th><th>Durée</th><th>Motif</th><th>Statut</th></tr>
+          <tr class="alert-row" data-status="active"><td>ET ···</td><td><span class="badge-peach">UCAO</span></td><td>18/06/2026 14:32</td><td>24h</td><td>Annulations répétées</td><td><span class="badge-orange">Active</span></td></tr>
+          <tr class="alert-row" data-status="active"><td>MK ···</td><td><span class="badge-peach">UL</span></td><td>18/06/2026 09:15</td><td>24h</td><td>Annulations répétées</td><td><span class="badge-orange">Active</span></td></tr>
+          <tr class="alert-row" data-status="active"><td>YB ···</td><td><span class="badge-peach">UCAO</span></td><td>17/06/2026 11:00</td><td>24h</td><td>Annulations répétées</td><td><span class="badge-orange">Active</span></td></tr>
+          <tr data-status="expired"><td>AF ···</td><td><span class="badge-peach">UL</span></td><td>10/06/2026 16:44</td><td>24h</td><td>Annulations répétées</td><td><span class="badge-green">Expirée</span></td></tr>
+          <tr data-status="expired"><td>DK ···</td><td><span class="badge-peach">UCAO</span></td><td>05/06/2026 08:20</td><td>24h</td><td>Annulations répétées</td><td><span class="badge-green">Expirée</span></td></tr>
+        </table></div>
+        <div style="font-size:12px;color:#94A3B8;margin-top:12px">La levée manuelle de suspension s'effectue depuis l'interface admin.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 12: NOTES & ALERTES -->
+<div class="page" id="p-notes">
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item" onclick="showPage('p-campus')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus</div>
+        <div class="nav-item" onclick="showPage('p-perf')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine</div>
+        <div class="nav-item" onclick="showPage('p-etud')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants</div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div>
+        <div class="nav-item parent-active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité<span class="nav-chevron open"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub open"><div class="nav-sub-item active">Notes & alertes</div><div class="nav-sub-item" onclick="showPage('p-comments')">Commentaires</div></div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="showPage('p-ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs</div></div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar"><span class="topbar-icon-wrap"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span><span class="breadcrumb">Qualité <span class="bc-sep">/</span> <span>Notes & alertes</span></span><span class="topbar-badge">30 derniers jours</span><div class="topbar-right"><select class="topbar-select"><option>30 jours</option><option>7 jours</option><option>3 mois</option></select><select class="topbar-select"><option>Tous les campus</option><option>UCAO</option><option>UL</option></select><button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button><button class="topbar-btn" title="Paramètres"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></button></div></div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Note moyenne globale</div><div class="kpi-value">4.0 / 5 <span class="badge-green"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trend-up"/></svg> 0.2</span></div><div class="kpi-sub"><span class="star-row">★★★★☆</span></div></div>
+        <div class="kpi-card"><div class="kpi-label">Cantines bien notées</div><div class="kpi-value">3 / 4</div><div class="kpi-sub">note ≥ 4.0 / 5</div></div>
+        <div class="kpi-card"><div class="kpi-label">Cantines en alerte</div><div class="kpi-value orange">1</div><div class="kpi-sub">note &lt; 3.5 sur 7 jours</div></div>
+        <div class="kpi-card"><div class="kpi-label">Avis collectés (30j)</div><div class="kpi-value">1 840</div><div class="kpi-sub">après confirmation commande</div></div>
+      </div>
+      <div class="card alert-card">
+        <div class="alert-header"><span style="color:#F07840"><svg class="ico" aria-hidden="true"><use href="#i-warning"/></svg></span><div class="card-title" style="color:#F07840;margin-bottom:0">Cantine en zone d'alerte</div></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="initials init-orange" style="width:36px;height:36px;font-size:13px">KU</div>
+          <div class="flex-1"><div style="font-size:13px;font-weight:500">Kiosque UL Nord · <span class="badge-peach">UL</span></div><div style="font-size:12px;color:#888;margin-top:2px">Note en baisse depuis 2 semaines · 14 avis négatifs sur 7 jours</div></div>
+          <span class="badge-red" style="font-size:13px;padding:4px 10px">3.2 / 5</span>
+          <button class="action-btn">Voir les avis →</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Classement qualité — toutes cantines</div>
+        <div class="filter-pills" data-filter-target="notes-table" data-filter-col="2"><div class="pill active" data-filter="all">Tous</div><div class="pill" data-filter="UCAO">UCAO</div><div class="pill" data-filter="UL">UL</div></div>
+        <div class="table-scroll"><table id="notes-table">
+          <tr><th>Rang</th><th>Cantine</th><th>Campus</th><th>Note moy.</th><th>Avis (30j)</th><th>Évolution</th><th>Statut qualité</th></tr>
+          <tr class="rank1" data-campus="UL"><td><span class="rank-medal"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-medal"/></svg> 1</span></td><td>Resto UL Central</td><td><span class="badge-peach">UL</span></td><td><span class="star-row">★★★★★</span> 4.6</td><td>412</td><td><span style="color:#2e7d32">↑ +0.3</span></td><td><span class="badge-green">Excellente</span></td></tr>
+          <tr data-campus="UCAO"><td>2</td><td>Cantine Centrale UCAO</td><td><span class="badge-peach">UCAO</span></td><td><span class="star-row">★★★★☆</span> 4.2</td><td>520</td><td><span style="color:#2e7d32">↑ +0.1</span></td><td><span class="badge-green">Bonne</span></td></tr>
+          <tr data-campus="UCAO"><td>3</td><td>Snack du Campus</td><td><span class="badge-peach">UCAO</span></td><td><span class="star-row">★★★★☆</span> 3.8</td><td>380</td><td><span style="color:#888">→ stable</span></td><td><span class="badge-gray">Correcte</span></td></tr>
+          <tr class="alert-row" data-campus="UL"><td>4</td><td>Kiosque UL Nord</td><td><span class="badge-peach">UL</span></td><td><span class="star-row">★★★☆☆</span> 3.2</td><td>528</td><td><span style="color:#e53935">↓ −0.4</span></td><td><span class="badge-red">En alerte</span></td></tr>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Distribution des notes — tous avis</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+          <div class="h-bar-row"><div class="h-bar-label" style="width:30px">5★</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:37%;background:#1B2A6B"></div></div><div class="h-bar-val">680 avis · 37%</div></div>
+          <div class="h-bar-row"><div class="h-bar-label" style="width:30px">4★</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:39%;background:#1B2A6B;opacity:.7"></div></div><div class="h-bar-val">720 avis · 39%</div></div>
+          <div class="h-bar-row"><div class="h-bar-label" style="width:30px">3★</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:15%;background:#ccc"></div></div><div class="h-bar-val">280 avis · 15%</div></div>
+          <div class="h-bar-row"><div class="h-bar-label" style="width:30px">2★</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:7%;background:#F07840;opacity:.7"></div></div><div class="h-bar-val">120 avis · 7%</div></div>
+          <div class="h-bar-row"><div class="h-bar-label" style="width:30px">1★</div><div class="h-bar-wrap"><div class="h-bar-fill" style="width:2%;background:#F07840"></div></div><div class="h-bar-val">40 avis · 2%</div></div>
+        </div>
+        <div style="font-size:12px;color:#aaa;margin-top:12px">1 840 avis au total</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 13: COMMENTAIRES -->
+<div class="page" id="p-comments">
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item" onclick="showPage('p-campus')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus</div>
+        <div class="nav-item" onclick="showPage('p-perf')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine</div>
+        <div class="nav-item" onclick="showPage('p-etud')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants</div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div>
+        <div class="nav-item parent-active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité<span class="nav-chevron open"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub open"><div class="nav-sub-item" onclick="showPage('p-notes')">Notes & alertes</div><div class="nav-sub-item active">Commentaires</div></div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="showPage('p-ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs</div></div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar"><span class="topbar-icon-wrap"><svg class="ico" aria-hidden="true"><use href="#i-chat"/></svg></span><span class="breadcrumb">Qualité <span class="bc-sep">/</span> <span>Commentaires</span></span><span class="topbar-badge"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-lock"/></svg> Interne · non public</span><div class="topbar-right"><select class="topbar-select"><option>Toutes les cantines</option></select><select class="topbar-select"><option>Toutes les notes</option><option>5★</option><option>1★</option></select><button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button><button class="topbar-btn" title="Paramètres"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></button></div></div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Avis collectés (30j)</div><div class="kpi-value">1 840</div><div class="kpi-sub">après confirmation commande</div></div>
+        <div class="kpi-card"><div class="kpi-label">Avis positifs</div><div class="kpi-value">1 400 <span class="badge-green">76%</span></div><div class="kpi-sub">note ≥ 4 / 5</div></div>
+        <div class="kpi-card"><div class="kpi-label">Avis négatifs</div><div class="kpi-value orange">160 <span class="badge-orange">9%</span></div><div class="kpi-sub">note ≤ 2 / 5</div></div>
+        <div class="kpi-card"><div class="kpi-label">Sans commentaire</div><div class="kpi-value">280 <span class="badge-gray">15%</span></div><div class="kpi-sub">note sans texte</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Tous les commentaires</div>
+        <div class="info-banner"><svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg> Ces avis sont strictement internes et ne sont jamais affichés aux étudiants</div>
+        <div class="filter-pills" data-filter-target="comments-wrap"><div class="pill active" data-filter="all">Tous</div><div class="pill" data-filter="5">5★</div><div class="pill" data-filter="4">4★</div><div class="pill" data-filter="3">3★</div><div class="pill" data-filter="2">2★</div><div class="pill" data-filter="1">1★</div></div>
+        <div id="comments-wrap">
+        <div class="comment-card" data-note="5">
+          <div class="comment-header"><div class="initials init-indigo" style="width:28px;height:28px;font-size:11px">KA</div><span style="font-size:12px;color:#888">Étudiant · UCAO</span><span class="badge-peach">Cantine Centrale UCAO</span><span class="star-row" style="margin-left:auto">★★★★★</span><span style="font-size:11px;color:#aaa">Aujourd'hui 11:24</span></div>
+          <div class="comment-text">Très bon repas, service rapide et vendeur très réactif. Je recommande vivement.</div>
+        </div>
+        <div class="comment-card" data-note="4">
+          <div class="comment-header"><div class="initials init-orange" style="width:28px;height:28px;font-size:11px">AB</div><span style="font-size:12px;color:#888">Étudiant · UL</span><span class="badge-peach">Resto UL Central</span><span class="star-row" style="margin-left:auto">★★★★☆</span><span style="font-size:11px;color:#aaa">Hier 14:52</span></div>
+          <div class="comment-text">Bonne qualité mais le temps d'attente était un peu long aujourd'hui.</div>
+        </div>
+        <div class="comment-card" data-note="3">
+          <div class="comment-header"><div class="initials init-indigo" style="width:28px;height:28px;font-size:11px">ED</div><span style="font-size:12px;color:#888">Étudiant · UCAO</span><span class="badge-peach">Snack du Campus</span><span class="star-row" style="margin-left:auto">★★★☆☆</span><span style="font-size:11px;color:#aaa">17/06/2026</span></div>
+          <div class="comment-text">Correct mais la portion était plus petite que d'habitude.</div>
+        </div>
+        <div class="comment-card negative" data-note="2">
+          <div class="comment-header"><div class="initials init-gray" style="width:28px;height:28px;font-size:11px">MK</div><span style="font-size:12px;color:#888">Étudiant · UL</span><span class="badge-red">Kiosque UL Nord</span><span style="color:#e53935;margin-left:auto">★★☆☆☆</span><span style="font-size:11px;color:#aaa">17/06/2026</span></div>
+          <div class="comment-text">Commande froide à la récupération, vendeur peu aimable. Très déçu.</div>
+        </div>
+        <div class="comment-card negative" data-note="1">
+          <div class="comment-header"><div class="initials init-gray" style="width:28px;height:28px;font-size:11px">YA</div><span style="font-size:12px;color:#888">Étudiant · UCAO</span><span class="badge-red">Kiosque UL Nord</span><span style="color:#e53935;margin-left:auto">★☆☆☆☆</span><span style="font-size:11px;color:#aaa">16/06/2026</span></div>
+          <div class="comment-text">Inacceptable. La commande n'était pas prête alors que le statut indiquait prête.</div>
+        </div>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-size:13px;color:#888">← Précédent · Page 1 / 12 · Suivant →</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Mots clés les plus mentionnés</div>
+        <div class="two-col" style="margin-bottom:0">
+          <div><div style="font-size:12px;color:#888;margin-bottom:8px;font-weight:500">Mentions positives</div><div class="tag tag-peach" style="font-size:15px">rapide</div><div class="tag tag-peach" style="font-size:14px">bon</div><div class="tag tag-peach" style="font-size:13px">chaud</div><div class="tag tag-peach" style="font-size:12px">aimable</div><div class="tag tag-peach">propre</div><div class="tag tag-peach">généreux</div></div>
+          <div><div style="font-size:12px;color:#888;margin-bottom:8px;font-weight:500">Mentions négatives</div><div class="tag tag-red" style="font-size:15px">attente</div><div class="tag tag-red" style="font-size:14px">froid</div><div class="tag tag-red" style="font-size:13px">petit</div><div class="tag tag-red" style="font-size:12px">cher</div><div class="tag tag-red">lent</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 14: SUPERVISION AMBASSADEURS -->
+<div class="page" id="p-ambass">
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item" onclick="showPage('p-campus')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus</div>
+        <div class="nav-item" onclick="showPage('p-perf')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine</div>
+        <div class="nav-item" onclick="showPage('p-etud')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants</div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div><div class="nav-item" onclick="showPage('p-notes')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité</div></div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div>
+        <div class="nav-item parent-active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs<span class="nav-chevron open"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-chevron"/></svg></span></div>
+        <div class="nav-sub open"><div class="nav-sub-item active">Supervision ambassadeurs</div></div>
+      </div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar"><span class="topbar-icon-wrap"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span><span class="breadcrumb">Programme <span class="bc-sep">/</span> <span>Supervision ambassadeurs</span></span><span class="topbar-badge">30 derniers jours</span><div class="topbar-right"><select class="topbar-select"><option>30 jours</option><option>3 mois</option><option>6 mois</option></select><select class="topbar-select"><option>Tous les campus</option><option>UCAO</option><option>UL</option></select><button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button><button class="topbar-btn" title="Paramètres"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></button></div></div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Ambassadeurs actifs</div><div class="kpi-value">8 <span class="badge-green">↑ 2 ce mois</span></div><div class="kpi-sub">sur 2 campus</div></div>
+        <div class="kpi-card"><div class="kpi-label">Volume parrainage (30j)</div><div class="kpi-value" style="font-size:15px">384 000 FCFA <span class="badge-green">↑ 22%</span></div></div>
+        <div class="kpi-card"><div class="kpi-label">Commissions versées (30j)</div><div class="kpi-value kpi-value-sm">3 120 FCFA</div><div class="kpi-sub">déduit du surplus</div></div>
+        <div class="kpi-card"><div class="kpi-label">Affiliés actifs</div><div class="kpi-value">94</div><div class="kpi-sub">ayant rechargé au moins 1 fois</div></div>
+      </div>
+      <div class="three-col">
+        <div class="level-card">
+          <div style="margin-bottom:8px"><span class="badge-peach" style="font-size:13px;padding:4px 12px">Bronze</span></div>
+          <div style="font-size:20px;font-weight:600;color:#0D1438;margin:8px 0">4 ambassadeurs</div>
+          <div style="font-size:12px;color:#888">Volume moy. : 28 400 FCFA / 30j</div>
+          <div style="font-size:12px;color:#888;margin-bottom:8px">Commission : 0,5%</div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:57%"></div></div>
+          <div style="font-size:11px;color:#aaa">Seuil Argent : 50 000 FCFA</div>
+        </div>
+        <div class="level-card">
+          <div style="margin-bottom:8px"><span class="badge-gray" style="font-size:13px;padding:4px 12px">Argent</span></div>
+          <div style="font-size:20px;font-weight:600;color:#0D1438;margin:8px 0">3 ambassadeurs</div>
+          <div style="font-size:12px;color:#888">Volume moy. : 84 200 FCFA / 30j</div>
+          <div style="font-size:12px;color:#888;margin-bottom:8px">Commission : 0,8%</div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:56%"></div></div>
+          <div style="font-size:11px;color:#aaa">Seuil Or : 150 000 FCFA</div>
+        </div>
+        <div class="level-card">
+          <div style="margin-bottom:8px"><span class="badge-amber" style="font-size:13px;padding:4px 12px">Or</span></div>
+          <div style="font-size:20px;font-weight:600;color:#0D1438;margin:8px 0">1 ambassadeur</div>
+          <div style="font-size:12px;color:#888">Volume moy. : 186 400 FCFA / 30j</div>
+          <div style="font-size:12px;color:#888;margin-bottom:8px">Commission : 1,2%</div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:100%"></div></div>
+          <div style="font-size:11px;color:#aaa">Niveau maximum atteint</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Classement — top ambassadeurs</div>
+        <div class="card-sub">Par volume de recharges affiliés · 30 jours</div>
+        <div class="filter-pills" data-filter-target="ambass-table" data-filter-col="2"><div class="pill active" data-filter="all">Tous</div><div class="pill" data-filter="UCAO">UCAO</div><div class="pill" data-filter="UL">UL</div><div class="pill" data-filter="Suspendu">Suspendus</div></div>
+        <div class="table-scroll"><table id="ambass-table">
+          <tr><th>Rang</th><th>Ambassadeur</th><th>Campus</th><th>Niveau</th><th>Affiliés inscrits</th><th>Affiliés actifs</th><th>Volume (30j)</th><th>Commission</th><th>Statut</th></tr>
+          <tr class="rank1" data-campus="UCAO"><td><span class="rank-medal"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-medal"/></svg> 1</span></td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-indigo" style="width:28px;height:28px;font-size:11px">KA</div>Koffi A.</div></td><td><span class="badge-peach">UCAO</span></td><td><span class="badge-amber">Or</span></td><td>38</td><td>24</td><td>186 400 FCFA</td><td>2 237 FCFA</td><td><span class="badge-green">Actif</span></td></tr>
+          <tr data-campus="UL"><td>2</td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-indigo" style="width:28px;height:28px;font-size:11px">AB</div>Ama B.</div></td><td><span class="badge-peach">UL</span></td><td><span class="badge-gray">Argent</span></td><td>26</td><td>18</td><td>94 800 FCFA</td><td>758 FCFA</td><td><span class="badge-green">Actif</span></td></tr>
+          <tr data-campus="UCAO"><td>3</td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-orange" style="width:28px;height:28px;font-size:11px">EC</div>Edem C.</div></td><td><span class="badge-peach">UCAO</span></td><td><span class="badge-gray">Argent</span></td><td>22</td><td>14</td><td>71 200 FCFA</td><td>570 FCFA</td><td><span class="badge-green">Actif</span></td></tr>
+          <tr data-campus="UL"><td>4</td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-indigo" style="width:28px;height:28px;font-size:11px">MK</div>Mawuli K.</div></td><td><span class="badge-peach">UL</span></td><td><span class="badge-peach">Bronze</span></td><td>18</td><td>11</td><td>42 600 FCFA</td><td>213 FCFA</td><td><span class="badge-green">Actif</span></td></tr>
+          <tr data-campus="UCAO"><td>5</td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-indigo" style="width:28px;height:28px;font-size:11px">YA</div>Yawa A.</div></td><td><span class="badge-peach">UCAO</span></td><td><span class="badge-peach">Bronze</span></td><td>14</td><td>8</td><td>31 800 FCFA</td><td>159 FCFA</td><td><span class="badge-green">Actif</span></td></tr>
+          <tr style="opacity:.6" data-campus="UL" data-status="Suspendu"><td>6</td><td><div style="display:flex;align-items:center;gap:8px"><div class="initials init-gray" style="width:28px;height:28px;font-size:11px">DK</div>Dodzi K.</div></td><td><span class="badge-peach">UL</span></td><td><span class="badge-peach">Bronze</span></td><td>10</td><td>4</td><td>18 200 FCFA</td><td>91 FCFA</td><td><span class="badge-orange">Suspendu</span></td></tr>
+        </table></div>
+      </div>
+      <div class="card alert-card">
+        <div class="alert-header"><span style="color:#F07840"><svg class="ico" aria-hidden="true"><use href="#i-warning"/></svg></span><div class="card-title" style="color:#F07840;margin-bottom:0">Ambassadeur suspendu</div></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="initials init-gray" style="width:36px;height:36px;font-size:13px">DK</div>
+          <div class="flex-1"><div style="font-size:13px;font-weight:500">Dodzi K. · <span class="badge-peach">UL</span> <span class="badge-orange">Suspendu</span></div><div style="font-size:12px;color:#888;margin-top:2px">Inactif depuis 3 mois · aucun affilié invité · Suspension : 01/06/2026</div><div style="font-size:12px;color:#F07840;margin-top:4px">Appel en attente depuis le 10/06/2026 — à traiter depuis l'interface admin</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Impact du programme sur les inscriptions</div>
+        <div class="card-sub">Inscriptions via ambassadeur vs inscription directe · 6 mois</div>
+        <div class="chart-grouped">
+          <div class="chart-grouped-item"><div class="bar" style="height:55%;background:#F07840;opacity:.75"></div><div class="bar" style="height:80%;background:#1B2A6B;opacity:.75"></div></div>
+          <div class="chart-grouped-item"><div class="bar" style="height:65%;background:#F07840;opacity:.78"></div><div class="bar" style="height:85%;background:#1B2A6B;opacity:.78"></div></div>
+          <div class="chart-grouped-item"><div class="bar" style="height:72%;background:#F07840;opacity:.82"></div><div class="bar" style="height:88%;background:#1B2A6B;opacity:.82"></div></div>
+          <div class="chart-grouped-item"><div class="bar" style="height:80%;background:#F07840;opacity:.85"></div><div class="bar" style="height:90%;background:#1B2A6B;opacity:.9"></div></div>
+          <div class="chart-grouped-item"><div class="bar" style="height:88%;background:#F07840;opacity:.9"></div><div class="bar" style="height:93%;background:#1B2A6B;opacity:.93"></div></div>
+          <div class="chart-grouped-item"><div class="bar" style="height:95%;background:#F07840"></div><div class="bar" style="height:95%;background:#1B2A6B"></div></div>
+        </div>
+        <div class="bar-labels"><div class="bar-label">Jan</div><div class="bar-label">Fév</div><div class="bar-label">Mar</div><div class="bar-label">Avr</div><div class="bar-label">Mai</div><div class="bar-label">Jun</div></div>
+        <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:#F07840"></div>Via ambassadeur</div><div class="legend-item"><div class="legend-dot" style="background:#1B2A6B"></div>Inscription directe</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 15 : PARAMÈTRES (layout avec tabs internes)      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page" id="p-settings">
+<div class="dash-layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item" onclick="showPage('p-campus')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus</div>
+        <div class="nav-item" onclick="showPage('p-perf')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine</div>
+        <div class="nav-item" onclick="showPage('p-etud')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants</div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div><div class="nav-item" onclick="showPage('p-notes')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité</div></div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="showPage('p-ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs</div></div>
+      <div class="nav-section"><div class="nav-section-label">Compte</div>
+        <div class="nav-item active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></span>Paramètres</div>
+      </div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')" title="Déconnexion"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+
+  <div class="main-area">
+    <div class="topbar">
+      <span class="topbar-icon-wrap"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></span>
+      <span class="breadcrumb"><span>Paramètres</span></span>
+      <div class="topbar-right">
+        <button class="topbar-btn" title="Notifications"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <h1>Paramètres</h1>
+        <p>Gérez votre compte, votre sécurité et les accès à la plateforme</p>
+      </div>
+
+      <div class="settings-layout">
+        <!-- Tabs sidebar -->
+        <div class="settings-sidebar">
+          <button class="settings-tab-btn active" data-stab="profil" onclick="showSettingsTab('profil')">
+            <svg class="ico" aria-hidden="true"><use href="#i-user"/></svg>Profil
+          </button>
+          <button class="settings-tab-btn" data-stab="securite" onclick="showSettingsTab('securite')">
+            <svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg>Sécurité
+          </button>
+          <button class="settings-tab-btn" data-stab="notifications" onclick="showSettingsTab('notifications')">
+            <svg class="ico" aria-hidden="true"><use href="#i-notif"/></svg>Notifications
+          </button>
+          <button class="settings-tab-btn" data-stab="preferences" onclick="showSettingsTab('preferences')">
+            <svg class="ico" aria-hidden="true"><use href="#i-sliders"/></svg>Préférences
+          </button>
+          <button class="settings-tab-btn" data-stab="acces" onclick="showSettingsTab('acces')">
+            <svg class="ico" aria-hidden="true"><use href="#i-users-plus"/></svg>Gestion des accès
+          </button>
+        </div>
+
+        <!-- Contenu tabs -->
+        <div class="settings-main">
+
+          <!-- ── TAB 1 : PROFIL ── -->
+          <div class="settings-tab-content" id="stab-profil" style="display:block">
+            <div class="card">
+              <div class="card-title">Informations personnelles</div>
+              <div class="card-sub">Modifiez vos informations de compte</div>
+              <!-- Avatar -->
+              <div style="display:flex;align-items:center;gap:20px;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">
+                <div class="avatar" style="width:72px;height:72px;font-size:22px;border-radius:16px;background:var(--indigo)">DG</div>
+                <div>
+                  <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">Directeur général</div>
+                  <div style="font-size:14px;color:var(--muted);margin-bottom:10px">Compte Supervision · Accès total</div>
+                  <button class="action-btn" style="font-size:13px">Changer les initiales</button>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field-group">
+                  <label>Prénom</label>
+                  <input type="text" value="Jean-Paul">
+                </div>
+                <div class="field-group">
+                  <label>Nom</label>
+                  <input type="text" value="Mensah">
+                </div>
+              </div>
+              <div class="field-group">
+                <label>Adresse e-mail</label>
+                <input type="email" value="direction@nesso.app">
+              </div>
+              <div class="field-group">
+                <label>Rôle</label>
+                <input type="text" value="Supervision — Équipe dirigeante" readonly>
+              </div>
+              <div class="field-group">
+                <label>Téléphone (optionnel)</label>
+                <input type="tel" placeholder="+228 90 00 00 00">
+              </div>
+              <div class="btn-row">
+                <button class="save-btn"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-check"/></svg>Enregistrer les modifications</button>
+                <button class="cancel-btn">Annuler</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── TAB 2 : SÉCURITÉ ── -->
+          <div class="settings-tab-content" id="stab-securite">
+            <div class="card" style="margin-bottom:20px">
+              <div class="card-title">Mot de passe</div>
+              <div class="card-sub">Modifiez votre mot de passe de connexion</div>
+              <div class="field-group">
+                <label>Mot de passe actuel</label>
+                <input type="password" placeholder="••••••••••••">
+              </div>
+              <div class="field-row">
+                <div class="field-group">
+                  <label>Nouveau mot de passe</label>
+                  <input type="password" placeholder="Minimum 12 caractères">
+                </div>
+                <div class="field-group">
+                  <label>Confirmer le mot de passe</label>
+                  <input type="password" placeholder="Répétez le mot de passe">
+                </div>
+              </div>
+              <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px">
+                <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px">Exigences :</div>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <div style="font-size:13px;color:#22C55E">✓ Au moins 12 caractères</div>
+                  <div style="font-size:13px;color:#22C55E">✓ Au moins une majuscule</div>
+                  <div style="font-size:13px;color:#94A3B8">○ Au moins un chiffre</div>
+                  <div style="font-size:13px;color:#94A3B8">○ Au moins un caractère spécial</div>
+                </div>
+              </div>
+              <div class="btn-row">
+                <button class="save-btn">Changer le mot de passe</button>
+              </div>
+            </div>
+
+            <div class="card" style="margin-bottom:20px">
+              <div class="card-title">Authentification à deux facteurs (2FA)</div>
+              <div class="card-sub">Google Authenticator · Actuellement actif</div>
+              <div style="display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap">
+                <div class="qr-placeholder">
+                  <svg style="width:48px;height:48px;color:#94A3B8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M14 17h3M17 14v3"/></svg>
+                  <span>QR Code 2FA</span>
+                </div>
+                <div style="flex:1;min-width:200px">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+                    <span class="badge-green" style="font-size:13px;padding:5px 12px">● Actif</span>
+                    <span style="font-size:14px;color:var(--muted)">Configuré sur votre téléphone</span>
+                  </div>
+                  <div style="font-size:14px;color:#475569;line-height:1.6;margin-bottom:16px">
+                    Votre compte est protégé par Google Authenticator. Chaque connexion nécessite la saisie d'un code à 6 chiffres généré par l'application sur votre téléphone.
+                  </div>
+                  <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px">Clé de secours</div>
+                  <div style="font-family:monospace;background:#F1F5F9;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;color:#334155;letter-spacing:.12em;margin-bottom:16px">NXXX-4821-YZZZ-0094</div>
+                  <div style="display:flex;gap:10px;flex-wrap:wrap">
+                    <button class="action-btn">Reconfigurer le 2FA</button>
+                    <button class="danger-btn">Désactiver le 2FA</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">Historique des connexions</div>
+              <div class="card-sub">Vos 5 dernières sessions</div>
+              <div class="session-row session-current">
+                <div style="width:36px;height:36px;background:rgba(27,42,107,.1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="ico" style="color:var(--indigo)" aria-hidden="true"><use href="#i-monitor"/></svg></div>
+                <div style="flex:1">
+                  <div style="font-size:14px;font-weight:600;color:var(--text)">Session actuelle <span class="badge-green" style="font-size:11px">En cours</span></div>
+                  <div style="font-size:13px;color:var(--muted)">Chrome · Windows · Lomé, Togo</div>
+                  <div style="font-size:12px;color:#94A3B8">Aujourd'hui à 09:14 · IP 41.66.xxx.xxx</div>
+                </div>
+              </div>
+              <div class="session-row">
+                <div style="width:36px;height:36px;background:#F1F5F9;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="ico" style="color:#94A3B8" aria-hidden="true"><use href="#i-monitor"/></svg></div>
+                <div style="flex:1">
+                  <div style="font-size:14px;font-weight:500;color:var(--text)">Chrome · Windows · Lomé, Togo</div>
+                  <div style="font-size:12px;color:#94A3B8">Hier à 18:42 · IP 41.66.xxx.xxx</div>
+                </div>
+                <button class="danger-btn" style="font-size:12px;padding:4px 12px">Révoquer</button>
+              </div>
+              <div class="session-row">
+                <div style="width:36px;height:36px;background:#F1F5F9;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="ico" style="color:#94A3B8" aria-hidden="true"><use href="#i-monitor"/></svg></div>
+                <div style="flex:1">
+                  <div style="font-size:14px;font-weight:500;color:var(--text)">Safari · iPhone · Lomé, Togo</div>
+                  <div style="font-size:12px;color:#94A3B8">17/06/2026 à 11:05 · IP 41.66.xxx.xxx</div>
+                </div>
+                <button class="danger-btn" style="font-size:12px;padding:4px 12px">Révoquer</button>
+              </div>
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+                <button class="danger-btn">Déconnecter toutes les autres sessions</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── TAB 3 : NOTIFICATIONS ── -->
+          <div class="settings-tab-content" id="stab-notifications">
+            <div class="card">
+              <div class="card-title">Préférences de notifications</div>
+              <div class="card-sub">Choisissez comment et quand vous souhaitez être alerté</div>
+
+              <div class="section-label">Qualité & cantines</div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Cantine en zone d'alerte qualité</div><div class="toggle-sub">Note moyenne sous 3.5 sur 7 jours</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Rapport qualité hebdomadaire</div><div class="toggle-sub">Envoyé chaque lundi matin par e-mail</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+
+              <div class="section-label">Finance & créances</div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Nouvelle créance vendeur</div><div class="toggle-sub">Quand la plateforme avance un remboursement</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Rapport financier quotidien</div><div class="toggle-sub">Résumé des revenus du jour par e-mail</div></div>
+                <button class="toggle" onclick="this.classList.toggle('on')"></button>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Rapport financier mensuel</div><div class="toggle-sub">Synthèse complète le 1er de chaque mois</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+
+              <div class="section-label">Étudiants & abus</div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Suspensions de comptes étudiants</div><div class="toggle-sub">Notification à chaque nouvelle suspension</div></div>
+                <button class="toggle" onclick="this.classList.toggle('on')"></button>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Rapport abus hebdomadaire</div><div class="toggle-sub">Synthèse des annulations et suspensions</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+
+              <div class="section-label">Programme ambassadeur</div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Ambassadeur suspendu</div><div class="toggle-sub">Notification à chaque suspension automatique</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Appel ambassadeur en attente</div><div class="toggle-sub">Rappel si un appel n'est pas traité sous 48h</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+
+              <div class="section-label">Canal de notification</div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Notifications par e-mail</div><div class="toggle-sub">direction@nesso.app</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Notifications dans l'interface</div><div class="toggle-sub">Badge et panneau de notifications en haut à droite</div></div>
+                <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+              </div>
+
+              <div class="btn-row">
+                <button class="save-btn">Enregistrer les préférences</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── TAB 4 : PRÉFÉRENCES ── -->
+          <div class="settings-tab-content" id="stab-preferences">
+            <div class="card">
+              <div class="card-title">Préférences d'affichage</div>
+              <div class="card-sub">Personnalisez votre expérience sur la plateforme</div>
+
+              <div class="field-group">
+                <label>Langue de l'interface</label>
+                <select>
+                  <option selected>Français</option>
+                  <option>English</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label>Fuseau horaire</label>
+                <select>
+                  <option selected>Africa/Lomé (UTC+0)</option>
+                  <option>Africa/Abidjan (UTC+0)</option>
+                  <option>Europe/Paris (UTC+2)</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label>Format des montants</label>
+                <select>
+                  <option selected>FCFA — ex : 12 450 FCFA</option>
+                  <option>XOF — ex : XOF 12,450</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label>Période par défaut des tableaux de bord</label>
+                <select>
+                  <option>Aujourd'hui</option>
+                  <option>7 derniers jours</option>
+                  <option selected>30 derniers jours</option>
+                  <option>3 derniers mois</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label>Format de date</label>
+                <select>
+                  <option selected>JJ/MM/AAAA — ex : 19/06/2026</option>
+                  <option>MM/DD/YYYY — ex : 06/19/2026</option>
+                  <option>AAAA-MM-JJ — ex : 2026-06-19</option>
+                </select>
+              </div>
+
+              <div class="section-label">KPI prioritaires sur le tableau de bord</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+                <div class="toggle-row" style="padding:10px 0">
+                  <div><div class="toggle-label">Commandes du jour</div></div>
+                  <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+                </div>
+                <div class="toggle-row" style="padding:10px 0">
+                  <div><div class="toggle-label">Revenus nets</div></div>
+                  <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+                </div>
+                <div class="toggle-row" style="padding:10px 0">
+                  <div><div class="toggle-label">Étudiants actifs</div></div>
+                  <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+                </div>
+                <div class="toggle-row" style="padding:10px 0">
+                  <div><div class="toggle-label">Tickets en circulation</div></div>
+                  <button class="toggle" onclick="this.classList.toggle('on')"></button>
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <button class="save-btn">Enregistrer les préférences</button>
+                <button class="cancel-btn">Réinitialiser</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── TAB 5 : GESTION DES ACCÈS ── -->
+          <div class="settings-tab-content" id="stab-acces">
+
+            <!-- Comptes supervision -->
+            <div class="card" style="margin-bottom:20px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                <div>
+                  <div class="card-title">Comptes Supervision</div>
+                  <div class="card-sub">Membres de l'équipe dirigeante · Accès complet à l'interface de supervision</div>
+                </div>
+                <button class="add-user-btn" onclick="showPage('p-settings-new-user');document.getElementById('new-user-role').value='supervision'">
+                  <svg class="ico ico-sm" aria-hidden="true"><use href="#i-users-plus"/></svg>Ajouter
+                </button>
+              </div>
+
+              <div class="access-card">
+                <div class="avatar" style="width:44px;height:44px;font-size:14px;border-radius:12px">DG</div>
+                <div style="flex:1">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span style="font-size:15px;font-weight:600;color:var(--text)">Jean-Paul Mensah</span>
+                    <span class="role-badge role-supervision">Supervision</span>
+                    <span class="badge-green" style="font-size:11px">● Vous</span>
+                  </div>
+                  <div style="font-size:13px;color:var(--muted);margin-top:2px">direction@nesso.app</div>
+                  <div style="font-size:12px;color:#94A3B8;margin-top:2px">Dernière connexion : Aujourd'hui à 09:14 · 2FA actif</div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="action-btn" onclick="showPage('p-settings-edit-user')"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-edit"/></svg></button>
+                </div>
+              </div>
+
+              <div class="access-card">
+                <div class="initials init-orange" style="width:44px;height:44px;font-size:14px;border-radius:12px">MK</div>
+                <div style="flex:1">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span style="font-size:15px;font-weight:600;color:var(--text)">Marie Kokou</span>
+                    <span class="role-badge role-supervision">Supervision</span>
+                  </div>
+                  <div style="font-size:13px;color:var(--muted);margin-top:2px">m.kokou@nesso.app</div>
+                  <div style="font-size:12px;color:#94A3B8;margin-top:2px">Dernière connexion : Hier à 16:30 · 2FA actif</div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="action-btn" onclick="showPage('p-settings-edit-user')"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-edit"/></svg></button>
+                  <button class="danger-btn" style="font-size:12px;padding:4px 12px"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trash"/></svg></button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comptes admin web -->
+            <div class="card" style="margin-bottom:20px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                <div>
+                  <div class="card-title">Comptes Administration</div>
+                  <div class="card-sub">Administrateurs web · Gestion des cantines, litiges et ambassadeurs</div>
+                </div>
+                <button class="add-user-btn" onclick="showPage('p-settings-new-user');document.getElementById('new-user-role').value='admin'">
+                  <svg class="ico ico-sm" aria-hidden="true"><use href="#i-users-plus"/></svg>Ajouter
+                </button>
+              </div>
+
+              <div class="access-card">
+                <div class="initials init-indigo" style="width:44px;height:44px;font-size:14px;border-radius:12px">AD</div>
+                <div style="flex:1">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span style="font-size:15px;font-weight:600;color:var(--text)">Akosua Dossou</span>
+                    <span class="role-badge role-admin">Admin web</span>
+                    <span class="badge-green" style="font-size:11px">● Actif</span>
+                  </div>
+                  <div style="font-size:13px;color:var(--muted);margin-top:2px">a.dossou@nesso.app</div>
+                  <div style="font-size:12px;color:#94A3B8;margin-top:2px">Dernière connexion : Aujourd'hui à 08:52 · 2FA actif</div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="action-btn" onclick="showPage('p-settings-edit-user')"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-edit"/></svg></button>
+                  <button class="danger-btn" style="font-size:12px;padding:4px 12px"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trash"/></svg></button>
+                </div>
+              </div>
+
+              <div class="access-card">
+                <div class="initials init-gray" style="width:44px;height:44px;font-size:14px;border-radius:12px">KT</div>
+                <div style="flex:1">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span style="font-size:15px;font-weight:600;color:var(--text)">Kofi Tepe</span>
+                    <span class="role-badge role-admin">Admin web</span>
+                    <span class="badge-orange" style="font-size:11px">Inactif</span>
+                  </div>
+                  <div style="font-size:13px;color:var(--muted);margin-top:2px">k.tepe@nesso.app</div>
+                  <div style="font-size:12px;color:#94A3B8;margin-top:2px">Dernière connexion : 10/06/2026 · 2FA non configuré</div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="action-btn" onclick="showPage('p-settings-edit-user')"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-edit"/></svg></button>
+                  <button class="danger-btn" style="font-size:12px;padding:4px 12px"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-trash"/></svg></button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Différences de droits -->
+            <div class="card">
+              <div class="card-title">Différences de droits</div>
+              <div class="card-sub">Ce que chaque rôle peut ou ne peut pas faire</div>
+              <div class="table-scroll"><table>
+                <tr><th>Fonctionnalité</th><th>Supervision</th><th>Admin web</th></tr>
+                <tr><td>Tableau de bord général</td><td><span class="badge-green">✓ Oui</span></td><td><span class="badge-gray">✗ Non</span></td></tr>
+                <tr><td>Analyse par campus / cantine</td><td><span class="badge-green">✓ Oui</span></td><td><span class="badge-gray">✗ Non</span></td></tr>
+                <tr><td>Supervision ambassadeurs</td><td><span class="badge-green">✓ Oui</span></td><td><span class="badge-gray">✗ Non</span></td></tr>
+                <tr><td>Simulation financière</td><td><span class="badge-green">✓ Oui</span></td><td><span class="badge-gray">✗ Non</span></td></tr>
+                <tr><td>Gestion des cantines</td><td><span class="badge-gray">✗ Non</span></td><td><span class="badge-green">✓ Oui</span></td></tr>
+                <tr><td>Gestion des litiges</td><td><span class="badge-gray">✗ Non</span></td><td><span class="badge-green">✓ Oui</span></td></tr>
+                <tr><td>Traitement appels ambassadeurs</td><td><span class="badge-gray">✗ Non</span></td><td><span class="badge-green">✓ Oui</span></td></tr>
+                <tr><td>Gestion des accès</td><td><span class="badge-green">✓ Oui</span></td><td><span class="badge-gray">✗ Non</span></td></tr>
+              </table></div>
+            </div>
+          </div>
+
+        </div><!-- /settings-main -->
+      </div><!-- /settings-layout -->
+    </div><!-- /content -->
+  </div><!-- /main-area -->
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 16 : CRÉER UN COMPTE                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page" id="p-settings-new-user">
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item" onclick="showPage('p-campus')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus</div>
+        <div class="nav-item" onclick="showPage('p-perf')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine</div>
+        <div class="nav-item" onclick="showPage('p-etud')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants</div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div><div class="nav-item" onclick="showPage('p-notes')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité</div></div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="showPage('p-ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs</div></div>
+      <div class="nav-section"><div class="nav-section-label">Compte</div><div class="nav-item active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></span>Paramètres</div></div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar">
+      <button class="back-btn" onclick="showPage('p-settings');showSettingsTab('acces')">← Retour</button>
+      <span class="breadcrumb"><span class="bc-link" onclick="showPage('p-settings');showSettingsTab('acces')">Paramètres</span> <span class="bc-sep">›</span> <span>Créer un compte</span></span>
+      <div class="topbar-right"><button class="topbar-btn"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button></div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <h1>Créer un compte</h1>
+        <p>Ajoutez un nouveau membre à la plateforme Nésso!!</p>
+      </div>
+      <div style="max-width:640px">
+        <div class="card">
+          <div class="card-title">Informations du compte</div>
+          <div class="card-sub">Renseignez les informations du nouveau membre</div>
+
+          <div class="field-row">
+            <div class="field-group">
+              <label>Prénom</label>
+              <input type="text" placeholder="ex : Kofi">
+            </div>
+            <div class="field-group">
+              <label>Nom</label>
+              <input type="text" placeholder="ex : Mensah">
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Adresse e-mail professionnelle</label>
+            <input type="email" placeholder="prenom.nom@nesso.app">
+          </div>
+          <div class="field-group">
+            <label>Rôle</label>
+            <select id="new-user-role">
+              <option value="supervision">Supervision — Équipe dirigeante</option>
+              <option value="admin">Administration web</option>
+            </select>
+          </div>
+
+          <!-- Aperçu droits selon rôle -->
+          <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px">
+            <div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">Droits accordés avec ce rôle</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:14px;color:#22C55E">✓ Accès en lecture à tous les tableaux de bord</div>
+              <div style="font-size:14px;color:#22C55E">✓ Analyse financière et simulation</div>
+              <div style="font-size:14px;color:#22C55E">✓ Supervision des ambassadeurs</div>
+              <div style="font-size:14px;color:#94A3B8">✗ Gestion des cantines et litiges (Admin uniquement)</div>
+              <div style="font-size:14px;color:#94A3B8">✗ Modification des données opérationnelles</div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>Téléphone (optionnel)</label>
+            <input type="tel" placeholder="+228 90 00 00 00">
+          </div>
+
+          <!-- Mot de passe temporaire -->
+          <div style="background:var(--peach);border-radius:12px;padding:14px 18px;font-size:14px;color:var(--indigo);margin-bottom:20px;line-height:1.6">
+            💡 Un mot de passe temporaire sera généré automatiquement et envoyé par e-mail au nouveau membre. Il devra le modifier à sa première connexion et configurer Google Authenticator (2FA).
+          </div>
+
+          <div class="btn-row">
+            <button class="save-btn" onclick="showPage('p-settings');showSettingsTab('acces')">
+              <svg class="ico ico-sm" aria-hidden="true"><use href="#i-check"/></svg>Créer le compte
+            </button>
+            <button class="cancel-btn" onclick="showPage('p-settings');showSettingsTab('acces')">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE 17 : MODIFIER UN COMPTE                           -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="page" id="p-settings-edit-user">
+<div class="dash-layout">
+  <div class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-text">Nésso<span>!!</span></div><div class="sidebar-logo-sub">Supervision · v1.0</div></div>
+    <div class="sidebar-nav">
+      <div class="nav-section"><div class="nav-section-label">Tableau de bord</div><div class="nav-item" onclick="showPage('p-dashboard')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-dashboard"/></svg></span>Vue générale</div></div>
+      <div class="nav-section"><div class="nav-section-label">Analyse</div>
+        <div class="nav-item" onclick="showPage('p-campus')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-campus"/></svg></span>Par campus</div>
+        <div class="nav-item" onclick="showPage('p-perf')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-cantine"/></svg></span>Par cantine</div>
+        <div class="nav-item" onclick="showPage('p-etud')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span>Étudiants</div>
+      </div>
+      <div class="nav-section"><div class="nav-section-label">Qualité</div><div class="nav-item" onclick="showPage('p-notes')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg></span>Avis & qualité</div></div>
+      <div class="nav-section"><div class="nav-section-label">Programme</div><div class="nav-item" onclick="showPage('p-ambass')"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span>Ambassadeurs</div></div>
+      <div class="nav-section"><div class="nav-section-label">Compte</div><div class="nav-item active"><span class="nav-icon"><svg class="ico" aria-hidden="true"><use href="#i-settings"/></svg></span>Paramètres</div></div>
+    </div>
+    <div class="sidebar-bottom"><div class="avatar">DG</div><div><div class="user-name">Directeur général</div><div class="user-role">Supervision</div></div><button class="logout-btn" onclick="showPage('p-login1')"><svg class="ico" aria-hidden="true"><use href="#i-logout"/></svg></button></div>
+  </div>
+  <div class="main-area">
+    <div class="topbar">
+      <button class="back-btn" onclick="showPage('p-settings');showSettingsTab('acces')">← Retour</button>
+      <span class="breadcrumb"><span class="bc-link" onclick="showPage('p-settings');showSettingsTab('acces')">Paramètres</span> <span class="bc-sep">›</span> <span>Modifier le compte</span></span>
+      <div class="topbar-right"><button class="topbar-btn"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg></button></div>
+    </div>
+    <div class="content">
+      <div class="page-header">
+        <h1>Modifier le compte</h1>
+        <p>Akosua Dossou · Admin web</p>
+      </div>
+      <div style="max-width:640px">
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-title">Informations du compte</div>
+          <div class="field-row">
+            <div class="field-group"><label>Prénom</label><input type="text" value="Akosua"></div>
+            <div class="field-group"><label>Nom</label><input type="text" value="Dossou"></div>
+          </div>
+          <div class="field-group"><label>Adresse e-mail</label><input type="email" value="a.dossou@nesso.app"></div>
+          <div class="field-group">
+            <label>Rôle</label>
+            <select>
+              <option>Supervision — Équipe dirigeante</option>
+              <option selected>Administration web</option>
+            </select>
+          </div>
+          <div class="field-group"><label>Téléphone</label><input type="tel" value="+228 91 23 45 67"></div>
+          <div class="btn-row">
+            <button class="save-btn" onclick="showPage('p-settings');showSettingsTab('acces')">Enregistrer</button>
+            <button class="cancel-btn" onclick="showPage('p-settings');showSettingsTab('acces')">Annuler</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-title">Statut du compte</div>
+          <div class="card-sub">Activez ou suspendez l'accès de ce membre</div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Compte actif</div><div class="toggle-sub">Ce membre peut se connecter à la plateforme</div></div>
+            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Authentification 2FA</div><div class="toggle-sub">Google Authenticator configuré <span class="badge-green" style="font-size:11px">Actif</span></div></div>
+            <button class="action-btn" style="font-size:12px">Réinitialiser le 2FA</button>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Réinitialiser le mot de passe</div><div class="toggle-sub">Envoi d'un lien de réinitialisation par e-mail</div></div>
+            <button class="action-btn" style="font-size:12px">Envoyer le lien</button>
+          </div>
+        </div>
+
+        <div class="danger-zone">
+          <div class="card-title">Zone de danger</div>
+          <div style="font-size:14px;color:#475569;margin:10px 0 16px">La suppression de ce compte est irréversible. Le membre perdra immédiatement tout accès à la plateforme.</div>
+          <button class="danger-btn" onclick="showPage('p-settings');showSettingsTab('acces')">Supprimer ce compte définitivement</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+/* ── Paramètres tabs ──────────────────────────────────── */
+function showSettingsTab(tabId){
+  document.querySelectorAll('.settings-tab-content').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.settings-tab-btn').forEach(b=>b.classList.remove('active'));
+  const tab=document.getElementById('stab-'+tabId);
+  const btn=document.querySelector('[data-stab="'+tabId+'"]');
+  if(tab)tab.style.display='block';
+  if(btn)btn.classList.add('active');
+}
+
+/* ── Navigation ───────────────────────────────────────── */
+function closeMobileSidebar(){
+  document.querySelectorAll('.sidebar.open').forEach(s=>s.classList.remove('open'));
+  const overlay=document.getElementById('sidebar-overlay');
+  if(overlay)overlay.classList.remove('visible');
+  document.body.classList.remove('sidebar-open');
+}
+function openMobileSidebar(){
+  const page=document.querySelector('.page.active');
+  const sidebar=page?page.querySelector('.sidebar'):null;
+  if(!sidebar)return;
+  sidebar.classList.add('open');
+  const overlay=document.getElementById('sidebar-overlay');
+  if(overlay)overlay.classList.add('visible');
+  document.body.classList.add('sidebar-open');
+}
+function initMobileNav(){
+  document.querySelectorAll('.main-area .topbar').forEach(topbar=>{
+    if(topbar.querySelector('.mobile-menu-btn'))return;
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='mobile-menu-btn';
+    btn.title='Menu';
+    btn.setAttribute('aria-label','Ouvrir le menu');
+    btn.innerHTML='<svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg>';
+    btn.addEventListener('click',openMobileSidebar);
+    topbar.insertBefore(btn,topbar.firstChild);
+  });
+  document.querySelectorAll('.sidebar').forEach(sidebar=>{
+    if(sidebar.querySelector('.sidebar-close'))return;
+    const logo=sidebar.querySelector('.sidebar-logo');
+    if(!logo)return;
+    const close=document.createElement('button');
+    close.type='button';
+    close.className='sidebar-close';
+    close.title='Fermer';
+    close.setAttribute('aria-label','Fermer le menu');
+    close.innerHTML='<svg class="ico" aria-hidden="true"><use href="#i-x"/></svg>';
+    close.addEventListener('click',closeMobileSidebar);
+    logo.appendChild(close);
+  });
+  const overlay=document.getElementById('sidebar-overlay');
+  if(overlay)overlay.addEventListener('click',closeMobileSidebar);
+}
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el){el.classList.add('active');window.scrollTo(0,0)}
+  closeMobileSidebar();
+}
+function toggleNav(id){
+  const sub=document.getElementById('sub-'+id);
+  const chev=document.getElementById('chev-'+id);
+  if(!sub)return;
+  const open=sub.classList.contains('open');
+  sub.classList.toggle('open',!open);
+  if(chev)chev.classList.toggle('open',!open);
+}
+document.addEventListener('click',function(e){
+  const nav=e.target.closest('.nav-item,.nav-sub-item');
+  if(nav&&window.innerWidth<=768)closeMobileSidebar();
+});
+document.addEventListener('DOMContentLoaded',initMobileNav);
+initMobileNav();
+
+/* ── Filtres pills ────────────────────────────────────── */
+/*
+  Usage HTML :
+    <div class="filter-pills" data-filter-target="TABLE_ID" data-filter-col="COL_INDEX">
+      <div class="pill active" data-filter="all">Tous</div>
+      <div class="pill" data-filter="UCAO">UCAO</div>
+    </div>
+    <table id="TABLE_ID">
+      <tr data-campus="UCAO"> ... </tr>
+    </table>
+  data-filter-col indique quelle colonne lire (0-based). Si absent, on lit l'attribut data-campus / data-status.
+*/
+document.addEventListener('click', function(e){
+  const pill = e.target.closest('.pill');
+  if(!pill) return;
+  const wrap = pill.closest('.filter-pills');
+  if(!wrap) return;
+
+  // toggle active
+  wrap.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  pill.classList.add('active');
+
+  const tableId = wrap.dataset.filterTarget;
+  if(!tableId) return;
+  const target = document.getElementById(tableId);
+  if(!target) return;
+
+  const filter = pill.dataset.filter;
+  const col = wrap.dataset.filterCol !== undefined ? parseInt(wrap.dataset.filterCol) : null;
+
+  // Cas comment-cards (div avec data-note)
+  const cards = target.querySelectorAll('[data-note]');
+  if(cards.length > 0){
+    cards.forEach(card=>{
+      card.style.display = (filter === 'all' || card.dataset.note === filter) ? '' : 'none';
+    });
+    return;
+  }
+
+  // Cas tableaux
+  target.querySelectorAll('tbody tr, tr[data-campus], tr[data-status]').forEach(row=>{
+    if(row.querySelector('th')) return;
+    if(filter === 'all'){
+      row.style.display = '';
+      return;
+    }
+    const campus = row.dataset.campus;
+    const status = row.dataset.status;
+    // filtre "Suspendu" — checker le statut
+    if(filter === 'Suspendu'){
+      row.style.display = (status === 'Suspendu') ? '' : 'none';
+      return;
+    }
+    if(filter === 'active' || filter === 'expired'){
+      if(status !== undefined){
+        row.style.display = (status === filter) ? '' : 'none';
+        return;
+      }
+    }
+    if(campus !== undefined){
+      row.style.display = (campus === filter) ? '' : 'none';
+      return;
+    }
+    if(col !== null){
+      const cell = row.cells[col];
+      if(cell){
+        row.style.display = cell.textContent.includes(filter) ? '' : 'none';
+      }
+    }
+  });
+});
+
+/* ── Expand rows (boutons Voir →) ─────────────────────── */
+/*
+  Un bouton avec class "expand-btn" et data-content="HTML à afficher"
+  insère une ligne de détail sous la ligne cliquée.
+*/
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('.expand-btn');
+  if(!btn) return;
+
+  const row = btn.closest('tr');
+  if(!row) return;
+
+  // toggle
+  const existingDetail = row.nextElementSibling;
+  if(existingDetail && existingDetail.classList.contains('detail-row')){
+    existingDetail.remove();
+    btn.textContent = 'Voir →';
+    return;
+  }
+
+  const cols = row.cells.length;
+  const content = btn.dataset.content || '';
+  const detailRow = document.createElement('tr');
+  detailRow.classList.add('detail-row');
+  detailRow.innerHTML = `<td colspan="${cols}" style="background:#F8FAFC;padding:16px 20px;border-bottom:2px solid var(--border)">${content}</td>`;
+  row.after(detailRow);
+  btn.textContent = 'Fermer ↑';
+});
+
+/* ── Filtres select (campus dans topbar) ──────────────── */
+/*
+  <select data-filter-target="TABLE_ID" data-filter-col="1">
+    <option value="">Tous les campus</option>
+    <option value="UCAO">UCAO</option>
+  </select>
+*/
+document.addEventListener('change', function(e){
+  const sel = e.target.closest('select[data-filter-target]');
+  if(!sel) return;
+  const tableId = sel.dataset.filterTarget;
+  const col = parseInt(sel.dataset.filterCol || '0');
+  const table = document.getElementById(tableId);
+  if(!table) return;
+  const val = sel.value;
+  table.querySelectorAll('tr').forEach(row=>{
+    if(row.querySelector('th')) return;
+    if(!val){ row.style.display=''; return; }
+    const cell = row.cells[col];
+    row.style.display = (cell && cell.textContent.includes(val)) ? '' : 'none';
+  });
+});
+</script>
+</body>
+</html>
