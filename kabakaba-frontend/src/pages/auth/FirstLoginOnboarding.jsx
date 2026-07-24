@@ -4,6 +4,8 @@ import {
   ArrowRight, ArrowLeft, Check, Clock,
 } from 'lucide-react';
 import styles from './FirstLoginOnboarding.module.css';
+import { useAuth } from '../../context/AuthContext';
+import * as webAuth from '../../services/webAuthService';
 
 const OTP_LENGTH = 6;
 const OTP_DURATION = 30;
@@ -15,8 +17,6 @@ const STEP_META = [
   { title: 'Accès au tableau de bord', sub: null },
 ];
 
-// Étape 3 a deux visages (config 2FA puis vérification du code) mais reste
-// le même numéro dans le tracker — fidèle au prototype.
 function stepMetaFor(internalStep) {
   if (internalStep === 4) {
     return { title: 'Vérification du code', sub: 'Confirmer que le 2FA est bien configuré' };
@@ -25,7 +25,6 @@ function stepMetaFor(internalStep) {
 }
 
 function StepTracker({ internalStep }) {
-  // internalStep: 1..5 (5 = succès, tous les cercles sont "done")
   const visualStep = internalStep >= 5 ? 4 : internalStep >= 3 ? 3 : internalStep;
 
   return (
@@ -91,8 +90,9 @@ function checkPasswordStrength(pw) {
 }
 
 export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone }) {
+  const { applySession } = useAuth();
   const [internalStep, setInternalStep] = useState(1);
-  const [email, setEmail] = useState('a.dossou@kabakaba.app');
+  const [email, setEmail] = useState('');
   const [tempPassword, setTempPassword] = useState('');
   const [showTempPw, setShowTempPw] = useState(false);
 
@@ -104,11 +104,17 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
 
   const [tfaTab, setTfaTab] = useState('qr'); // 'qr' | 'key'
   const [keyCopied, setKeyCopied] = useState(false);
-  const secretKey = 'NXAU 4P2K YMBR 0094 WZLQ 8FDX';
 
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(''));
   const [timer, setTimer] = useState(OTP_DURATION);
   const otpRefs = useRef([]);
+
+  const [onboardingToken, setOnboardingToken] = useState(null);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState(null);
+  const [manualKey, setManualKey] = useState(null);
+  const [backupCode, setBackupCode] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState(null);
 
   useEffect(() => {
     if (internalStep !== 4) return;
@@ -124,8 +130,9 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
   }, [internalStep, onDone]);
 
   const handleCopyKey = async () => {
+    if (!manualKey) return;
     try {
-      await navigator.clipboard.writeText(secretKey.replace(/\s/g, ''));
+      await navigator.clipboard.writeText(manualKey.replace(/\s/g, ''));
       setKeyCopied(true);
       setTimeout(() => setKeyCopied(false), 2000);
     } catch {
@@ -170,9 +177,19 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
         </div>
 
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            setInternalStep(2);
+            setFormError(null);
+            setLoading(true);
+            try {
+              const result = await webAuth.firstLogin(email, tempPassword);
+              setOnboardingToken(result.onboardingToken);
+              setInternalStep(2);
+            } catch (err) {
+              setFormError(err.message || 'Identifiants temporaires invalides.');
+            } finally {
+              setLoading(false);
+            }
           }}
         >
           <div className={styles.field}>
@@ -203,8 +220,10 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
             </div>
           </div>
 
-          <button type="submit" className={styles.btnPrimary}>
-            Continuer <ArrowRight size={15} />
+          {formError && <div className={styles.fieldError}>{formError}</div>}
+
+          <button type="submit" className={styles.btnPrimary} disabled={loading}>
+            {loading ? 'Vérification...' : 'Continuer'} <ArrowRight size={15} />
           </button>
         </form>
       </Shell>
@@ -234,9 +253,21 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
         <div className={styles.formSub}>Ce mot de passe remplace définitivement le mot de passe temporaire</div>
 
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            setInternalStep(3);
+            setFormError(null);
+            setLoading(true);
+            try {
+              await webAuth.setOnboardingPassword(onboardingToken, newPw);
+              const setupResult = await webAuth.setupTwoFactor(onboardingToken);
+              setQrCodeDataUrl(setupResult.qrCodeDataUrl);
+              setManualKey(setupResult.manualKey);
+              setInternalStep(3);
+            } catch (err) {
+              setFormError(err.message || 'Erreur lors de la mise à jour du mot de passe.');
+            } finally {
+              setLoading(false);
+            }
           }}
         >
           <div className={styles.field}>
@@ -299,13 +330,15 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
             )}
           </div>
 
+          {formError && <div className={styles.fieldError}>{formError}</div>}
+
           <button
             type="submit"
             className={styles.btnPrimary}
             style={{ marginTop: 10 }}
-            disabled={strength.score < 4 || !passwordsMatch}
+            disabled={strength.score < 4 || !passwordsMatch || loading}
           >
-            Continuer <ArrowRight size={15} />
+            {loading ? 'Enregistrement...' : 'Continuer'} <ArrowRight size={15} />
           </button>
           <button type="button" className={styles.btnBack} onClick={() => setInternalStep(1)}>
             <ArrowLeft size={15} /> Retour
@@ -359,7 +392,11 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
             </div>
             <div className={styles.qrWrap}>
               <div className={styles.qrFrame}>
-                <QrPlaceholder />
+                {qrCodeDataUrl ? (
+                  <img src={qrCodeDataUrl} alt="QR code 2FA" width={148} height={148} />
+                ) : (
+                  <QrPlaceholder />
+                )}
               </div>
               <div className={styles.qrTag}>kabakaba · Administration</div>
             </div>
@@ -374,7 +411,7 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
               </span>
             </div>
             <div className={styles.keyBoxLabel}>Votre clé secrète</div>
-            <div className={styles.keyBox}>{secretKey}</div>
+            <div className={styles.keyBox}>{manualKey || '—'}</div>
             <button type="button" className={styles.copyBtn} onClick={handleCopyKey}>
               <Copy size={14} /> {keyCopied ? 'Copiée !' : 'Copier la clé'}
             </button>
@@ -422,9 +459,21 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
         </div>
 
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            setInternalStep(5);
+            setFormError(null);
+            setLoading(true);
+            try {
+              const code = otp.join('');
+              const result = await webAuth.verifyTwoFactorSetup(onboardingToken, code);
+              applySession(result.accessToken, result.webUser);
+              setBackupCode(result.backupCode);
+              setInternalStep(5);
+            } catch (err) {
+              setFormError(err.message || 'Code invalide.');
+            } finally {
+              setLoading(false);
+            }
           }}
         >
           <div className={styles.otpRow}>
@@ -446,8 +495,10 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
             Code valide encore <strong>{timer}s</strong>
           </div>
 
-          <button type="submit" className={styles.btnPrimary}>
-            <ShieldCheck size={15} /> Vérifier et accéder
+          {formError && <div className={styles.fieldError}>{formError}</div>}
+
+          <button type="submit" className={styles.btnPrimary} disabled={loading}>
+            <ShieldCheck size={15} /> {loading ? 'Vérification...' : 'Vérifier et accéder'}
           </button>
           <button type="button" className={styles.btnBack} onClick={() => setInternalStep(3)}>
             <ArrowLeft size={15} /> Retour — reconfigurer le 2FA
@@ -475,10 +526,10 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
           <KeyRound size={16} />
           <div>
             <div style={{ fontWeight: 600, marginBottom: 4 }}>Clé de secours 2FA</div>
-            <div className={styles.backupKey}>NXAU-4P2K-YMBR-0094</div>
+            <div className={styles.backupKey}>{backupCode || '—'}</div>
             <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
               Conservez cette clé en lieu sûr. Elle vous permettra de récupérer l&apos;accès si vous
-              perdez votre téléphone.
+              perdez votre téléphone. Elle ne sera plus jamais réaffichée.
             </div>
           </div>
         </div>
@@ -496,8 +547,6 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
   );
 }
 
-// QR code décoratif — pas un vrai QR scannable, en attendant que le backend
-// génère un vrai secret TOTP + une vraie image QR (ex: librairie `qrcode`).
 function QrPlaceholder() {
   return (
     <svg width="148" height="148" viewBox="0 0 148 148" fill="none" aria-label="QR code de configuration Google Authenticator">

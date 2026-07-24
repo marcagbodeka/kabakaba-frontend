@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Loader2 } from 'lucide-react';
 import LoginIllustration from './LoginIllustration';
 import styles from './Login.module.css';
+import { useAuth } from '../../context/AuthContext';
+import * as webAuth from '../../services/webAuthService';
+import { ApiError } from '../../services/httpClient';
 
 const OTP_LENGTH = 6;
-const OTP_DURATION = 30; // secondes
+const OTP_DURATION = 30;
 
 function LoginShell({ subtitle, children }) {
   return (
@@ -19,9 +21,7 @@ function LoginShell({ subtitle, children }) {
           </div>
           <div className={styles.tagline}>{subtitle}</div>
         </div>
-        <div className={styles.leftFooter}>
-          Outil interne réservé aux équipes kabakaba
-        </div>
+        <div className={styles.leftFooter}>Outil interne réservé aux équipes kabakaba</div>
       </div>
       <div className={styles.right}>
         <div className={styles.form}>{children}</div>
@@ -30,22 +30,16 @@ function LoginShell({ subtitle, children }) {
   );
 }
 
-/**
- * Composant de login réutilisé par les deux espaces (/supervision/login et
- * /admin/login) — c'est App.jsx qui décide, via `onSuccess` + le routeur,
- * vers quel dashboard atterrir. Le composant lui-même ne connaît pas le rôle.
- *
- * Props :
- * - subtitle : texte affiché sous le logo ("Supervision" / "Admin web")
- * - onSuccess : appelé une fois la 2FA validée
- */
 export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }) {
-  const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1 = identifiants, 2 = 2FA, 3 = redirection
+  const { applySession } = useAuth();
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [challengeToken, setChallengeToken] = useState(null);
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(''));
   const [timer, setTimer] = useState(OTP_DURATION);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const otpRefs = useRef([]);
 
   useEffect(() => {
@@ -55,20 +49,30 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
     return () => clearInterval(id);
   }, [step]);
 
-  // Redirection automatique une fois la 2FA validée — pas d'écran à cliquer.
   useEffect(() => {
     if (step !== 3) return;
-    const id = setTimeout(() => {
-      onSuccess?.();
-    }, 700);
+    const id = setTimeout(() => onSuccess?.(), 700);
     return () => clearTimeout(id);
   }, [step, onSuccess]);
 
-  const handleCredentialsSubmit = (e) => {
+  const handleCredentialsSubmit = async (e) => {
     e.preventDefault();
-    // TODO: appeler POST /auth/login une fois l'API prête
-    setStep(2);
-    setTimeout(() => otpRefs.current[0]?.focus(), 50);
+    setError(null);
+    setLoading(true);
+    try {
+      const result = await webAuth.login(email, password);
+      setChallengeToken(result.challengeToken);
+      setStep(2);
+      setTimeout(() => otpRefs.current[0]?.focus(), 50);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        onFirstLogin?.();
+        return;
+      }
+      setError(err.message || 'Identifiants invalides.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOtpChange = (index, value) => {
@@ -76,21 +80,27 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
     const next = [...otp];
     next[index] = digit;
     setOtp(next);
-    if (digit && index < OTP_LENGTH - 1) {
-      otpRefs.current[index + 1]?.focus();
-    }
+    if (digit && index < OTP_LENGTH - 1) otpRefs.current[index + 1]?.focus();
   };
 
   const handleOtpKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
+    if (e.key === 'Backspace' && !otp[index] && index > 0) otpRefs.current[index - 1]?.focus();
   };
 
-  const handleOtpSubmit = (e) => {
+  const handleOtpSubmit = async (e) => {
     e.preventDefault();
-    // TODO: appeler POST /auth/verify-2fa une fois l'API prête
-    setStep(3);
+    setError(null);
+    setLoading(true);
+    try {
+      const code = otp.join('');
+      const result = await webAuth.verify2fa(challengeToken, code);
+      applySession(result.accessToken, result.webUser);
+      setStep(3);
+    } catch (err) {
+      setError(err.message || 'Code invalide ou expiré.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (step === 1) {
@@ -122,8 +132,9 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
               placeholder="••••••••••"
             />
           </div>
-          <button type="submit" className={styles.btnPrimary}>
-            Continuer
+          {error && <div className={styles.fieldError}>{error}</div>}
+          <button type="submit" className={styles.btnPrimary} disabled={loading}>
+            {loading ? 'Connexion...' : 'Continuer'}
           </button>
           <a className={styles.linkSmall}>Mot de passe oublié ?</a>
           {onFirstLogin && (
@@ -163,8 +174,9 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
             <span>Code valide {timer}s</span>
             <a className={styles.linkInline}>Renvoyer</a>
           </div>
-          <button type="submit" className={styles.btnPrimary}>
-            <ShieldCheck size={15} /> Vérifier
+          {error && <div className={styles.fieldError}>{error}</div>}
+          <button type="submit" className={styles.btnPrimary} disabled={loading}>
+            <ShieldCheck size={15} /> {loading ? 'Vérification...' : 'Vérifier'}
           </button>
         </form>
         <a className={styles.linkCenter} onClick={() => setStep(1)}>

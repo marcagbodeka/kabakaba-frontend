@@ -97,6 +97,8 @@
   border-radius: 20px;
 }
 
+.badge-black { background: #0D1438; color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
+
 /* ── Cards ───────────────────────────────────────────── */
 .card {
   background: var(--surface);

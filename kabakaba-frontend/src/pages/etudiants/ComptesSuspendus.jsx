@@ -1,29 +1,77 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import { findUsers, updateUser, extractList } from '../../services/domain/usersService';
+import { findAllCampuses } from '../../services/domain/campusesService';
+import { getSupervisionStats } from '../../services/domain/adminStatsService';
 
-const initialSuspensions = [
-  { id: 1, initials: 'KA', name: 'K. Amegan', campus: 'UCAO · Lomé', motif: 'Annulations répétées (6 en 10 min)', date: '12 juil. 2026', ends: 'dans 8h', active: true },
-  { id: 2, initials: 'ML', name: 'M. Lawson', campus: 'Université de Lomé', motif: 'Annulations répétées (6 en 10 min)', date: '11 juil. 2026', ends: 'dans 22h', active: true },
-  { id: 3, initials: 'SD', name: 'S. Dossou', campus: 'UCAO · Lomé', motif: 'Annulations répétées (6 en 10 min)', date: '10 juil. 2026', ends: 'expirée', active: false },
-];
+function initials(firstName, lastName) {
+  return `${(firstName || '?')[0]}${(lastName || '?')[0]}`.toUpperCase();
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatTickets(n) {
+  return `${n.toLocaleString('fr-FR')} tickets`;
+}
 
 export default function ComptesSuspendus() {
-  const [suspensions, setSuspensions] = useState(initialSuspensions);
-  const activeCount = suspensions.filter((s) => s.active).length;
+  const [students, setStudents] = useState([]);
+  const [campusById, setCampusById] = useState({});
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [liftingId, setLiftingId] = useState(null);
 
-  const handleLift = (id) => {
-    // TODO: appeler PATCH /admin/suspensions/:id une fois l'API prête
-    setSuspensions((prev) => prev.map((s) => (s.id === id ? { ...s, active: false, ends: 'levée manuellement' } : s)));
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [usersResponse, campuses, supervisionStats] = await Promise.all([
+        findUsers({ role: 'STUDENT', isSuspended: true, limit: 100 }),
+        findAllCampuses(),
+        getSupervisionStats(),
+      ]);
+      const { items } = extractList(usersResponse);
+      setStudents(items);
+      setCampusById(Object.fromEntries(campuses.map((c) => [c.id, c.name])));
+      setStats(supervisionStats);
+    } catch (err) {
+      setError(err.message || 'Impossible de charger les comptes suspendus.');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const handleLift = async (id) => {
+    setLiftingId(id);
+    try {
+      await updateUser(id, { isSuspended: false });
+      setStudents((prev) => prev.filter((s) => s.id !== id));
+      setStats((prev) => (prev ? { ...prev, activeSuspensions: Math.max(0, prev.activeSuspensions - 1) } : prev));
+    } catch (err) {
+      setError(err.message || 'Impossible de lever cette suspension.');
+    } finally {
+      setLiftingId(null);
+    }
+  };
+
+  const blockedFunds = students.reduce((sum, s) => sum + (s.walletBalance || 0) + (s.escrowBalance || 0), 0);
 
   return (
     <>
       <Topbar
         icon={ShieldAlert}
         breadcrumb={[{ label: 'Étudiants', path: '/supervision/etudiants' }, { label: 'Comptes suspendus' }]}
-        badge={{ text: `${activeCount} actives`, tone: activeCount > 0 ? 'red' : 'default' }}
+        badge={{ text: `${stats?.activeSuspensions ?? students.length} actives`, tone: (stats?.activeSuspensions ?? 0) > 0 ? 'red' : 'default' }}
       />
       <PageContent>
         <div className="page-header">
@@ -34,49 +82,64 @@ export default function ComptesSuspendus() {
         <div className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-label">Suspensions actives</div>
-            <div className="kpi-value">{activeCount}</div>
+            <div className="kpi-value">{loading ? '—' : stats?.activeSuspensions ?? students.length}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Suspensions (30 jours)</div>
-            <div className="kpi-value">7</div>
+            <div className="kpi-value">{loading ? '—' : stats?.suspensions30d ?? '—'}</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Tickets déduits (30 jours)</div>
-            <div className="kpi-value kpi-value-sm">1 400</div>
-            <div className="kpi-sub">200 tickets par récidive</div>
+            <div className="kpi-label">Fonds bloqués</div>
+            <div className="kpi-value">{loading ? '—' : formatTickets(blockedFunds)}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Bannissements définitifs</div>
+            <div className="kpi-value">{loading ? '—' : stats?.totalBanned ?? '—'}</div>
           </div>
         </div>
 
+        {error && (
+          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+            {error}
+          </div>
+        )}
+
         <div className="card">
           <div className="card-title">Étudiants suspendus</div>
-          <div className="card-sub">Possibilité d&apos;annuler ou d&apos;ajuster manuellement une suspension</div>
+          <div className="card-sub">Possibilité de lever une suspension manuellement</div>
           <div className="table-scroll">
             <table>
               <thead>
-                <tr><th>Étudiant</th><th>Campus</th><th>Motif</th><th>Date</th><th>Fin</th><th>Statut</th><th></th></tr>
+                <tr><th>Étudiant</th><th>Campus</th><th>Motif</th><th>Date</th><th>Fin de suspension</th><th>Statut</th><th></th></tr>
               </thead>
               <tbody>
-                {suspensions.map((s) => (
+                {loading && (
+                  <tr><td colSpan={7}>Chargement...</td></tr>
+                )}
+                {!loading && students.length === 0 && (
+                  <tr><td colSpan={7}>Aucun compte suspendu actuellement.</td></tr>
+                )}
+                {!loading && students.map((s) => (
                   <tr key={s.id}>
                     <td className="name-cell">
-                      <span className="initials init-indigo">{s.initials}</span>
-                      <strong>{s.name}</strong>
+                      <span className="initials init-indigo">{initials(s.firstName, s.lastName)}</span>
+                      <strong>{s.firstName} {s.lastName}</strong>
                     </td>
-                    <td>{s.campus}</td>
-                    <td>{s.motif}</td>
-                    <td>{s.date}</td>
-                    <td>{s.ends}</td>
+                    <td>{campusById[s.campusId] || '—'}</td>
+                    <td>{s.suspensionReason || '—'}</td>
+                    <td>{formatDate(s.suspendedAt)}</td>
+                    <td>{s.suspensionUntil ? formatDate(s.suspensionUntil) : 'Indéterminée'}</td>
                     <td>
-                      {s.active ? (
-                        <span className="badge-red">Suspendu</span>
+                      {s.isBanned ? (
+                        <span className="badge-black">Banni définitivement</span>
                       ) : (
-                        <span className="badge-gray">Terminée</span>
+                        <span className="badge-red">Suspendu</span>
                       )}
                     </td>
                     <td>
-                      {s.active && (
-                        <button className="action-btn" onClick={() => handleLift(s.id)}>
-                          Lever la suspension
+                      {!s.isBanned && (
+                        <button className="action-btn" disabled={liftingId === s.id} onClick={() => handleLift(s.id)}>
+                          {liftingId === s.id ? 'Levée...' : 'Lever la suspension'}
                         </button>
                       )}
                     </td>

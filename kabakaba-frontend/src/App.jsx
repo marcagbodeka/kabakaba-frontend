@@ -4,6 +4,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 import LoginPage from './pages/auth/LoginPage';
 import FirstLoginOnboarding from './pages/auth/FirstLoginOnboarding';
 import Home from './pages/site/Home';
+import { useAuth } from './context/AuthContext';
 
 import { navSections as supervisionNav } from './router/navConfigSupervision';
 import { navSections as adminNav } from './router/navConfigAdmin';
@@ -39,16 +40,16 @@ import Transactions from './pages/admin/transactions/Transactions';
 import TransactionDetail from './pages/admin/transactions/TransactionDetail';
 import ParametresAdmin from './pages/admin/parametres/ParametresAdmin';
 
-const fakeSupervisionUser = { name: 'Directeur général', role: 'Supervision' };
 const fakeAdminUser = { name: 'Kofi Mensah', role: 'Admin web' };
 
 export default function App() {
-  // Deux sessions indépendantes, en mémoire seulement — chaque espace a son
-  // propre login et son propre état de connexion.
-  // TODO: remplacer par un vrai AuthContext par espace, avec cookie de
-  // session partagé sur le domaine parent + expiration par inactivité.
-  const [supervisionAuth, setSupervisionAuth] = useState(false);
+  // Admin web : toujours en mock pour l'instant — pas encore dans le
+  // périmètre du câblage API (on ne fait que Supervision pour le moment).
+  // TODO: brancher sur le même AuthContext une fois Supervision validé.
   const [adminAuth, setAdminAuth] = useState(false);
+
+  // Supervision : branché sur le vrai AuthContext (session réelle via /web-auth/*)
+  const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <BrowserRouter>
@@ -60,23 +61,23 @@ export default function App() {
         <Route
           path="/supervision/login"
           element={
-            supervisionAuth ? (
+            isAuthenticated ? (
               <Navigate to="/supervision/dashboard" replace />
             ) : (
-              <LoginPage subtitle="Supervision" userName="Directeur général" onSuccess={() => setSupervisionAuth(true)} />
+              <LoginPage subtitle="Supervision" userName="Directeur général" onSuccess={() => {}} />
             )
           }
         />
         <Route
           path="/supervision"
-          element={<Navigate to={supervisionAuth ? '/supervision/dashboard' : '/supervision/login'} replace />}
+          element={<Navigate to={isAuthenticated ? '/supervision/dashboard' : '/supervision/login'} replace />}
         />
         <Route
           element={
-            supervisionAuth ? (
+            isAuthenticated ? (
               <DashboardLayout
-                user={fakeSupervisionUser}
-                onLogout={() => setSupervisionAuth(false)}
+                user={user ? { name: `${user.firstName} ${user.lastName}`, role: 'Supervision' } : { name: 'Supervision', role: 'Supervision' }}
+                onLogout={logout}
                 navSections={supervisionNav}
                 subtitle="Supervision"
                 loginPath="/supervision/login"
@@ -99,7 +100,7 @@ export default function App() {
           <Route path="/supervision/parametres" element={<ParametresSupervision />} />
         </Route>
 
-        {/* ── Espace Admin web ───────────────────────────────── */}
+        {/* ── Espace Admin web (toujours mock pour l'instant) ── */}
         <Route
           path="/admin/login"
           element={
