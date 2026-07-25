@@ -1,13 +1,40 @@
-import { Users, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Users, TrendingUp, TrendingDown } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import { getStudentBehavior } from '../../services/domain/analyticsService';
 
-const parCampus = [
-  { campus: 'UCAO · Lomé', signed: '1 540', active: '1 120', avgRecharge: '1 180 FCFA', freq: '2.4 / semaine' },
-  { campus: 'Université de Lomé', signed: '1 300', active: '860', avgRecharge: '980 FCFA', freq: '2.0 / semaine' },
-];
+function formatFcfa(n) {
+  return `${Number(n).toLocaleString('fr-FR')} FCFA`;
+}
+
+const DAY_LABELS_FR = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 0: 'Dim' };
 
 export default function ComportementEtudiants() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        setData(await getStudentBehavior(30));
+      } catch (err) {
+        setError(err.message || 'Impossible de charger le comportement étudiants.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const summary = data?.summary;
+  const perCampus = data?.perCampus ?? [];
+  const dailyValues = data?.dailyRegistrations?.values ?? [];
+  const maxDaily = Math.max(1, ...dailyValues);
+  const dayLabels = (data?.dailyRegistrations?.labels ?? []).map((d) => DAY_LABELS_FR[new Date(d).getDay()]);
+
   return (
     <>
       <Topbar
@@ -21,25 +48,37 @@ export default function ComportementEtudiants() {
           <p>Fréquence de commande, montant moyen rechargé, nombre d&apos;inscrits par campus</p>
         </div>
 
+        {error && (
+          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+            {error}
+          </div>
+        )}
+
         <div className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-label">Étudiants inscrits</div>
-            <div className="kpi-value">2 840</div>
+            <div className="kpi-value">{loading ? '—' : summary?.totalEnrolled}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Actifs (30 jours)</div>
             <div className="kpi-value">
-              1 980 <span className="badge-green"><TrendingUp size={13} /> 9%</span>
+              {loading ? '—' : summary?.totalActive}{' '}
+              {summary?.activeChangePct !== null && summary?.activeChangePct !== undefined && (
+                <span className={summary.activeChangePct >= 0 ? 'badge-green' : 'badge-red'}>
+                  {summary.activeChangePct >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />}{' '}
+                  {Math.abs(summary.activeChangePct)}%
+                </span>
+              )}
             </div>
-            <div className="kpi-sub">70% des inscrits</div>
+            <div className="kpi-sub">{loading ? '' : `${summary?.activeShare}% des inscrits`}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Montant moyen rechargé</div>
-            <div className="kpi-value kpi-value-sm">1 090 FCFA</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.avgRecharge ?? 0)}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Fréquence moyenne</div>
-            <div className="kpi-value kpi-value-sm">2.2 / semaine</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : `${summary?.avgFrequency} / semaine`}</div>
           </div>
         </div>
 
@@ -47,14 +86,18 @@ export default function ComportementEtudiants() {
           <div className="card-title">Évolution des inscriptions (7 jours)</div>
           <div className="chart-wrap">
             <div className="chart-bars" style={{ marginTop: 12 }}>
-              {[38, 42, 35, 50, 58, 66, 72].map((h, i) => (
-                <div key={i} className="bar" style={{ height: `${h}%`, background: '#F07840', opacity: 0.55 + h / 250 }} />
+              {dailyValues.map((v, i) => (
+                <div
+                  key={i}
+                  className="bar"
+                  style={{ height: `${Math.max(4, (v / maxDaily) * 100)}%`, background: '#F07840', opacity: 0.55 + v / (maxDaily * 2.5) }}
+                />
               ))}
             </div>
           </div>
           <div className="bar-labels">
-            {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((d) => (
-              <div key={d} className="bar-label">{d}</div>
+            {dayLabels.map((d, i) => (
+              <div key={i} className="bar-label">{d}</div>
             ))}
           </div>
         </div>
@@ -67,13 +110,15 @@ export default function ComportementEtudiants() {
                 <tr><th>Campus</th><th>Inscrits</th><th>Actifs (30j)</th><th>Montant moyen rechargé</th><th>Fréquence moyenne</th></tr>
               </thead>
               <tbody>
-                {parCampus.map((c) => (
-                  <tr key={c.campus}>
-                    <td><strong>{c.campus}</strong></td>
-                    <td>{c.signed}</td>
+                {loading && <tr><td colSpan={5}>Chargement...</td></tr>}
+                {!loading && perCampus.length === 0 && <tr><td colSpan={5}>Aucune donnée.</td></tr>}
+                {!loading && perCampus.map((c) => (
+                  <tr key={c.id}>
+                    <td><strong>{c.name}</strong></td>
+                    <td>{c.enrolled}</td>
                     <td>{c.active}</td>
-                    <td>{c.avgRecharge}</td>
-                    <td>{c.freq}</td>
+                    <td>{formatFcfa(c.avgRecharge)}</td>
+                    <td>{c.avgFrequency} / semaine</td>
                   </tr>
                 ))}
               </tbody>
