@@ -1,15 +1,38 @@
+import { useEffect, useState } from 'react';
 import { Utensils } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import { getVendorPerformance } from '../../services/domain/analyticsService';
 
-const vendors = [
-  { name: 'Cantine Centrale UCAO', campus: 'UCAO · Lomé', orders: '1 840', acceptance: '86%', refus: '8%', annulation: '6%', avgTime: '1min 40s', status: 'green' },
-  { name: 'Resto U Lomé 1', campus: 'Université de Lomé', orders: '1 402', acceptance: '81%', refus: '11%', annulation: '8%', avgTime: '2min 10s', status: 'green' },
-  { name: 'Snack du Campus', campus: 'UCAO · Lomé', orders: '1 280', acceptance: '81%', refus: '12%', annulation: '7%', avgTime: '2min 50s', status: 'orange' },
-  { name: 'Cantine du Lac', campus: 'Université de Lomé', orders: '934', acceptance: '74%', refus: '18%', annulation: '9%', avgTime: '3min 40s', status: 'red' },
-];
+function formatDuration(seconds) {
+  if (seconds === null || seconds === undefined) return '—';
+  const m = Math.floor(seconds / 60);
+  const s = Math.round(seconds % 60);
+  return m > 0 ? `${m}min ${s}s` : `${s}s`;
+}
 
 export default function PerformanceVendeurs() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        setData(await getVendorPerformance(30));
+      } catch (err) {
+        setError(err.message || 'Impossible de charger les performances vendeurs.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const summary = data?.summary;
+  const vendors = data?.vendors ?? [];
+
   return (
     <>
       <Topbar
@@ -23,25 +46,31 @@ export default function PerformanceVendeurs() {
           <p>Volume de commandes, taux d&apos;acceptation, de refus et d&apos;annulation par cantine</p>
         </div>
 
+        {error && (
+          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+            {error}
+          </div>
+        )}
+
         <div className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-label">Cantines actives</div>
-            <div className="kpi-value">4</div>
-            <div className="kpi-sub">sur 4 affiliées</div>
+            <div className="kpi-value">{loading ? '—' : summary?.activeVendors}</div>
+            <div className="kpi-sub">{loading ? '' : `sur ${summary?.totalVendors} affiliées`}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Acceptation moyenne</div>
-            <div className="kpi-value">80.5%</div>
+            <div className="kpi-value">{loading ? '—' : `${summary?.avgAcceptanceRate}%`}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Temps moyen d&apos;acceptation</div>
-            <div className="kpi-value kpi-value-sm">2min 35s</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : formatDuration(summary?.avgAcceptanceSeconds)}</div>
             <div className="kpi-sub">limite réglementaire : 5min</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Cantine sous surveillance</div>
-            <div className="kpi-value kpi-value-sm">1</div>
-            <div className="kpi-sub">réactivité en baisse</div>
+            <div className="kpi-label">Cantines sous surveillance</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : summary?.watchCount}</div>
+            <div className="kpi-sub">{loading ? '' : `+ ${summary?.alertCount} en alerte`}</div>
           </div>
         </div>
 
@@ -52,29 +81,25 @@ export default function PerformanceVendeurs() {
             <table>
               <thead>
                 <tr>
-                  <th>Cantine</th>
-                  <th>Campus</th>
-                  <th>Commandes</th>
-                  <th>Acceptation</th>
-                  <th>Refus</th>
-                  <th>Annulation</th>
-                  <th>Temps moyen</th>
-                  <th>Statut</th>
+                  <th>Cantine</th><th>Campus</th><th>Commandes</th><th>Acceptation</th>
+                  <th>Refus</th><th>Annulation</th><th>Temps moyen</th><th>Statut</th>
                 </tr>
               </thead>
               <tbody>
-                {vendors.map((v) => (
-                  <tr key={v.name}>
+                {loading && <tr><td colSpan={8}>Chargement...</td></tr>}
+                {!loading && vendors.length === 0 && <tr><td colSpan={8}>Aucune cantine avec des commandes sur la période.</td></tr>}
+                {!loading && vendors.map((v) => (
+                  <tr key={v.id}>
                     <td className="name-cell">
                       <span className={`status-dot dot-${v.status}`} />
                       <strong>{v.name}</strong>
                     </td>
-                    <td>{v.campus}</td>
+                    <td>{v.campusName}</td>
                     <td>{v.orders}</td>
-                    <td>{v.acceptance}</td>
-                    <td>{v.refus}</td>
-                    <td>{v.annulation}</td>
-                    <td>{v.avgTime}</td>
+                    <td>{v.acceptanceRate}%</td>
+                    <td>{v.refusalRate}%</td>
+                    <td>{v.cancellationRate}%</td>
+                    <td>{formatDuration(v.avgAcceptanceSeconds)}</td>
                     <td>
                       {v.status === 'green' && <span className="badge-green">Bonne</span>}
                       {v.status === 'orange' && <span className="badge-orange">À surveiller</span>}

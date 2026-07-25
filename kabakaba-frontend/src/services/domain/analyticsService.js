@@ -11,3 +11,7 @@ export function getTopCanteens(days = 30, limit = 10) {
 export function getRevenueBreakdown(days = 30) {
   return apiFetch(`/admin/analytics/revenue?days=${days}`);
 }
+
+export function getVendorPerformance(days = 30) {
+  return apiFetch(`/admin/analytics/vendors?days=${days}`);
+}
