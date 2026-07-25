@@ -21,6 +21,7 @@ import NotesAlertes from './pages/qualite/NotesAlertes';
 import Commentaires from './pages/qualite/Commentaires';
 import SupervisionAmbassadeurs from './pages/ambassadeurs/SupervisionAmbassadeurs';
 import ParametresSupervision from './pages/parametres/Parametres';
+import DetailAmbassadeur from './pages/ambassadeurs/DetailAmbassadeur';
 
 // Admin web
 import VueVendeurs from './pages/admin/dashboard/VueVendeurs';
@@ -87,7 +88,7 @@ export default function App() {
             )
           }
         >
-          <Route path="/supervision/analytics" element={<Analytics />} />
+
           <Route path="/supervision/dashboard" element={<VueGenerale />} />
           <Route path="/supervision/campus" element={<ComparaisonCampus />} />
           <Route path="/supervision/campus/revenus" element={<VolumeRevenus />} />
@@ -98,6 +99,7 @@ export default function App() {
           <Route path="/supervision/qualite/notes" element={<NotesAlertes />} />
           <Route path="/supervision/qualite/commentaires" element={<Commentaires />} />
           <Route path="/supervision/ambassadeurs" element={<SupervisionAmbassadeurs />} />
+          <Route path="/supervision/ambassadeurs/:id" element={<DetailAmbassadeur />} />
           <Route path="/supervision/parametres" element={<ParametresSupervision />} />
         </Route>
 
