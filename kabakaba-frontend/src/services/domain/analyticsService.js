@@ -23,3 +23,7 @@ export function getVendorFinancials(days = 30) {
 export function getStudentBehavior(days = 30) {
   return apiFetch(`/admin/analytics/students?days=${days}`);
 }
+
+export function getReviewsQuality(days = 30) {
+  return apiFetch(`/admin/analytics/reviews?days=${days}`);
+}
