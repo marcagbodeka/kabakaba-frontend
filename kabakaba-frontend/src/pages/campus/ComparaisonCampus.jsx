@@ -1,31 +1,50 @@
-import { useState } from 'react';
-import { Building2, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Building2, TrendingUp, TrendingDown } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import { getCampusComparison, getTopCanteens } from '../../services/domain/analyticsService';
 
-const campuses = [
-  { name: 'UCAO · Lomé', cantines: 2, orders: '3 120', completion: '84%', revenue: '168 450', signed: '1 540', active: '1 120', status: 'Actif' },
-  { name: 'Université de Lomé', cantines: 2, orders: '2 336', completion: '79%', revenue: '122 232', signed: '1 300', active: '860', status: 'Actif' },
-];
+function formatFcfa(n) {
+  return `${Number(n).toLocaleString('fr-FR')} FCFA`;
+}
 
-const topCantines = [
-  { name: 'Cantine Centrale UCAO', campus: 'UCAO · Lomé', orders: '1 840', acceptance: '86%', note: '4.2' },
-  { name: 'Resto U Lomé 1', campus: 'Université de Lomé', orders: '1 402', acceptance: '81%', note: '4.0' },
-  { name: 'Snack du Campus', campus: 'UCAO · Lomé', orders: '1 280', acceptance: '81%', note: '3.8' },
-];
+function pctChange(current, previous) {
+  if (!previous) return null;
+  return Math.round(((current - previous) / previous) * 100);
+}
 
-// Une seule série par option — jamais N séries simultanées, peu importe
-// le nombre de campus. Ajouter un campus = ajouter une entrée ici,
-// pas une nouvelle couleur/barre dans le graphique.
-const volumeByOption = {
-  'Tous les campus': [70, 82, 68, 92, 85, 98, 79],
-  'UCAO · Lomé': [60, 75, 65, 90, 80, 95, 70],
-  'Université de Lomé': [40, 50, 45, 65, 55, 72, 48],
-};
+const DAY_LABELS_FR = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 0: 'Dim' };
 
 export default function ComparaisonCampus() {
+  const [data, setData] = useState(null);
+  const [topCanteens, setTopCanteens] = useState([]);
   const [selected, setSelected] = useState('Tous les campus');
-  const values = volumeByOption[selected];
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const [comparison, canteens] = await Promise.all([getCampusComparison(30), getTopCanteens(30, 10)]);
+        setData(comparison);
+        setTopCanteens(canteens);
+      } catch (err) {
+        setError(err.message || 'Impossible de charger les données.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const summary = data?.summary;
+  const ordersChange = summary ? pctChange(summary.totalOrders, summary.totalOrdersPrevPeriod) : null;
+  const revenueChange = summary ? pctChange(summary.totalRevenue, summary.totalRevenuePrevPeriod) : null;
+
+  const dailySeries = data?.dailyVolume?.series?.[selected] ?? [];
+  const maxDaily = Math.max(1, ...dailySeries);
+  const dayLabels = (data?.dailyVolume?.labels ?? []).map((d) => DAY_LABELS_FR[new Date(d).getDay()]);
 
   return (
     <>
@@ -40,29 +59,45 @@ export default function ComparaisonCampus() {
           <p>Performances comparées entre les campus actifs</p>
         </div>
 
+        {error && (
+          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+            {error}
+          </div>
+        )}
+
         <div className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-label">Campus actifs</div>
-            <div className="kpi-value">2</div>
-            <div className="kpi-sub">sur 2 enregistrés</div>
+            <div className="kpi-value">{loading ? '—' : summary?.activeCampuses}</div>
+            <div className="kpi-sub">{loading ? '' : `sur ${summary?.totalCampuses} enregistrés`}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Commandes totales</div>
             <div className="kpi-value">
-              5 456 <span className="badge-green"><TrendingUp size={13} /> 18%</span>
+              {loading ? '—' : summary?.totalOrders}{' '}
+              {ordersChange !== null && (
+                <span className={ordersChange >= 0 ? 'badge-green' : 'badge-red'}>
+                  {ordersChange >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />} {Math.abs(ordersChange)}%
+                </span>
+              )}
             </div>
             <div className="kpi-sub">sur 30 jours</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Revenus générés</div>
             <div className="kpi-value kpi-value-sm">
-              290 682 FCFA <span className="badge-green"><TrendingUp size={13} /> 11%</span>
+              {loading ? '—' : formatFcfa(summary?.totalRevenue ?? 0)}{' '}
+              {revenueChange !== null && (
+                <span className={revenueChange >= 0 ? 'badge-green' : 'badge-red'}>
+                  {revenueChange >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />} {Math.abs(revenueChange)}%
+                </span>
+              )}
             </div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Étudiants inscrits</div>
-            <div className="kpi-value">2 840</div>
-            <div className="kpi-sub">actifs : 1 980</div>
+            <div className="kpi-value">{loading ? '—' : summary?.totalStudents}</div>
+            <div className="kpi-sub">{loading ? '' : `actifs : ${summary?.activeStudents}`}</div>
           </div>
         </div>
 
@@ -73,27 +108,25 @@ export default function ComparaisonCampus() {
             <table>
               <thead>
                 <tr>
-                  <th>Campus</th>
-                  <th>Cantines</th>
-                  <th>Commandes</th>
-                  <th>Taux complétion</th>
-                  <th>Revenus (FCFA)</th>
-                  <th>Inscrits</th>
-                  <th>Actifs</th>
-                  <th>Statut</th>
+                  <th>Campus</th><th>Cantines</th><th>Commandes</th><th>Taux complétion</th>
+                  <th>Revenus (FCFA)</th><th>Inscrits</th><th>Actifs</th><th>Statut</th>
                 </tr>
               </thead>
               <tbody>
-                {campuses.map((c) => (
-                  <tr key={c.name}>
+                {loading && <tr><td colSpan={8}>Chargement...</td></tr>}
+                {!loading && (data?.campuses?.length ?? 0) === 0 && <tr><td colSpan={8}>Aucun campus.</td></tr>}
+                {!loading && data?.campuses?.map((c) => (
+                  <tr key={c.id}>
                     <td><strong>{c.name}</strong></td>
                     <td>{c.cantines}</td>
                     <td>{c.orders}</td>
-                    <td>{c.completion}</td>
-                    <td>{c.revenue}</td>
-                    <td>{c.signed}</td>
+                    <td>{c.completionRate}%</td>
+                    <td>{formatFcfa(c.revenue)}</td>
+                    <td>{c.enrolled}</td>
                     <td>{c.active}</td>
-                    <td><span className="badge-green">{c.status}</span></td>
+                    <td>
+                      {c.isActive ? <span className="badge-green">Actif</span> : <span className="badge-gray">Inactif</span>}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -113,21 +146,21 @@ export default function ComparaisonCampus() {
                 padding: '6px 10px', fontFamily: 'inherit', background: 'var(--surface)',
               }}
             >
-              {Object.keys(volumeByOption).map((opt) => (
+              {Object.keys(data?.dailyVolume?.series ?? { 'Tous les campus': [] }).map((opt) => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
           </div>
           <div className="chart-wrap">
             <div className="chart-bars" style={{ marginTop: 12 }}>
-              {values.map((h, i) => (
-                <div key={i} className="bar" style={{ height: `${h}%`, background: '#1B2A6B', opacity: 0.55 + h / 250 }} />
+              {dailySeries.map((v, i) => (
+                <div key={i} className="bar" style={{ height: `${(v / maxDaily) * 100}%`, background: '#1B2A6B', opacity: 0.55 + v / (maxDaily * 2.5) }} />
               ))}
             </div>
           </div>
           <div className="bar-labels">
-            {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((d) => (
-              <div key={d} className="bar-label">{d}</div>
+            {dayLabels.map((d, i) => (
+              <div key={i} className="bar-label">{d}</div>
             ))}
           </div>
         </div>
@@ -140,13 +173,15 @@ export default function ComparaisonCampus() {
                 <tr><th>Cantine</th><th>Campus</th><th>Commandes</th><th>Acceptation</th><th>Note</th></tr>
               </thead>
               <tbody>
-                {topCantines.map((c) => (
-                  <tr key={c.name}>
+                {loading && <tr><td colSpan={5}>Chargement...</td></tr>}
+                {!loading && topCanteens.length === 0 && <tr><td colSpan={5}>Aucune donnée.</td></tr>}
+                {!loading && topCanteens.map((c) => (
+                  <tr key={c.id}>
                     <td><strong>{c.name}</strong></td>
-                    <td>{c.campus}</td>
+                    <td>{c.campusName}</td>
                     <td>{c.orders}</td>
-                    <td>{c.acceptance}</td>
-                    <td>★ {c.note}</td>
+                    <td>{c.acceptanceRate}%</td>
+                    <td>{c.avgRating !== null ? `★ ${c.avgRating}` : '—'}</td>
                   </tr>
                 ))}
               </tbody>

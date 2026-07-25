@@ -403,6 +403,8 @@ table tr.rank1 td {
   border-radius: 20px;
 }
 
+.badge-gray { background: #E5E7EB; color: #374151; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
+
 .badge-peach {
   background: var(--peach);
   color: var(--indigo);
