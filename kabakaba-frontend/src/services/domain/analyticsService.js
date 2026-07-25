@@ -27,3 +27,11 @@ export function getStudentBehavior(days = 30) {
 export function getReviewsQuality(days = 30) {
   return apiFetch(`/admin/analytics/reviews?days=${days}`);
 }
+
+export function getAmbassadorRanking(days = 30) {
+  return apiFetch(`/admin/analytics/ambassadors?days=${days}`);
+}
+
+export function getAmbassadorDetail(id, days = 30) {
+  return apiFetch(`/admin/analytics/ambassadors/${id}?days=${days}`);
+}

@@ -87,6 +87,7 @@ export default function App() {
             )
           }
         >
+          <Route path="/supervision/analytics" element={<Analytics />} />
           <Route path="/supervision/dashboard" element={<VueGenerale />} />
           <Route path="/supervision/campus" element={<ComparaisonCampus />} />
           <Route path="/supervision/campus/revenus" element={<VolumeRevenus />} />

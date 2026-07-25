@@ -1,17 +1,43 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Trophy } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import { getAmbassadorRanking } from '../../services/domain/analyticsService';
 
-const ranking = [
-  { rank: 1, name: 'E. Kodjo', campus: 'UCAO · Lomé', level: 'Or', affiliates: 42, volume: '182 400 FCFA', commission: '2 189 FCFA' },
-  { rank: 2, name: 'A. Mensah', campus: 'Université de Lomé', level: 'Argent', affiliates: 27, volume: '96 200 FCFA', commission: '770 FCFA' },
-  { rank: 3, name: 'R. Adjovi', campus: 'UCAO · Lomé', level: 'Argent', affiliates: 19, volume: '68 900 FCFA', commission: '551 FCFA' },
-  { rank: 4, name: 'C. Bakoa', campus: 'Université de Lomé', level: 'Bronze', affiliates: 8, volume: '24 100 FCFA', commission: '120 FCFA' },
-];
+function formatFcfa(n) {
+  return `${Number(n).toLocaleString('fr-FR')} FCFA`;
+}
 
-const levelBadge = { Or: 'badge-amber', Argent: 'badge-gray', Bronze: 'badge-peach' };
+const levelLabel = { GOLD: 'Or', SILVER: 'Argent', BRONZE: 'Bronze' };
+const levelBadge = { GOLD: 'badge-amber', SILVER: 'badge-gray', BRONZE: 'badge-peach' };
+const levelColor = { GOLD: '#F59E0B', SILVER: '#94A3B8', BRONZE: '#C08552' };
 
 export default function SupervisionAmbassadeurs() {
+  const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        setData(await getAmbassadorRanking(30));
+      } catch (err) {
+        setError(err.message || 'Impossible de charger les ambassadeurs.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const summary = data?.summary;
+  const ranking = data?.ranking ?? [];
+  const levelCounts = summary?.levelCounts ?? { GOLD: 0, SILVER: 0, BRONZE: 0 };
+  const totalLevels = Math.max(1, levelCounts.GOLD + levelCounts.SILVER + levelCounts.BRONZE);
+
   return (
     <>
       <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs' }]} badge={{ text: '30 derniers jours' }} />
@@ -21,23 +47,46 @@ export default function SupervisionAmbassadeurs() {
           <p>Ambassadeurs actifs, volume de recharges générées via parrainage, commissions versées</p>
         </div>
 
+        {error && (
+          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+            {error}
+          </div>
+        )}
+
         <div className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-label">Ambassadeurs actifs</div>
-            <div className="kpi-value">14</div>
-            <div className="kpi-sub">2 campus</div>
+            <div className="kpi-value">{loading ? '—' : summary?.activeAmbassadors}</div>
+            <div className="kpi-sub">{loading ? '' : `${summary?.campusCount} campus`}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Volume parrainage (30j)</div>
-            <div className="kpi-value kpi-value-sm">371 600 FCFA</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.totalVolume ?? 0)}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Commissions versées</div>
-            <div className="kpi-value kpi-value-sm">3 630 FCFA</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.totalCommission ?? 0)}</div>
           </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Répartition par niveau</div>
-            <div className="kpi-value kpi-value-sm">1 Or · 6 Argent · 7 Bronze</div>
+        </div>
+
+        <div className="card">
+          <div className="card-title">Répartition par niveau</div>
+          <div style={{ display: 'flex', height: 10, borderRadius: 6, overflow: 'hidden', margin: '12px 0' }}>
+            {(['GOLD', 'SILVER', 'BRONZE']).map((lvl) => (
+              <div
+                key={lvl}
+                style={{ width: `${(levelCounts[lvl] / totalLevels) * 100}%`, background: levelColor[lvl] }}
+                title={`${levelLabel[lvl]} : ${levelCounts[lvl]}`}
+              />
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            {(['GOLD', 'SILVER', 'BRONZE']).map((lvl) => (
+              <div key={lvl} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+                <span style={{ width: 10, height: 10, borderRadius: 3, background: levelColor[lvl], display: 'inline-block' }} />
+                <strong>{levelCounts[lvl]}</strong> <span style={{ color: 'var(--muted)' }}>{levelLabel[lvl]}</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -47,18 +96,25 @@ export default function SupervisionAmbassadeurs() {
           <div className="table-scroll">
             <table>
               <thead>
-                <tr><th>Rang</th><th>Ambassadeur</th><th>Campus</th><th>Niveau</th><th>Affiliés actifs</th><th>Volume</th><th>Commission</th></tr>
+                <tr><th>Rang</th><th>Ambassadeur</th><th>Campus</th><th>Niveau</th><th>Affiliés</th><th>Volume</th><th>Commission</th></tr>
               </thead>
               <tbody>
-                {ranking.map((a) => (
-                  <tr key={a.rank} className={a.rank === 1 ? 'rank1' : ''}>
+                {loading && <tr><td colSpan={7}>Chargement...</td></tr>}
+                {!loading && ranking.length === 0 && <tr><td colSpan={7}>Aucun ambassadeur actif.</td></tr>}
+                {!loading && ranking.map((a) => (
+                  <tr
+                    key={a.id}
+                    className={a.rank === 1 ? 'rank1' : ''}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navigate(`/supervision/ambassadeurs/${a.id}`)}
+                  >
                     <td>#{a.rank}</td>
                     <td><strong>{a.name}</strong></td>
-                    <td>{a.campus}</td>
-                    <td><span className={levelBadge[a.level]}>{a.level}</span></td>
+                    <td>{a.campusName}</td>
+                    <td><span className={levelBadge[a.level]}>{levelLabel[a.level]}</span></td>
                     <td>{a.affiliates}</td>
-                    <td>{a.volume}</td>
-                    <td>{a.commission}</td>
+                    <td>{formatFcfa(a.volume)}</td>
+                    <td>{formatFcfa(a.commission)}</td>
                   </tr>
                 ))}
               </tbody>
