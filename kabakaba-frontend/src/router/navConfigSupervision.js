@@ -7,6 +7,7 @@ import {
   Trophy,
   ShieldCheck,
   Settings,
+  Banknote,
 } from 'lucide-react';
 
 export const navSections = [
@@ -67,6 +68,19 @@ export const navSections = [
         icon: Trophy,
         children: [
           { label: 'Supervision ambassadeurs', path: '/supervision/ambassadeurs' },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Paie',
+    items: [
+      {
+        label: 'Paie équipe',
+        icon: Banknote,
+        children: [
+          { label: 'Configuration', path: '/supervision/paie/config' },
+          { label: 'Demandes de retrait', path: '/supervision/paie/retraits' },
         ],
       },
     ],

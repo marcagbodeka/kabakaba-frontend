@@ -1,85 +1,153 @@
-import { LayoutDashboard, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { LayoutDashboard, TrendingDown, TrendingUp } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import { getCampusComparison, getRevenueBreakdown, getVendorPerformance } from '../../services/domain/analyticsService';
+import { getSupervisionStats } from '../../services/domain/adminStatsService';
 
-const WEEKLY_ORDERS = [
-  { height: '45%', opacity: 0.5 },
-  { height: '62%', opacity: 0.6 },
-  { height: '54%', opacity: 0.55 },
-  { height: '80%', opacity: 0.75 },
-  { height: '70%', opacity: 0.7 },
-  { height: '95%', opacity: 1, highlight: true },
-  { height: '78%', opacity: 0.8 },
-];
+const DAY_LABELS_FR = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 0: 'Dim' };
 
-const WEEK_DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+function formatFcfa(n) {
+  return `${Number(n).toLocaleString('fr-FR')} FCFA`;
+}
 
-const STATUS_DISTRIBUTION = [
-  { value: '82%', height: '82%', color: '#1B2A6B', opacity: 0.88 },
-  { value: '11%', height: '11%', color: '#F07840', opacity: 0.85 },
-  { value: '7%', height: '7%', color: '#CBD5E1', opacity: 1 },
-];
-
-const REVENUE_BREAKDOWN = [
-  { label: 'Surplus recharges', value: '7 056 FCFA', sub: 'revenu principal' },
-  { label: 'Frais retrait non couverts', value: '450 FCFA', sub: 'vendeurs sous seuil 10k' },
-  { label: 'Commissions ambassadeurs', value: '− 900 FCFA', color: 'var(--orange)', sub: 'déduit du surplus' },
-  { label: 'Revenus nets', value: '6 606 FCFA', color: 'var(--indigo)', sub: 'après déductions' },
-];
+function pctChange(current, previous) {
+  if (previous == null || previous === 0) return null;
+  return Math.round(((current - previous) / previous) * 100);
+}
 
 function TrendBadge({ value }) {
+  if (value == null) return null;
+  const up = value >= 0;
+  const Icon = up ? TrendingUp : TrendingDown;
   return (
-    <span className="badge-green">
-      <TrendingUp size={14} />
-      {value}
+    <span className={up ? 'badge-green' : 'badge-orange'}>
+      <Icon size={14} />
+      {Math.abs(value)}%
     </span>
   );
 }
 
 export default function VueGenerale() {
+  const [campus, setCampus] = useState(null);
+  const [revenue, setRevenue] = useState(null);
+  const [vendorPerf, setVendorPerf] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const days = 7;
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const [campusData, revenueData, perfData, statsData] = await Promise.all([
+          getCampusComparison(days),
+          getRevenueBreakdown(days),
+          getVendorPerformance(days),
+          getSupervisionStats(),
+        ]);
+        setCampus(campusData);
+        setRevenue(revenueData);
+        setVendorPerf(perfData);
+        setStats(statsData);
+      } catch (err) {
+        setError(err.message || 'Impossible de charger le tableau de bord.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const summary = campus?.summary;
+  const revSummary = revenue?.summary;
+  const ordersChange = summary ? pctChange(summary.totalOrders, summary.totalOrdersPrevPeriod) : null;
+  const revenueChange = summary ? pctChange(summary.totalRevenue, summary.totalRevenuePrevPeriod) : null;
+
+  const dailySeries = campus?.dailyVolume?.series?.['Tous les campus'] ?? [];
+  const maxDaily = Math.max(1, ...dailySeries);
+  const dayLabels = (campus?.dailyVolume?.labels ?? []).map((d) => DAY_LABELS_FR[new Date(d).getDay()]);
+
+  let completedOrders = 0;
+  for (const c of campus?.campuses ?? []) {
+    completedOrders += Math.round((c.orders * c.completionRate) / 100);
+  }
+  const totalOrders = summary?.totalOrders ?? 0;
+  const otherOrders = Math.max(0, totalOrders - completedOrders);
+  const completedPct = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+  const otherPct = totalOrders > 0 ? 100 - completedPct : 0;
+
+  const acceptanceRate = vendorPerf?.summary?.avgAcceptanceRate ?? 0;
+
+  const revenueBreakdown = [
+    { label: 'Surplus recharges', value: revSummary?.surplus ?? 0, sub: 'revenu principal' },
+    { label: 'Frais retrait non couverts', value: revSummary?.uncoveredFees ?? 0, sub: 'vendeurs sous seuil 10k' },
+    { label: 'Commissions ambassadeurs', value: -(revSummary?.commissions ?? 0), sub: 'déduit du surplus', color: 'var(--orange)' },
+    { label: 'Revenus nets', value: revSummary?.net ?? 0, sub: 'après déductions', color: 'var(--indigo)' },
+  ];
+
+  const statusBars = [
+    { value: `${completedPct}%`, height: `${completedPct}%`, color: '#1B2A6B', opacity: 0.88, label: 'Complétées' },
+    { value: `${otherPct}%`, height: `${otherPct}%`, color: '#F07840', opacity: 0.85, label: 'En cours / autres' },
+  ];
+
   return (
     <>
-      <Topbar
-        icon={LayoutDashboard}
-        breadcrumb={[{ label: 'Vue générale' }]}
-        badge={{ text: '7 derniers jours' }}
-      />
+      <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Vue générale' }]} badge={{ text: '7 derniers jours' }} />
       <PageContent>
         <div className="page-header">
           <h1>Vue générale</h1>
           <p>Synthèse de l&apos;activité kabakaba sur l&apos;ensemble des campus</p>
         </div>
 
+        {error && (
+          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+            {error}
+          </div>
+        )}
+
         <div className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-label">Commandes</div>
             <div className="kpi-value">
-              248 <TrendBadge value="12%" />
+              {loading ? '—' : totalOrders.toLocaleString('fr-FR')} {!loading && <TrendBadge value={ordersChange} />}
             </div>
-            <div className="kpi-sub">vs période précédente : 221</div>
+            <div className="kpi-sub">
+              {loading ? '—' : `vs période précédente : ${summary?.totalOrdersPrevPeriod ?? 0}`}
+            </div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">CA brut plateforme</div>
+            <div className="kpi-label">CA brut (commandes complétées)</div>
             <div className="kpi-value kpi-value-sm">
-              159 200 FCFA <TrendBadge value="11%" />
+              {loading ? '—' : formatFcfa(summary?.totalRevenue ?? 0)} {!loading && <TrendBadge value={revenueChange} />}
             </div>
-            <div className="kpi-sub">volume transactionnel</div>
+            <div className="kpi-sub">volume séquestre complété</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Tickets en circulation</div>
-            <div className="kpi-value kpi-value-sm">284 500</div>
-            <div className="kpi-sub">dont 12 000 en séquestre</div>
+            <div className="kpi-label">Étudiants / cantines</div>
+            <div className="kpi-value kpi-value-sm">
+              {loading ? '—' : `${stats?.totalUsers ?? '—'} / ${stats?.totalVendors ?? '—'}`}
+            </div>
+            <div className="kpi-sub">
+              {loading ? '—' : `${summary?.activeStudents ?? 0} actifs · ${stats?.activeSuspensions ?? 0} suspensions`}
+            </div>
           </div>
         </div>
 
-        <div className="card-title" style={{ marginTop: 4 }}>Décomposition des revenus</div>
-        <div className="card-sub">Ventilation par source</div>
+        <div className="card-title" style={{ marginTop: 4 }}>
+          Décomposition des revenus
+        </div>
+        <div className="card-sub">Ventilation par source ({days} jours)</div>
         <div className="kpi-grid">
-          {REVENUE_BREAKDOWN.map((item) => (
+          {revenueBreakdown.map((item) => (
             <div key={item.label} className="kpi-card">
               <div className="kpi-label">{item.label}</div>
               <div className="kpi-value kpi-value-sm" style={item.color ? { color: item.color } : undefined}>
-                {item.value}
+                {loading ? '—' : typeof item.value === 'number' && item.label.includes('Commissions')
+                  ? `${item.value <= 0 ? '− ' : ''}${Math.abs(item.value).toLocaleString('fr-FR')} FCFA`
+                  : formatFcfa(item.value)}
               </div>
               <div className="kpi-sub">{item.sub}</div>
             </div>
@@ -91,22 +159,22 @@ export default function VueGenerale() {
             <div className="card-title">Commandes / jour</div>
             <div className="chart-wrap">
               <div className="chart-bars" style={{ marginTop: 12 }}>
-                {WEEKLY_ORDERS.map((bar, i) => (
+                {dailySeries.map((count, i) => (
                   <div
-                    key={WEEK_DAYS[i]}
+                    key={dayLabels[i] ?? i}
                     className="bar"
                     style={{
-                      height: bar.height,
-                      background: bar.highlight ? '#F07840' : '#1B2A6B',
-                      opacity: bar.opacity,
+                      height: `${Math.max(4, (count / maxDaily) * 100)}%`,
+                      background: '#1B2A6B',
+                      opacity: 0.5 + (count / maxDaily) * 0.5,
                     }}
                   />
                 ))}
               </div>
             </div>
             <div className="bar-labels">
-              {WEEK_DAYS.map((day, i) => (
-                <div key={day} className={`bar-label${i === 5 ? ' active' : ''}`}>
+              {dayLabels.map((day, i) => (
+                <div key={day + i} className="bar-label">
                   {day}
                 </div>
               ))}
@@ -116,13 +184,13 @@ export default function VueGenerale() {
           <div className="card">
             <div className="card-title">Répartition statuts</div>
             <div className="chart-stacked">
-              {STATUS_DISTRIBUTION.map((item) => (
-                <div key={item.value} className="chart-stacked-col">
-                  <span className="chart-stacked-val">{item.value}</span>
+              {statusBars.map((item) => (
+                <div key={item.label} className="chart-stacked-col">
+                  <span className="chart-stacked-val">{loading ? '—' : item.value}</span>
                   <div
                     className="chart-stacked-bar"
                     style={{
-                      height: item.height,
+                      height: loading ? '10%' : item.height,
                       background: item.color,
                       opacity: item.opacity,
                     }}
@@ -131,19 +199,16 @@ export default function VueGenerale() {
               ))}
             </div>
             <div className="legend">
-              <div className="legend-item">
-                <div className="legend-dot" style={{ background: '#1B2A6B' }} />
-                Complétées
-              </div>
-              <div className="legend-item">
-                <div className="legend-dot" style={{ background: '#F07840' }} />
-                Annulées
-              </div>
-              <div className="legend-item">
-                <div className="legend-dot" style={{ background: '#ccc' }} />
-                Refusées
-              </div>
+              {statusBars.map((item) => (
+                <div key={item.label} className="legend-item">
+                  <div className="legend-dot" style={{ background: item.color }} />
+                  {item.label}
+                </div>
+              ))}
             </div>
+            <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 12 }}>
+              Taux d&apos;acceptation vendeurs (décisions) : {loading ? '—' : `${acceptanceRate} %`}
+            </p>
           </div>
         </div>
       </PageContent>

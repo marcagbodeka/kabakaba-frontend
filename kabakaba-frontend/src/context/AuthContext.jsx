@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { getStoredToken, setStoredToken } from '../services/httpClient';
 import * as webAuth from '../services/webAuthService';
 
@@ -27,6 +27,14 @@ export function AuthProvider({ children }) {
     setUser(me);
     return me;
   }, []);
+
+  useEffect(() => {
+    if (!token || user) return;
+    refreshMe().catch(() => {
+      setStoredToken(null);
+      setToken(null);
+    });
+  }, [token, user, refreshMe]);
 
   const value = { token, user, isAuthenticated, applySession, logout, refreshMe };
 
