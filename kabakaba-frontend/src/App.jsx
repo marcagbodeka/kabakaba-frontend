@@ -22,6 +22,7 @@ import Commentaires from './pages/qualite/Commentaires';
 import SupervisionAmbassadeurs from './pages/ambassadeurs/SupervisionAmbassadeurs';
 import ParametresSupervision from './pages/parametres/Parametres';
 import DetailAmbassadeur from './pages/ambassadeurs/DetailAmbassadeur';
+import GestionComptes from './pages/comptes/GestionComptes';
 
 // Admin web
 import VueVendeurs from './pages/admin/dashboard/VueVendeurs';
@@ -100,6 +101,7 @@ export default function App() {
           <Route path="/supervision/qualite/commentaires" element={<Commentaires />} />
           <Route path="/supervision/ambassadeurs" element={<SupervisionAmbassadeurs />} />
           <Route path="/supervision/ambassadeurs/:id" element={<DetailAmbassadeur />} />
+          <Route path="/supervision/comptes" element={<GestionComptes />} />
           <Route path="/supervision/parametres" element={<ParametresSupervision />} />
         </Route>
 

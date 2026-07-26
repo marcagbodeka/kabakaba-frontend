@@ -1202,3 +1202,21 @@ textarea.fg-input {
     grid-template-columns: 1fr;
   }
 }
+
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(13,20,56,.5);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+}
+.modal-content {
+  background: #fff; border-radius: 12px; padding: 24px; width: 420px; max-width: 90vw;
+}
+.action-btn-danger {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;
+  color: #EF4444; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px; padding: 4px 8px; cursor: pointer;
+}
+.btn-primary-sm, .btn-secondary-sm {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;
+  border-radius: 8px; padding: 8px 14px; cursor: pointer; border: none;
+}
+.btn-primary-sm { background: var(--indigo, #1B2A6B); color: #fff; }
+.btn-secondary-sm { background: #F1F5F9; color: #334155; }

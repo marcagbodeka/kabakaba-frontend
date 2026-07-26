@@ -6,6 +6,7 @@ import {
   Star,
   Trophy,
   Settings,
+  ShieldCheck,
 } from 'lucide-react';
 
 // Une seule source de vérité pour la sidebar.
@@ -73,6 +74,9 @@ export const navSections = [
   },
   {
     label: 'Compte',
-    items: [{ label: 'Paramètres', path: '/supervision/parametres', icon: Settings }],
+    items: [
+    { label: 'Gestion des comptes', path: '/supervision/comptes', icon: ShieldCheck },
+    { label: 'Paramètres', path: '/supervision/parametres', icon: Settings },
+  ],
   },
 ];
