@@ -17,12 +17,14 @@ import PerformanceVendeurs from './pages/cantines/PerformanceVendeurs';
 import SoldeCreances from './pages/cantines/SoldeCreances';
 import ComportementEtudiants from './pages/etudiants/ComportementEtudiants';
 import ComptesSuspendus from './pages/etudiants/ComptesSuspendus';
+import HistoriqueSuspensions from './pages/etudiants/HistoriqueSuspensions';
 import NotesAlertes from './pages/qualite/NotesAlertes';
 import Commentaires from './pages/qualite/Commentaires';
 import SupervisionAmbassadeurs from './pages/ambassadeurs/SupervisionAmbassadeurs';
-import ParametresSupervision from './pages/parametres/Parametres';
 import DetailAmbassadeur from './pages/ambassadeurs/DetailAmbassadeur';
-import GestionComptes from './pages/comptes/GestionComptes';
+import ParametresSupervision from './pages/parametres/Parametres';
+import ComptesSupervision from './pages/comptes/ComptesSupervision';
+import ComptesAdmin from './pages/comptes/ComptesAdmin';
 
 // Admin web
 import VueVendeurs from './pages/admin/dashboard/VueVendeurs';
@@ -45,9 +47,8 @@ import ParametresAdmin from './pages/admin/parametres/ParametresAdmin';
 const fakeAdminUser = { name: 'Kofi Mensah', role: 'Admin web' };
 
 export default function App() {
-  // Admin web : toujours en mock pour l'instant — pas encore dans le
-  // périmètre du câblage API (on ne fait que Supervision pour le moment).
-  // TODO: brancher sur le même AuthContext une fois Supervision validé.
+  // Admin web : toujours en mock pour l'instant — hors périmètre du câblage
+  // API en cours (on ne fait que Supervision pour le moment).
   const [adminAuth, setAdminAuth] = useState(false);
 
   // Supervision : branché sur le vrai AuthContext (session réelle via /web-auth/*)
@@ -89,7 +90,6 @@ export default function App() {
             )
           }
         >
-
           <Route path="/supervision/dashboard" element={<VueGenerale />} />
           <Route path="/supervision/campus" element={<ComparaisonCampus />} />
           <Route path="/supervision/campus/revenus" element={<VolumeRevenus />} />
@@ -97,11 +97,13 @@ export default function App() {
           <Route path="/supervision/cantines/solde" element={<SoldeCreances />} />
           <Route path="/supervision/etudiants" element={<ComportementEtudiants />} />
           <Route path="/supervision/etudiants/suspendus" element={<ComptesSuspendus />} />
+          <Route path="/supervision/etudiants/historique" element={<HistoriqueSuspensions />} />
           <Route path="/supervision/qualite/notes" element={<NotesAlertes />} />
           <Route path="/supervision/qualite/commentaires" element={<Commentaires />} />
           <Route path="/supervision/ambassadeurs" element={<SupervisionAmbassadeurs />} />
           <Route path="/supervision/ambassadeurs/:id" element={<DetailAmbassadeur />} />
-          <Route path="/supervision/comptes" element={<GestionComptes />} />
+          <Route path="/supervision/comptes/supervision" element={<ComptesSupervision />} />
+          <Route path="/supervision/comptes/admin" element={<ComptesAdmin />} />
           <Route path="/supervision/parametres" element={<ParametresSupervision />} />
         </Route>
 
