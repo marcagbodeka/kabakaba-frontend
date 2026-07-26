@@ -5,12 +5,10 @@ import {
   Users,
   Star,
   Trophy,
-  Settings,
   ShieldCheck,
+  Settings,
 } from 'lucide-react';
 
-// Une seule source de vérité pour la sidebar.
-// Chaque page n'a plus besoin de redéclarer son propre HTML de nav.
 export const navSections = [
   {
     label: 'Tableau de bord',
@@ -43,6 +41,7 @@ export const navSections = [
         children: [
           { label: 'Comportement étudiants', path: '/supervision/etudiants' },
           { label: 'Comptes suspendus', path: '/supervision/etudiants/suspendus' },
+          { label: 'Historique des suspensions', path: '/supervision/etudiants/historique' },
         ],
       },
     ],
@@ -74,16 +73,16 @@ export const navSections = [
   },
   {
     label: 'Compte',
-  items: [
-    {
-      label: 'Gestion des comptes',
-      icon: ShieldCheck,
-      children: [
-        { label: 'Comptes Supervision', path: '/supervision/comptes/supervision' },
-        { label: 'Comptes Admin', path: '/supervision/comptes/admin' },
-      ],
-    },
-    { label: 'Paramètres', path: '/supervision/parametres', icon: Settings },
-  ],
+    items: [
+      {
+        label: 'Gestion des comptes',
+        icon: ShieldCheck,
+        children: [
+          { label: 'Comptes Supervision', path: '/supervision/comptes/supervision' },
+          { label: 'Comptes Admin', path: '/supervision/comptes/admin' },
+        ],
+      },
+      { label: 'Paramètres', path: '/supervision/parametres', icon: Settings },
+    ],
   },
 ];
