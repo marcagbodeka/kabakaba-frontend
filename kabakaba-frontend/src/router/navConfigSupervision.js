@@ -74,8 +74,15 @@ export const navSections = [
   },
   {
     label: 'Compte',
-    items: [
-    { label: 'Gestion des comptes', path: '/supervision/comptes', icon: ShieldCheck },
+  items: [
+    {
+      label: 'Gestion des comptes',
+      icon: ShieldCheck,
+      children: [
+        { label: 'Comptes Supervision', path: '/supervision/comptes/supervision' },
+        { label: 'Comptes Admin', path: '/supervision/comptes/admin' },
+      ],
+    },
     { label: 'Paramètres', path: '/supervision/parametres', icon: Settings },
   ],
   },

@@ -1,0 +1,207 @@
+.acct-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 20, 56, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: acctFadeIn 0.15s ease-out;
+}
+
+@keyframes acctFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.acct-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 440px;
+  max-width: 92vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(13, 20, 56, 0.25);
+  animation: acctSlideUp 0.18s ease-out;
+}
+
+@keyframes acctSlideUp {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.acct-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid #EEF1F6;
+}
+
+.acct-modal-header h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0D1438;
+  letter-spacing: -0.01em;
+}
+
+.acct-close-btn {
+  background: #F1F5F9;
+  border: none;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748B;
+  transition: background 0.15s;
+}
+.acct-close-btn:hover { background: #E2E8F0; }
+
+.acct-modal-body {
+  padding: 20px 22px;
+}
+
+.acct-row {
+  display: flex;
+  gap: 12px;
+}
+.acct-row .acct-field { flex: 1; }
+
+.acct-field {
+  margin-bottom: 16px;
+}
+.acct-field:last-child { margin-bottom: 0; }
+
+.acct-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.acct-optional {
+  font-weight: 400;
+  color: #94A3B8;
+  font-size: 12px;
+}
+
+.acct-required {
+  color: #EF4444;
+}
+
+.acct-field input,
+.acct-field select,
+.acct-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #E2E8F0;
+  border-radius: 9px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #0D1438;
+  transition: border-color 0.15s;
+  resize: vertical;
+}
+.acct-field input:focus,
+.acct-field select:focus,
+.acct-field textarea:focus {
+  outline: none;
+  border-color: #1B2A6B;
+}
+
+.acct-mono {
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.acct-password-row {
+  display: flex;
+  gap: 8px;
+}
+.acct-password-row input { flex: 1; }
+
+.acct-icon-btn {
+  width: 38px;
+  border: 1px solid #E2E8F0;
+  border-radius: 9px;
+  background: #F8FAFC;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  transition: background 0.15s;
+}
+.acct-icon-btn:hover { background: #F1F5F9; }
+
+.acct-hint {
+  font-size: 12.5px;
+  color: #94A3B8;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.acct-error {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #DC2626;
+  font-size: 13px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 8px;
+}
+
+.acct-credentials-box {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 13.5px;
+  line-height: 2;
+}
+.acct-cred-label {
+  display: inline-block;
+  width: 90px;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.acct-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px 20px;
+  border-top: 1px solid #EEF1F6;
+}
+
+.acct-btn-primary,
+.acct-btn-secondary,
+.acct-btn-danger {
+  padding: 9px 16px;
+  border-radius: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+.acct-btn-primary:disabled,
+.acct-btn-danger:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.acct-btn-primary { background: #1B2A6B; color: #fff; }
+.acct-btn-primary:hover:not(:disabled) { background: #16215A; }
+
+.acct-btn-secondary { background: #F1F5F9; color: #334155; }
+.acct-btn-secondary:hover { background: #E2E8F0; }
+
+.acct-btn-danger { background: #EF4444; color: #fff; }
+.acct-btn-danger:hover:not(:disabled) { background: #DC2626; }
