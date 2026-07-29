@@ -78,10 +78,7 @@ export const navSections = [
       {
         label: 'Paie équipe',
         icon: Banknote,
-        children: [
-          { label: 'Configuration', path: '/supervision/paie/config' },
-          { label: 'Demandes de retrait', path: '/supervision/paie/retraits' },
-        ],
+        path: '/supervision/paie',
       },
     ],
   },

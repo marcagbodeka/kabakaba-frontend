@@ -25,8 +25,7 @@ import DetailAmbassadeur from './pages/ambassadeurs/DetailAmbassadeur';
 import ParametresSupervision from './pages/parametres/Parametres';
 import ComptesSupervision from './pages/comptes/ComptesSupervision';
 import ComptesAdmin from './pages/comptes/ComptesAdmin';
-import ConfigurationPaie from './pages/paie/ConfigurationPaie';
-import DemandesRetraits from './pages/paie/DemandesRetraits';
+import PaieEquipe from './pages/paie/PaieEquipe';
 
 // Admin web
 import VueVendeurs from './pages/admin/dashboard/VueVendeurs';
@@ -106,8 +105,9 @@ export default function App() {
           <Route path="/supervision/ambassadeurs/:id" element={<DetailAmbassadeur />} />
           <Route path="/supervision/comptes/supervision" element={<ComptesSupervision />} />
           <Route path="/supervision/comptes/admin" element={<ComptesAdmin />} />
-          <Route path="/supervision/paie/config" element={<ConfigurationPaie />} />
-          <Route path="/supervision/paie/retraits" element={<DemandesRetraits />} />
+          <Route path="/supervision/paie" element={<PaieEquipe />} />
+          <Route path="/supervision/paie/config" element={<Navigate to="/supervision/paie" replace />} />
+          <Route path="/supervision/paie/retraits" element={<Navigate to="/supervision/paie" replace />} />
           <Route path="/supervision/parametres" element={<ParametresSupervision />} />
         </Route>
 
