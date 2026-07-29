@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Banknote, Play, RefreshCw } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
@@ -97,13 +97,22 @@ export default function ConfigurationPaie() {
   const accounts = config?.accounts ?? [];
   const platformBalance = config?.platformAccount?.balance ?? 0;
 
+  // Somme des pourcentages EN COURS DE SAISIE (avant tout clic sur "Appliquer"),
+  // pour donner un retour immédiat plutôt que d'attendre un rechargement.
+  const draftSum = useMemo(
+    () => Object.values(pctDraft).reduce((sum, v) => sum + (Number(v) || 0), 0),
+    [pctDraft],
+  );
+  const draftRemaining = 100 - draftSum;
+  const overAllocated = draftSum > 100;
+
   return (
     <>
       <Topbar icon={Banknote} breadcrumb={[{ label: 'Paie', path: '/supervision/paie/config' }, { label: 'Configuration' }]} />
       <PageContent>
         <div className="page-header">
           <h1>Configuration de la paie</h1>
-          <p>Répartition des revenus nets entre les comptes WebUser et le compte plateforme</p>
+          <p>Chaque mois, le revenu net de la plateforme est réparti entre les comptes ci-dessous selon leur part (%). Le reste va au compte plateforme.</p>
         </div>
 
         {error && (
@@ -119,12 +128,20 @@ export default function ConfigurationPaie() {
 
         <div className="kpi-grid">
           <div className="kpi-card">
-            <div className="kpi-label">Part plateforme (reste)</div>
-            <div className="kpi-value kpi-value-sm">{loading ? '—' : `${config?.platformPercentage ?? 0} %`}</div>
+            <div className="kpi-label">Réparti entre les comptes</div>
+            <div className={`kpi-value kpi-value-sm ${overAllocated ? 'orange' : ''}`}>{loading ? '—' : `${draftSum} %`}</div>
+            <div className="kpi-sub">
+              {loading
+                ? ''
+                : overAllocated
+                  ? `Dépasse 100 % de ${Math.abs(draftRemaining)} pt — corrige avant d'appliquer`
+                  : 'Somme des champs ci-dessous (avant application)'}
+            </div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Somme des parts comptes</div>
-            <div className="kpi-value kpi-value-sm">{loading ? '—' : `${config?.sumPercentage ?? 0} %`}</div>
+            <div className="kpi-label">Part plateforme (le reste)</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : `${Math.max(draftRemaining, 0)} %`}</div>
+            <div className="kpi-sub">Ce qui n'est attribué à aucun compte reste sur le compte plateforme</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Solde compte plateforme</div>
@@ -133,45 +150,11 @@ export default function ConfigurationPaie() {
         </div>
 
         <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-title">Paie automatique mensuelle</div>
-          <div className="card-sub">Déclenchement planifié sur le revenu net du mois précédent</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-end', marginTop: 14 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
-              <input
-                type="checkbox"
-                checked={scheduleDraft.isEnabled}
-                onChange={(e) => setScheduleDraft((s) => ({ ...s, isEnabled: e.target.checked }))}
-              />
-              Activée
-            </label>
-            <label style={{ fontSize: 13 }}>
-              Jour du mois (1–28)
-              <input
-                type="number"
-                min={1}
-                max={28}
-                value={scheduleDraft.dayOfMonth}
-                onChange={(e) => setScheduleDraft((s) => ({ ...s, dayOfMonth: e.target.value }))}
-                style={{ marginLeft: 8, width: 64 }}
-              />
-            </label>
-            <button type="button" className="btn-secondary-sm" onClick={saveSchedule}>
-              Enregistrer
-            </button>
-            <button type="button" className="btn-secondary-sm" onClick={handleRunPayroll} disabled={runningPayroll}>
-              <Play size={14} /> {runningPayroll ? 'Exécution…' : 'Lancer la paie manuellement'}
-            </button>
+          <div className="card-title">1. Répartition par compte</div>
+          <div className="card-sub">
+            Modifie la part (%) d'un compte puis clique "Appliquer" sur sa ligne — chaque compte se sauvegarde séparément.
           </div>
-          {config?.schedule?.lastRunAt && (
-            <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 10 }}>
-              Dernière exécution auto : {formatDateTime(config.schedule.lastRunAt)}
-            </p>
-          )}
-        </div>
-
-        <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-title">Parts par compte</div>
-          <div className="table-scroll">
+          <div className="table-scroll" style={{ marginTop: 12 }}>
             <table>
               <thead>
                 <tr>
@@ -194,46 +177,94 @@ export default function ConfigurationPaie() {
                   </tr>
                 )}
                 {!loading &&
-                  accounts.map((a) => (
-                    <tr key={a.id}>
-                      <td>
-                        <strong>
-                          {a.firstName} {a.lastName}
-                        </strong>
-                      </td>
-                      <td>{ROLE_LABEL[a.role] ?? a.role}</td>
-                      <td>{formatFcfa(a.balance)}</td>
-                      <td>
-                        <input
-                          type="number"
-                          min={0}
-                          max={100}
-                          step={0.01}
-                          value={pctDraft[a.id] ?? 0}
-                          onChange={(e) => setPctDraft((d) => ({ ...d, [a.id]: e.target.value }))}
-                          style={{ width: 72 }}
-                        />
-                      </td>
-                      <td>
-                        <button type="button" className="action-btn" disabled={savingId === a.id} onClick={() => savePercentage(a.id)}>
-                          {savingId === a.id ? '…' : 'Appliquer'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  accounts.map((a) => {
+                    const isDirty = Number(pctDraft[a.id] ?? 0) !== Number(a.payoutPercentage);
+                    return (
+                      <tr key={a.id}>
+                        <td>
+                          <strong>
+                            {a.firstName} {a.lastName}
+                          </strong>
+                        </td>
+                        <td>{ROLE_LABEL[a.role] ?? a.role}</td>
+                        <td>{formatFcfa(a.balance)}</td>
+                        <td>
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            step={0.01}
+                            value={pctDraft[a.id] ?? 0}
+                            onChange={(e) => setPctDraft((d) => ({ ...d, [a.id]: e.target.value }))}
+                            style={{
+                              width: 72,
+                              borderColor: isDirty ? 'var(--orange, #f97316)' : undefined,
+                            }}
+                          />
+                          {isDirty && (
+                            <div style={{ fontSize: 11, color: 'var(--orange, #f97316)', marginTop: 2 }}>
+                              non enregistré (actuel : {Number(a.payoutPercentage)}%)
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <button type="button" className="action-btn" disabled={savingId === a.id} onClick={() => savePercentage(a.id)}>
+                            {savingId === a.id ? '…' : 'Appliquer'}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
         </div>
 
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="card-title">2. Paie automatique mensuelle</div>
+          <div className="card-sub">Déclenchement planifié sur le revenu net du mois précédent, selon les parts ci-dessus</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-end', marginTop: 14 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+              <input
+                type="checkbox"
+                checked={scheduleDraft.isEnabled}
+                onChange={(e) => setScheduleDraft((s) => ({ ...s, isEnabled: e.target.checked }))}
+              />
+              Activée
+            </label>
+            <label style={{ fontSize: 13 }}>
+              Jour du mois (1–28)
+              <input
+                type="number"
+                min={1}
+                max={28}
+                value={scheduleDraft.dayOfMonth}
+                onChange={(e) => setScheduleDraft((s) => ({ ...s, dayOfMonth: e.target.value }))}
+                style={{ marginLeft: 8, width: 64 }}
+              />
+            </label>
+            <button type="button" className="btn-secondary-sm" onClick={saveSchedule}>
+              Enregistrer la planification
+            </button>
+            <button type="button" className="btn-secondary-sm" onClick={handleRunPayroll} disabled={runningPayroll}>
+              <Play size={14} /> {runningPayroll ? 'Exécution…' : 'Lancer la paie manuellement'}
+            </button>
+          </div>
+          {config?.schedule?.lastRunAt && (
+            <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 10 }}>
+              Dernière exécution auto : {formatDateTime(config.schedule.lastRunAt)}
+            </p>
+          )}
+        </div>
+
         <div className="card">
           <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            Historique des paies
+            3. Historique des paies
             <button type="button" className="acct-icon-btn" onClick={load} title="Actualiser">
               <RefreshCw size={14} />
             </button>
           </div>
-          <div className="table-scroll">
+          <div className="table-scroll" style={{ marginTop: 12 }}>
             <table>
               <thead>
                 <tr>

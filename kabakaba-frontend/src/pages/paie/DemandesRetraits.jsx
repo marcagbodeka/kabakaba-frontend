@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowDownToLine } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
@@ -13,8 +13,31 @@ function formatDateTime(iso) {
   return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
-const STATUS_LABEL = { PENDING: 'En attente', COMPLETED: 'Effectué', FAILED: 'Rejeté / échec' };
-const STATUS_BADGE = { PENDING: 'badge-orange', COMPLETED: 'badge-green', FAILED: 'badge-red' };
+// PROCESSING = validé par la Supervision, payout envoyé à FedaPay, en attente
+// de confirmation (webhook). Tant que ce n'est pas COMPLETED ou FAILED, l'argent
+// est en transit : aucune action possible sur ces lignes.
+const STATUS_LABEL = {
+  PENDING: 'À valider',
+  PROCESSING: 'Envoyé à FedaPay',
+  COMPLETED: 'Payé',
+  FAILED: 'Rejeté / échec',
+};
+const STATUS_BADGE = {
+  PENDING: 'badge-orange',
+  PROCESSING: 'badge-amber',
+  COMPLETED: 'badge-green',
+  FAILED: 'badge-red',
+};
+const STATUS_HINT = {
+  PROCESSING: "En transit chez FedaPay — le statut passera automatiquement à \"Payé\" ou \"Échec\" dès confirmation.",
+};
+
+const TABS = [
+  { key: 'PENDING', label: 'À valider' },
+  { key: 'PROCESSING', label: 'En cours chez FedaPay' },
+  { key: 'HISTORY', label: 'Historique (payés / échecs)' },
+  { key: 'ALL', label: 'Toutes' },
+];
 
 export default function DemandesRetraits() {
   const [items, setItems] = useState([]);
@@ -22,6 +45,7 @@ export default function DemandesRetraits() {
   const [error, setError] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  const [tab, setTab] = useState('PENDING');
 
   const load = async () => {
     setLoading(true);
@@ -40,7 +64,7 @@ export default function DemandesRetraits() {
   }, []);
 
   const handleApprove = async (id) => {
-    if (!window.confirm('Valider cette demande et envoyer le payout FedaPay ?')) return;
+    if (!window.confirm('Valider cette demande et envoyer le payout FedaPay ? Cette action est irréversible et déclenche un vrai transfert d\'argent.')) return;
     setActionError(null);
     setBusyId(id);
     try {
@@ -68,19 +92,34 @@ export default function DemandesRetraits() {
     }
   };
 
-  const pendingCount = items.filter((i) => i.status === 'PENDING').length;
+  const counts = useMemo(() => {
+    const c = { PENDING: 0, PROCESSING: 0, COMPLETED: 0, FAILED: 0 };
+    for (const r of items) if (c[r.status] !== undefined) c[r.status] += 1;
+    return c;
+  }, [items]);
+
+  const pendingAmount = useMemo(
+    () => items.filter((i) => i.status === 'PENDING').reduce((sum, i) => sum + Number(i.amount), 0),
+    [items],
+  );
+
+  const visibleItems = useMemo(() => {
+    if (tab === 'ALL') return items;
+    if (tab === 'HISTORY') return items.filter((i) => i.status === 'COMPLETED' || i.status === 'FAILED');
+    return items.filter((i) => i.status === tab);
+  }, [items, tab]);
 
   return (
     <>
       <Topbar
         icon={ArrowDownToLine}
         breadcrumb={[{ label: 'Paie', path: '/supervision/paie/config' }, { label: 'Demandes de retrait' }]}
-        badge={pendingCount > 0 ? { text: `${pendingCount} en attente`, tone: 'orange' } : undefined}
+        badge={counts.PENDING > 0 ? { text: `${counts.PENDING} à valider`, tone: 'orange' } : undefined}
       />
       <PageContent>
         <div className="page-header">
           <h1>Demandes de retrait (paie)</h1>
-          <p>Validation Supervision des retraits sur solde WebUser — déclenche un payout Mobile Money</p>
+          <p>Valide un retrait pour déclencher un vrai transfert Mobile Money via FedaPay — action irréversible</p>
         </div>
 
         {error && (
@@ -94,9 +133,51 @@ export default function DemandesRetraits() {
           </div>
         )}
 
+        <div className="kpi-grid">
+          <div className="kpi-card">
+            <div className="kpi-label">À valider</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : counts.PENDING}</div>
+            <div className="kpi-sub">{loading ? '' : formatFcfa(pendingAmount)}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">En cours chez FedaPay</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : counts.PROCESSING}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Payés</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : counts.COMPLETED}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Échecs / rejets</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : counts.FAILED}</div>
+          </div>
+        </div>
+
+        <div className="filter-pills">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              className={`filter-pill ${tab === t.key ? 'active' : ''}`}
+              onClick={() => setTab(t.key)}
+            >
+              {t.label}
+              {t.key !== 'ALL' && t.key !== 'HISTORY' && counts[t.key] > 0 ? ` (${counts[t.key]})` : ''}
+            </button>
+          ))}
+        </div>
+
         <div className="card">
-          <div className="card-title">Toutes les demandes</div>
-          <div className="table-scroll">
+          <div className="card-title">
+            {TABS.find((t) => t.key === tab)?.label}
+          </div>
+          <div className="card-sub">
+            {tab === 'PENDING' && "Ces demandes attendent ta validation. Vérifie le numéro Mobile Money avant de valider."}
+            {tab === 'PROCESSING' && "Payout déjà envoyé à FedaPay pour ces demandes — aucune action possible, en attente de confirmation."}
+            {tab === 'HISTORY' && "Demandes déjà finalisées (payées ou en échec)."}
+            {tab === 'ALL' && "Toutes les demandes, tous statuts confondus."}
+          </div>
+          <div className="table-scroll" style={{ marginTop: 12 }}>
             <table>
               <thead>
                 <tr>
@@ -115,13 +196,15 @@ export default function DemandesRetraits() {
                     <td colSpan={7}>Chargement...</td>
                   </tr>
                 )}
-                {!loading && items.length === 0 && (
+                {!loading && visibleItems.length === 0 && (
                   <tr>
-                    <td colSpan={7}>Aucune demande.</td>
+                    <td colSpan={7}>
+                      {tab === 'PENDING' ? 'Aucune demande à valider pour le moment.' : 'Aucune demande dans cette catégorie.'}
+                    </td>
                   </tr>
                 )}
                 {!loading &&
-                  items.map((r) => (
+                  visibleItems.map((r) => (
                     <tr key={r.id}>
                       <td>
                         <strong>
@@ -136,6 +219,11 @@ export default function DemandesRetraits() {
                         {r.rejectionReason && (
                           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{r.rejectionReason}</div>
                         )}
+                        {STATUS_HINT[r.status] && (
+                          <div style={{ fontSize: 11.5, color: 'var(--muted-light)', marginTop: 4, maxWidth: 220 }}>
+                            {STATUS_HINT[r.status]}
+                          </div>
+                        )}
                       </td>
                       <td>{formatDateTime(r.requestedAt)}</td>
                       <td>
@@ -148,7 +236,7 @@ export default function DemandesRetraits() {
                         {r.status === 'PENDING' && (
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                             <button type="button" className="action-btn" disabled={busyId === r.id} onClick={() => handleApprove(r.id)}>
-                              Valider
+                              {busyId === r.id ? '…' : 'Valider'}
                             </button>
                             <button type="button" className="btn-secondary-sm" disabled={busyId === r.id} onClick={() => handleReject(r.id)}>
                               Rejeter
