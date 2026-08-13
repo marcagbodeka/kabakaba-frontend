@@ -59,7 +59,7 @@ function Shell({ internalStep, footer, children }) {
           <div className={styles.logo}>
             kaba<span>kaba</span>
           </div>
-          <div className={styles.logoTag}>Centre d&apos;opérations — Admin web</div>
+          <div className={styles.logoTag}>Centre d&apos;opérations, Admin web</div>
           {internalStep === 1 && (
             <div className={styles.logoRole}>
               <ShieldCheck size={14} />
@@ -501,7 +501,7 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
             <ShieldCheck size={15} /> {loading ? 'Vérification...' : 'Vérifier et accéder'}
           </button>
           <button type="button" className={styles.btnBack} onClick={() => setInternalStep(3)}>
-            <ArrowLeft size={15} /> Retour — reconfigurer le 2FA
+            <ArrowLeft size={15} /> Retour, reconfigurer le 2FA
           </button>
         </form>
       </Shell>

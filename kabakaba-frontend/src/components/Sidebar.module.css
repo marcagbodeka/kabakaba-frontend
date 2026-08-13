@@ -10,12 +10,62 @@
   left: 0;
   z-index: 100;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 13.5px;
+  font-size: 14px;
+  transition: width var(--t, 200ms ease);
+}
+
+.collapseBtn {
+  position: absolute;
+  top: 22px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--indigo);
+  box-shadow: var(--shadow-xs);
+  transition: background 0.12s, transform 0.2s;
+  z-index: 6;
+}
+
+.collapseBtn:hover {
+  background: var(--indigo-soft);
+}
+
+.collapseBtn svg {
+  transition: transform 0.2s;
+}
+
+.collapseBtn.collapsed svg {
+  transform: rotate(180deg);
 }
 
 .logo {
-  padding: 20px 20px 16px;
+  padding: 22px 20px 16px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoMark {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--orange), #D9612C);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px -2px rgba(240, 120, 64, 0.5);
 }
 
 .logoText {
@@ -23,6 +73,7 @@
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .logoText span {
@@ -35,6 +86,7 @@
   margin-top: 2px;
   font-weight: 500;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .nav {
@@ -51,32 +103,35 @@
 }
 
 .section {
-  padding-top: 16px;
+  padding-top: 18px;
 }
 
 .sectionLabel {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.32);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0 10px;
-  margin-bottom: 4px;
+  padding: 0 12px;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .navItem {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 10px;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 12px;
   cursor: pointer;
-  font-size: 13.5px;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.68);
   position: relative;
   user-select: none;
   transition: background 0.12s, color 0.12s;
   text-decoration: none;
-  border-radius: 7px;
+  border-radius: 10px;
   line-height: 1.3;
 }
 
@@ -90,11 +145,14 @@
 
 .navLabel {
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .navItem:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .navItem:focus-visible {
@@ -104,9 +162,20 @@
 
 .navItem.active,
 .navItem.parentActive {
-  background: rgba(240, 120, 64, 0.12);
+  background: rgba(240, 120, 64, 0.14);
   color: #fff;
   font-weight: 600;
+}
+
+.navItem.active::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--orange);
 }
 
 .navIcon {
@@ -133,26 +202,26 @@
 .subNav {
   overflow: hidden;
   transition: max-height 0.2s ease;
-  padding-left: 8px;
+  padding-left: 10px;
 }
 
 .subNavItem {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px 6px 28px;
-  font-size: 13px;
+  padding: 8px 10px 8px 30px;
+  font-size: 13.5px;
   color: rgba(255, 255, 255, 0.42);
   cursor: pointer;
   transition: color 0.12s, background 0.12s;
   text-decoration: none;
-  border-radius: 7px;
+  border-radius: 8px;
   margin: 1px 0;
 }
 
 .subNavItem:hover {
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .subNavItem:focus-visible {
@@ -163,7 +232,47 @@
 .subNavItem.active {
   color: #fff;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Mode replié : juste les icônes, en bande fine ────── */
+.sidebar.collapsed {
+  width: var(--sidebar-w-collapsed);
+}
+
+.sidebar.collapsed .logo {
+  padding: 22px 0 16px;
+  justify-content: center;
+}
+
+.sidebar.collapsed .sectionLabel {
+  height: 1px;
+  padding: 0;
+  margin: 0 12px 14px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.sidebar.collapsed .navItem {
+  justify-content: center;
+  padding: 12px;
+}
+
+.sidebar.collapsed .navItem.active::before {
+  left: auto;
+  right: -10px;
+}
+
+.sidebar.collapsed .userInfo {
+  display: none;
+}
+
+.sidebar.collapsed .bottom {
+  justify-content: center;
+}
+
+.sidebar.collapsed .logoutBtn {
+  margin-left: 0;
 }
 
 .bottom {

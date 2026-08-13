@@ -1,7 +1,9 @@
 :root{
   --indigo:#1B2A6B;
   --indigo-dark:#0D1438;
+  --indigo-soft:#EEF0FA;
   --orange:#F07840;
+  --orange-dark:#D9612C;
   --peach:#FFE8DC;
   --bg:#F7F8FB;
   --surface:#fff;
@@ -10,11 +12,25 @@
   --text:#0D1438;
   --muted:#64748B;
   --muted-light:#94A3B8;
-  --sidebar-w:248px;
-  --radius:10px;
-  --radius-sm:7px;
+
+  --green:#0F9D63;
+  --green-soft:#E4F7EE;
+  --red:#DC3B3B;
+  --red-soft:#FDEAEA;
+  --amber:#C9820A;
+  --amber-soft:#FBF0DC;
+
+  --sidebar-w:272px;
+  --sidebar-w-collapsed:76px;
+  --radius:12px;
+  --radius-lg:16px;
+  --radius-sm:8px;
   --shadow-xs:0 1px 2px rgba(13,20,56,.05);
-  --shadow:0 1px 3px rgba(13,20,56,.06), 0 1px 2px rgba(13,20,56,.04);
-  --ring: 0 0 0 2px rgba(240,120,64,.35);
+  --shadow:0 1px 2px rgba(13,20,56,.04), 0 6px 20px -8px rgba(13,20,56,.10);
+  --shadow-hover:0 2px 4px rgba(13,20,56,.05), 0 14px 28px -10px rgba(13,20,56,.16);
+  --ring: 0 0 0 3px rgba(27,42,107,.14);
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --t-fast: 120ms var(--ease);
+  --t: 200ms var(--ease);
   --font:'Plus Jakarta Sans',system-ui,sans-serif;
 }

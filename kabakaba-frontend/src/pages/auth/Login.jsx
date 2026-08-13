@@ -9,6 +9,30 @@ import { ApiError } from '../../services/httpClient';
 const OTP_LENGTH = 6;
 const OTP_DURATION = 30;
 
+const STEPS = ['Identifiant', 'Vérification', 'Accès'];
+
+function Stepper({ current }) {
+  return (
+    <div className={styles.stepper}>
+      {STEPS.map((label, i) => {
+        const n = i + 1;
+        const state = n < current ? 'done' : n === current ? 'current' : '';
+        return (
+          <div key={label} style={{ display: 'contents' }}>
+            <div className={`${styles.step} ${styles[state] || ''}`}>
+              <div className={styles.stepCircle}>{n < current ? '✓' : n}</div>
+              <span className={styles.stepLabel}>{label}</span>
+            </div>
+            {i < STEPS.length - 1 && (
+              <div className={`${styles.stepLine} ${n < current ? styles.done : ''}`} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function LoginShell({ subtitle, children }) {
   return (
     <div className={styles.wrap}>
@@ -106,9 +130,10 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
   if (step === 1) {
     return (
       <LoginShell subtitle={subtitle}>
+        <Stepper current={1} />
         <div className={styles.formTitle}>Se connecter</div>
         <div className={styles.formSub}>Accédez à votre espace kabakaba</div>
-        <form onSubmit={handleCredentialsSubmit}>
+        <form onSubmit={handleCredentialsSubmit} className={styles.formStep}>
           <div className={styles.field}>
             <label htmlFor="email">Adresse e-mail</label>
             <input
@@ -150,11 +175,12 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
   if (step === 2) {
     return (
       <LoginShell subtitle={subtitle}>
+        <Stepper current={2} />
         <div className={styles.formTitle}>Code de vérification</div>
         <div className={styles.formSub}>
           Entrez le code à 6 chiffres généré par votre application d&apos;authentification.
         </div>
-        <form onSubmit={handleOtpSubmit}>
+        <form onSubmit={handleOtpSubmit} className={styles.formStep}>
           <div className={styles.otpRow}>
             {otp.map((digit, i) => (
               <input
@@ -188,9 +214,10 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
 
   return (
     <LoginShell subtitle={subtitle}>
+      <Stepper current={3} />
       <div className={styles.redirecting}>
         <Loader2 size={20} className={styles.spinner} />
-        <span>Accès autorisé — redirection…</span>
+        <span>Accès autorisé, redirection en cours…</span>
       </div>
     </LoginShell>
   );

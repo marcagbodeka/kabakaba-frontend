@@ -127,16 +127,16 @@
 
 .btnPrimary {
   width: 100%;
-  height: 38px;
+  height: 42px;
   background: var(--indigo);
   border: none;
   border-radius: var(--radius-sm);
   color: #fff;
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   margin-top: 4px;
-  transition: filter 0.15s;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
   font-family: inherit;
   display: inline-flex;
   align-items: center;
@@ -145,7 +145,12 @@
 }
 
 .btnPrimary:hover {
-  filter: brightness(1.15);
+  background: var(--indigo-dark);
+  box-shadow: 0 6px 16px -4px rgba(27, 42, 107, 0.4);
+}
+
+.btnPrimary:active {
+  transform: scale(0.98);
 }
 
 .btnPrimary:focus-visible {
@@ -270,4 +275,84 @@
   
 }
 
-.fieldError { color: #EF4444; font-size: 13px; margin: 8px 0; }
+.fieldError { color: var(--red); font-size: 13px; margin: 8px 0; }
+
+/* ── Stepper de connexion ─────────────────────────────── */
+.stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 26px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepCircle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  border: 2px solid var(--border-strong);
+  color: var(--muted-light);
+  background: #fff;
+  transition: all var(--t, 200ms ease);
+  flex-shrink: 0;
+}
+
+.step.done .stepCircle {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+.step.current .stepCircle {
+  background: var(--indigo);
+  border-color: var(--indigo);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(27, 42, 107, 0.14);
+}
+
+.stepLabel {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted-light);
+  white-space: nowrap;
+}
+
+.step.current .stepLabel {
+  color: var(--indigo-dark);
+}
+
+.step.done .stepLabel {
+  color: var(--green);
+}
+
+.stepLine {
+  flex: 1;
+  height: 2px;
+  background: var(--border-strong);
+  margin: 0 8px;
+  position: relative;
+  top: -1px;
+  transition: background var(--t, 200ms ease);
+}
+
+.stepLine.done {
+  background: var(--green);
+}
+
+.formStep {
+  animation: step-in 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@keyframes step-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}

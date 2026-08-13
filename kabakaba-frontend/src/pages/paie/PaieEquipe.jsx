@@ -199,6 +199,7 @@ export default function PaieEquipe() {
       />
       <PageContent>
         <div className="page-header">
+          <div className="eyebrow">Supervision · Paie</div>
           <h1>Paie de l'équipe (Admin & Supervision)</h1>
           <p>
             Chaque mois, le revenu net de la plateforme crédite le solde interne de chaque compte selon sa part (%).
@@ -206,25 +207,16 @@ export default function PaieEquipe() {
           </p>
         </div>
 
-        {error && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
-            {error}
-          </div>
-        )}
-        {actionError && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
-            {actionError}
-          </div>
-        )}
-        {actionNotice && (
-          <div className="card" style={{ borderColor: 'var(--green, #16A34A)', color: 'var(--green, #16A34A)', marginBottom: 16 }}>
-            {actionNotice}
-          </div>
-        )}
+        {error && <div className="notice-banner notice-error">{error}</div>}
+        {actionError && <div className="notice-banner notice-error">{actionError}</div>}
+        {actionNotice && <div className="notice-banner notice-success">{actionNotice}</div>}
 
-        {/* ── 1. Employés : vue d'ensemble ─────────────────────────── */}
+        <div className="section-title">
+          <span className="section-num">1</span>
+          <h2>Employés</h2>
+          <span className="section-line"></span>
+        </div>
         <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-title">Employés</div>
           <div className="card-sub">
             Part (%), solde disponible à retirer, et statut de leur dernière demande de retrait.
           </div>
@@ -333,8 +325,12 @@ export default function PaieEquipe() {
         </div>
 
         {/* ── 2. Lancer la paie ─────────────────────────────────────── */}
+        <div className="section-title">
+          <span className="section-num">2</span>
+          <h2>Lancer la paie</h2>
+          <span className="section-line"></span>
+        </div>
         <div className="card" style={{ marginBottom: 16 }}>
-          <div className="card-title">Lancer la paie</div>
           <div className="card-sub">
             Calcule le revenu net du mois précédent complet et crédite chaque employé selon sa part. Si le revenu net est nul ou négatif, rien n'est distribué et un message clair s'affiche.
           </div>
@@ -368,10 +364,10 @@ export default function PaieEquipe() {
           </div>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 16 }}>
-            <button type="button" className="btn-secondary-sm" onClick={saveSchedule}>
+            <button type="button" className="action-btn" onClick={saveSchedule}>
               Enregistrer la planification
             </button>
-            <button type="button" className="action-btn" onClick={handleRunPayroll} disabled={runningPayroll}>
+            <button type="button" className="btn-accent" onClick={handleRunPayroll} disabled={runningPayroll}>
               <Play size={14} /> {runningPayroll ? 'Exécution…' : 'Lancer la paie manuellement'}
             </button>
           </div>
@@ -385,13 +381,18 @@ export default function PaieEquipe() {
 
         {/* ── 3. Retraits à valider ─────────────────────────────────── */}
         {(pendingWithdrawals.length > 0 || processingWithdrawals.length > 0) && (
-          <div className="card" style={{ marginBottom: 16 }}>
-            <div className="card-title">Retraits à valider</div>
-            <div className="card-sub">
-              Une demande de retrait transfère réellement l'argent du solde de l'employé vers son numéro Mobile Money via FedaPay.
+          <>
+            <div className="section-title">
+              <span className="section-num">3</span>
+              <h2>Retraits à valider</h2>
+              <span className="section-line"></span>
             </div>
-            <div className="table-scroll" style={{ marginTop: 12 }}>
-              <table>
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div className="card-sub">
+                Une demande de retrait transfère réellement l'argent du solde de l'employé vers son numéro Mobile Money via FedaPay.
+              </div>
+              <div className="table-scroll" style={{ marginTop: 12 }}>
+                <table>
                 <thead>
                   <tr>
                     <th>Employé</th>
@@ -421,7 +422,7 @@ export default function PaieEquipe() {
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                             <button
                               type="button"
-                              className="action-btn"
+                              className="btn-primary"
                               disabled={busyWithdrawalId === w.id}
                               onClick={() => handleApproveWithdrawal(w.id)}
                             >
@@ -429,7 +430,7 @@ export default function PaieEquipe() {
                             </button>
                             <button
                               type="button"
-                              className="btn-secondary-sm"
+                              className="btn-danger-outline"
                               disabled={busyWithdrawalId === w.id}
                               onClick={() => handleRejectWithdrawal(w.id)}
                             >
@@ -444,11 +445,16 @@ export default function PaieEquipe() {
               </table>
             </div>
           </div>
+          </>
         )}
 
         {/* ── 4. Historique ─────────────────────────────────────────── */}
+        <div className="section-title">
+          <span className="section-num">4</span>
+          <h2>Historique</h2>
+          <span className="section-line"></span>
+        </div>
         <div className="card">
-          <div className="card-title">Historique</div>
           <div className="filter-pills" style={{ marginTop: 10 }}>
             <button
               type="button"

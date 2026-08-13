@@ -11,6 +11,7 @@
   flex-direction: column;
   min-height: 100vh;
   width: calc(100% - var(--sidebar-w));
+  transition: margin-left 200ms ease, width 200ms ease;
 }
 
 @media (max-width: 768px) {
