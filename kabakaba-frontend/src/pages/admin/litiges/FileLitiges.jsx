@@ -25,6 +25,7 @@ export default function FileLitiges() {
       <PageContent>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div className="page-header" style={{ marginBottom: 0 }}>
+            <div className="eyebrow">Admin web · Litiges</div>
             <h1>Litiges</h1>
             <p>8 litiges ouverts · 3 en cours de traitement · 47 traités ce mois</p>
           </div>

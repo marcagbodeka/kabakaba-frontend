@@ -58,6 +58,7 @@ export default function VueVendeurs() {
       </Topbar>
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Admin web · Tableau de bord</div>
           <h1>Tableau de bord</h1>
           <p>Supervision des vendeurs — tous campus</p>
         </div>

@@ -40,12 +40,13 @@ export default function NotesAlertes() {
       />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Qualité</div>
           <h1>Notes & alertes</h1>
           <p>Note moyenne par vendeur, détection des cantines avec retours négatifs récurrents</p>
         </div>
 
         {error && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+          <div className="notice-banner notice-error">
             {error}
           </div>
         )}

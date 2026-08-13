@@ -65,7 +65,7 @@ export default function DetailAmbassadeur() {
           <button className="btn-secondary-sm" onClick={() => navigate('/supervision/ambassadeurs')}>← Retour</button>
         </Topbar>
         <PageContent>
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444' }}>{error || 'Ambassadeur introuvable.'}</div>
+          <div className="notice-banner notice-error">{error || 'Ambassadeur introuvable.'}</div>
         </PageContent>
       </>
     );

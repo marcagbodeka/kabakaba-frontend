@@ -63,6 +63,7 @@ export default function ArticleConfig() {
       </Topbar>
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Admin web · Cantines</div>
           <h1>{id ? 'Modifier un article' : 'Configurer un article'}</h1>
           <p>Cantine Centrale · UCAO</p>
         </div>

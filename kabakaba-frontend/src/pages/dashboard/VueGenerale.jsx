@@ -98,12 +98,13 @@ export default function VueGenerale() {
       <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Vue générale' }]} badge={{ text: '7 derniers jours' }} />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Tableau de bord</div>
           <h1>Vue générale</h1>
           <p>Synthèse de l&apos;activité kabakaba sur l&apos;ensemble des campus</p>
         </div>
 
         {error && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+          <div className="notice-banner notice-error">
             {error}
           </div>
         )}

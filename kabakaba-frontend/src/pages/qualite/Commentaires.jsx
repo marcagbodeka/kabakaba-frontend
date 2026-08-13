@@ -76,6 +76,7 @@ export default function Commentaires() {
       />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Qualité</div>
           <h1>Commentaires</h1>
           <p>Avis post-commande par cantine — visibles uniquement en interne (rôle Supervision)</p>
         </div>
@@ -157,7 +158,7 @@ export default function Commentaires() {
         </div>
 
         {error && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+          <div className="notice-banner notice-error">
             {error}
           </div>
         )}

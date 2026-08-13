@@ -63,6 +63,7 @@ export default function CampusFacultes() {
       </Topbar>
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Admin web · Cantines</div>
           <h1>Campus & facultés</h1>
           <p>{campuses.length} universités couvertes · {campuses.reduce((n, c) => n + c.faculties.length, 0)} facultés configurées</p>
         </div>

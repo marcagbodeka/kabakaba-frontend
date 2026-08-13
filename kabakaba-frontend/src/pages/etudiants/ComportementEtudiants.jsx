@@ -44,12 +44,13 @@ export default function ComportementEtudiants() {
       />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Étudiants</div>
           <h1>Comportement étudiants</h1>
           <p>Fréquence de commande, montant moyen rechargé, nombre d&apos;inscrits par campus</p>
         </div>
 
         {error && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+          <div className="notice-banner notice-error">
             {error}
           </div>
         )}

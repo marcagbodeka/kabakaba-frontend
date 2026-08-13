@@ -52,6 +52,7 @@ export default function HistoriqueSuspensions() {
       />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Étudiants</div>
           <h1>Historique des suspensions</h1>
           <p>Toutes les suspensions (actives, levées) et bannissements définitifs, avec origine et motif</p>
         </div>
@@ -72,7 +73,7 @@ export default function HistoriqueSuspensions() {
         </div>
 
         {error && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+          <div className="notice-banner notice-error">
             {error}
           </div>
         )}

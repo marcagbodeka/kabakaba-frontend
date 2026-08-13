@@ -39,12 +39,13 @@ export default function SoldeCreances() {
       />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Analyse cantines</div>
           <h1>Solde & créances</h1>
           <p>Solde actuel, créances actives et retraits par vendeur</p>
         </div>
 
         {error && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+          <div className="notice-banner notice-error">
             {error}
           </div>
         )}

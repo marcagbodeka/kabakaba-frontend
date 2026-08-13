@@ -22,6 +22,7 @@ export default function ListeAmbassadeurs() {
       </Topbar>
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Admin web · Ambassadeurs</div>
           <h1>Ambassadeurs</h1>
           <p>14 ambassadeurs actifs · 2 suspendus · 3 demandes en attente</p>
         </div>

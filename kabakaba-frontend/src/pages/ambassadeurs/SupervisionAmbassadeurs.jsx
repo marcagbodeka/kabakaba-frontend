@@ -47,12 +47,13 @@ export default function SupervisionAmbassadeurs() {
       <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs' }]} badge={{ text: '30 derniers jours' }} />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Ambassadeurs</div>
           <h1>Supervision du programme ambassadeur</h1>
           <p>Ambassadeurs actifs, volume de recharges générées via parrainage, commissions versées</p>
         </div>
 
         {error && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+          <div className="notice-banner notice-error">
             {error}
           </div>
         )}

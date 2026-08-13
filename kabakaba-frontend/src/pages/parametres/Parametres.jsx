@@ -66,6 +66,7 @@ export default function Parametres() {
       <Topbar icon={Settings} breadcrumb={[{ label: 'Paramètres' }]} />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Paramètres</div>
           <h1>Paramètres</h1>
           <p>Profil connecté, solde de paie et demandes de retrait</p>
         </div>

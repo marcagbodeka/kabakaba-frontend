@@ -53,6 +53,7 @@ export default function DemandesAmbassadeur() {
       />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Admin web · Ambassadeurs</div>
           <h1>Demandes de statut ambassadeur</h1>
           <p>Chaque demande doit être traitée manuellement. Le code promo est généré uniquement à l&apos;acceptation.</p>
         </div>

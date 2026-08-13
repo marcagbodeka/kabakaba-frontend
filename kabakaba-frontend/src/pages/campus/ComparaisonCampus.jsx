@@ -55,12 +55,13 @@ export default function ComparaisonCampus() {
       />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Analyse campus</div>
           <h1>Comparaison campus</h1>
           <p>Performances comparées entre les campus actifs</p>
         </div>
 
         {error && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+          <div className="notice-banner notice-error">
             {error}
           </div>
         )}

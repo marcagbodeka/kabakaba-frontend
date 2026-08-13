@@ -9,6 +9,7 @@ export default function ComptesSupervision() {
       <Topbar icon={ShieldCheck} breadcrumb={[{ label: 'Gestion des comptes', path: '/supervision/comptes' }, { label: 'Comptes Supervision' }]} />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Comptes</div>
           <h1>Comptes Supervision</h1>
           <p>Création et suppression (vote à la majorité, 48h) des comptes Supervision</p>
         </div>

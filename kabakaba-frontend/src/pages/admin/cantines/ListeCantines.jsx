@@ -25,6 +25,7 @@ export default function ListeCantines() {
       </Topbar>
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Admin web · Cantines</div>
           <h1>Cantines</h1>
           <p>10 cantines enregistrées — 2 campus couverts</p>
         </div>

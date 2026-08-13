@@ -45,12 +45,13 @@ export default function VolumeRevenus() {
       />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Analyse campus</div>
           <h1>Volume & revenus</h1>
           <p>Détail des recharges, surplus et commissions par campus et par période</p>
         </div>
 
         {error && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+          <div className="notice-banner notice-error">
             {error}
           </div>
         )}

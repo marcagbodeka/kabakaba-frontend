@@ -42,12 +42,13 @@ export default function PerformanceVendeurs() {
       />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Supervision · Analyse cantines</div>
           <h1>Performance vendeurs</h1>
           <p>Volume de commandes, taux d&apos;acceptation, de refus et d&apos;annulation par cantine</p>
         </div>
 
         {error && (
-          <div className="card" style={{ borderColor: '#EF4444', color: '#EF4444', marginBottom: 16 }}>
+          <div className="notice-banner notice-error">
             {error}
           </div>
         )}

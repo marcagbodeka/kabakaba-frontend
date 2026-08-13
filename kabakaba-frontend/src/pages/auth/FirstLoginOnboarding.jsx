@@ -10,40 +10,25 @@ import * as webAuth from '../../services/webAuthService';
 const OTP_LENGTH = 6;
 const OTP_DURATION = 30;
 
-const STEP_META = [
-  { title: 'Identifiants temporaires', sub: 'Email + mot de passe fourni' },
-  { title: 'Changer le mot de passe', sub: 'Définir votre mot de passe personnel' },
-  { title: 'Configurer Google Authenticator', sub: 'Scanner le QR code ou copier la clé' },
-  { title: 'Accès au tableau de bord', sub: null },
-];
-
-function stepMetaFor(internalStep) {
-  if (internalStep === 4) {
-    return { title: 'Vérification du code', sub: 'Confirmer que le 2FA est bien configuré' };
-  }
-  return STEP_META[2];
-}
-
 function StepTracker({ internalStep }) {
   const visualStep = internalStep >= 5 ? 4 : internalStep >= 3 ? 3 : internalStep;
+  const labels = ['Bienvenue', 'Mot de passe', 'Authentification', 'Confirmation'];
 
   return (
     <div className={styles.steps}>
       {[1, 2, 3, 4].map((n) => {
-        const state = n < visualStep ? 'done' : n === visualStep ? 'active' : 'idle';
-        const meta = n === 3 ? stepMetaFor(internalStep) : STEP_META[n - 1];
+        const state = n < visualStep ? 'done' : n === visualStep ? 'active' : '';
         return (
-          <div className={styles.step} key={n}>
-            <div className={styles.stepLeft}>
-              <div className={`${styles.stepNum} ${styles[state]}`}>
-                {state === 'done' ? <Check size={13} strokeWidth={3} /> : n}
+          <div key={n} style={{ display: 'contents' }}>
+            <div className={styles.step}>
+              <div className={`${styles.stepNum} ${styles[state] || ''}`}>
+                {state === 'done' ? <Check size={12} strokeWidth={3} /> : n}
               </div>
-              {n < 4 && <div className={styles.stepLine} />}
+              <div className={styles.stepContent}>
+                <div className={`${styles.stepTitle} ${styles[state] || ''}`}>{labels[n - 1]}</div>
+              </div>
             </div>
-            <div className={styles.stepContent}>
-              <div className={`${styles.stepTitle} ${styles[state]}`}>{meta.title}</div>
-              {meta.sub && state !== 'idle' && <div className={styles.stepSub}>{meta.sub}</div>}
-            </div>
+            {n < 4 && <div className={styles.stepLine} />}
           </div>
         );
       })}
@@ -55,20 +40,15 @@ function Shell({ internalStep, footer, children }) {
   return (
     <div className={styles.wrap}>
       <div className={styles.left}>
-        <div>
-          <div className={styles.logo}>
-            kaba<span>kaba</span>
-          </div>
-          <div className={styles.logoTag}>Centre d&apos;opérations, Admin web</div>
-          {internalStep === 1 && (
-            <div className={styles.logoRole}>
-              <ShieldCheck size={14} />
-              <span>Première connexion</span>
-            </div>
-          )}
+        <div className={styles.leftGlow} />
+        <div className={styles.mark}>K</div>
+        <div className={styles.leftBottom}>
+          <div className={styles.leftTag}>Première connexion</div>
+          <h3 className={styles.leftHeadline}>Sécurisons ton compte avant de commencer.</h3>
+          <p className={styles.leftSub}>Trois étapes rapides, à faire une seule fois.</p>
+          <StepTracker internalStep={internalStep} />
+          {footer && <div className={styles.leftFooter}>{footer}</div>}
         </div>
-        <StepTracker internalStep={internalStep} />
-        <div className={styles.leftFooter}>{footer}</div>
       </div>
       <div className={styles.right}>
         <div className={styles.form}>{children}</div>

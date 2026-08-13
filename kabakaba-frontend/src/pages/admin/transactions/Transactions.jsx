@@ -21,6 +21,7 @@ export default function Transactions() {
       <Topbar icon={Monitor} breadcrumb={[{ label: 'Transactions' }]} />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Admin web · Transactions</div>
           <h1>Transactions</h1>
           <p>Suivi en temps réel · Séquestres, débits, remboursements, créances</p>
         </div>

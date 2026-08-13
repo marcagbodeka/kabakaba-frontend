@@ -8,6 +8,7 @@ export default function Parametres() {
       <Topbar icon={Settings} breadcrumb={[{ label: 'Paramètres' }]} />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Admin web · Paramètres</div>
           <h1>Paramètres</h1>
           <p>Profil, sécurité, notifications, préférences</p>
         </div>

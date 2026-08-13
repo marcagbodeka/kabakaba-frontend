@@ -21,6 +21,7 @@ export default function ComptesSuspendus() {
       <Topbar icon={ShieldAlert} breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }, { label: 'Comptes suspendus' }]} />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Admin web · Litiges</div>
           <h1>Comptes suspendus</h1>
           <p>Étudiants bloqués pour comportement abusif — {rows.length} actifs</p>
         </div>

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { ShieldCheck, Loader2 } from 'lucide-react';
-import LoginIllustration from './LoginIllustration';
 import styles from './Login.module.css';
 import { useAuth } from '../../context/AuthContext';
 import * as webAuth from '../../services/webAuthService';
@@ -38,14 +37,12 @@ function LoginShell({ subtitle, children }) {
     <div className={styles.wrap}>
       <div className={styles.left}>
         <div className={styles.leftGlow} />
-        <div className={styles.leftCenter}>
-          <LoginIllustration />
-          <div className={styles.logo}>
-            kaba<span>kaba</span>
-          </div>
-          <div className={styles.tagline}>{subtitle}</div>
+        <div className={styles.mark}>K</div>
+        <div className={styles.leftBottom}>
+          <div className={styles.leftTag}>{subtitle}</div>
+          <h3 className={styles.leftHeadline}>Le pilotage de tes campus, en un seul endroit.</h3>
+          <p className={styles.leftSub}>Suivi des cantines, de la qualité et des paiements de l&apos;équipe, en temps réel.</p>
         </div>
-        <div className={styles.leftFooter}>Outil interne réservé aux équipes kabakaba</div>
       </div>
       <div className={styles.right}>
         <div className={styles.form}>{children}</div>
@@ -60,6 +57,7 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [challengeToken, setChallengeToken] = useState(null);
+  const [firstName, setFirstName] = useState(null);
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(''));
   const [timer, setTimer] = useState(OTP_DURATION);
   const [loading, setLoading] = useState(false);
@@ -86,6 +84,7 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
     try {
       const result = await webAuth.login(email, password);
       setChallengeToken(result.challengeToken);
+      setFirstName(result.firstName || result.webUser?.firstName || result.user?.firstName || null);
       setStep(2);
       setTimeout(() => otpRefs.current[0]?.focus(), 50);
     } catch (err) {
@@ -176,7 +175,7 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
     return (
       <LoginShell subtitle={subtitle}>
         <Stepper current={2} />
-        <div className={styles.formTitle}>Code de vérification</div>
+        <div className={styles.formTitle}>{firstName ? `Bienvenue, ${firstName}` : 'Code de vérification'}</div>
         <div className={styles.formSub}>
           Entrez le code à 6 chiffres généré par votre application d&apos;authentification.
         </div>

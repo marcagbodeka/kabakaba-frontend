@@ -43,6 +43,7 @@ export default function Candidatures() {
       <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} badge={{ text: '2 nouvelles', tone: 'red' }} />
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Admin web · Partenaires</div>
           <h1>Candidatures partenaires</h1>
           <p>Soumises via le formulaire kabakaba.com · Traitement manuel</p>
         </div>

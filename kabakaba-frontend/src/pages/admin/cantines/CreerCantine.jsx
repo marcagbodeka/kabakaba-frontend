@@ -22,6 +22,7 @@ export default function CreerCantine() {
       </Topbar>
       <PageContent>
         <div className="page-header">
+      <div className="eyebrow">Admin web · Cantines</div>
           <h1>Créer une cantine</h1>
           <p>Renseignez les informations du vendeur et configurez son accès à l&apos;application mobile.</p>
         </div>
