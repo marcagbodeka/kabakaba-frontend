@@ -1,0 +1,217 @@
+.wrap {
+  position: relative;
+}
+
+.trigger {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.trigger:hover {
+  background: #f8fafc;
+  border-color: var(--border-strong);
+}
+
+.trigger svg {
+  color: var(--indigo);
+  flex-shrink: 0;
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 100;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-hover);
+  padding: 14px;
+  width: 300px;
+}
+
+.presets {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.presets button {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--indigo-soft);
+  color: var(--indigo);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.presets button:hover {
+  background: var(--peach);
+  color: var(--orange-dark);
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.monthLabel {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+.navBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.navBtn:hover {
+  background: #f8fafc;
+  border-color: var(--border-strong);
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.weekdays span {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted-light);
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.blankCell {
+  height: 30px;
+}
+
+.dayCell {
+  height: 30px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s;
+}
+
+.dayCell:hover:not(:disabled) {
+  background: var(--indigo-soft);
+}
+
+.dayCell:disabled {
+  color: var(--muted-light);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dayCellInRange {
+  background: var(--indigo-soft);
+  border-radius: 0;
+}
+
+.dayCellSelected {
+  background: var(--indigo) !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.rangePreview {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.footerActions {
+  display: flex;
+  gap: 8px;
+}
+
+.cancelBtn,
+.applyBtn {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid var(--border);
+}
+
+.cancelBtn {
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.cancelBtn:hover {
+  background: #f8fafc;
+}
+
+.applyBtn {
+  background: var(--indigo);
+  color: #fff;
+  border-color: var(--indigo);
+}
+
+.applyBtn:hover {
+  background: var(--indigo-dark);
+}
+
+@media (max-width: 480px) {
+  .popover {
+    width: 260px;
+    right: -40px;
+  }
+}

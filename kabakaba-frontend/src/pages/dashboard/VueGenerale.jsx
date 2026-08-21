@@ -2,10 +2,23 @@ import { useEffect, useState } from 'react';
 import { LayoutDashboard, TrendingDown, TrendingUp } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import DateRangePicker from '../../components/DateRangePicker';
 import { getCampusComparison, getRevenueBreakdown, getVendorPerformance } from '../../services/domain/analyticsService';
 import { getSupervisionStats } from '../../services/domain/adminStatsService';
 
 const DAY_LABELS_FR = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 0: 'Dim' };
+
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
@@ -29,6 +42,7 @@ function TrendBadge({ value }) {
 }
 
 export default function VueGenerale() {
+  const [range, setRange] = useState({ from: daysAgo(6), to: startOfDay(new Date()) });
   const [campus, setCampus] = useState(null);
   const [revenue, setRevenue] = useState(null);
   const [vendorPerf, setVendorPerf] = useState(null);
@@ -36,17 +50,15 @@ export default function VueGenerale() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const days = 7;
-
   useEffect(() => {
     (async () => {
       setLoading(true);
       setError(null);
       try {
         const [campusData, revenueData, perfData, statsData] = await Promise.all([
-          getCampusComparison(days),
-          getRevenueBreakdown(days),
-          getVendorPerformance(days),
+          getCampusComparison(undefined, range),
+          getRevenueBreakdown(undefined, range),
+          getVendorPerformance(undefined, range),
           getSupervisionStats(),
         ]);
         setCampus(campusData);
@@ -59,11 +71,10 @@ export default function VueGenerale() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [range]);
 
   const summary = campus?.summary;
   const revSummary = revenue?.summary;
-  const ordersChange = summary ? pctChange(summary.totalOrders, summary.totalOrdersPrevPeriod) : null;
   const revenueChange = summary ? pctChange(summary.totalRevenue, summary.totalRevenuePrevPeriod) : null;
 
   const dailySeries = campus?.dailyVolume?.series?.['Tous les campus'] ?? [];
@@ -95,7 +106,9 @@ export default function VueGenerale() {
 
   return (
     <>
-      <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Vue générale' }]} badge={{ text: '7 derniers jours' }} />
+      <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Vue générale' }]} hidePeriodSelect>
+        <DateRangePicker value={range} onChange={setRange} />
+      </Topbar>
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Supervision · Tableau de bord</div>
@@ -113,34 +126,35 @@ export default function VueGenerale() {
           <div className="kpi-card">
             <div className="kpi-label">Commandes</div>
             <div className="kpi-value">
-              {loading ? '—' : totalOrders.toLocaleString('fr-FR')} {!loading && <TrendBadge value={ordersChange} />}
-            </div>
-            <div className="kpi-sub">
-              {loading ? '—' : `vs période précédente : ${summary?.totalOrdersPrevPeriod ?? 0}`}
+              {loading ? '—' : totalOrders.toLocaleString('fr-FR')}
             </div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">CA brut (commandes complétées)</div>
+            <div className="kpi-label">Chiffre d&apos;affaires</div>
             <div className="kpi-value kpi-value-sm">
               {loading ? '—' : formatFcfa(summary?.totalRevenue ?? 0)} {!loading && <TrendBadge value={revenueChange} />}
             </div>
-            <div className="kpi-sub">volume séquestre complété</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Étudiants / cantines</div>
+            <div className="kpi-label">Étudiants actifs</div>
             <div className="kpi-value kpi-value-sm">
-              {loading ? '—' : `${stats?.totalUsers ?? '—'} / ${stats?.totalVendors ?? '—'}`}
+              {loading ? '—' : (stats?.activeStudents30d ?? 0).toLocaleString('fr-FR')}
             </div>
-            <div className="kpi-sub">
-              {loading ? '—' : `${summary?.activeStudents ?? 0} actifs · ${stats?.activeSuspensions ?? 0} suspensions`}
+            <div className="kpi-sub">30 derniers jours</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Cantines actives</div>
+            <div className="kpi-value kpi-value-sm">
+              {loading ? '—' : (stats?.activeVendors30d ?? 0).toLocaleString('fr-FR')}
             </div>
+            <div className="kpi-sub">30 derniers jours</div>
           </div>
         </div>
 
         <div className="card-title" style={{ marginTop: 4 }}>
           Décomposition des revenus
         </div>
-        <div className="card-sub">Ventilation par source ({days} jours)</div>
+        <div className="card-sub">Ventilation par source (période sélectionnée)</div>
         <div className="kpi-grid">
           {revenueBreakdown.map((item) => (
             <div key={item.label} className="kpi-card">
