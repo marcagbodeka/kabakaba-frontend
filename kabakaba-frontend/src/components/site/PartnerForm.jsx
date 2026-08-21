@@ -66,7 +66,7 @@ export default function PartnerForm() {
         <label htmlFor="message">Message (optionnel)</label>
         <textarea id="message" rows={3} value={form.message} onChange={handleChange('message')} />
       </div>
-      <button type="submit" className="site-btn-primary" style={{ width: '100%' }}>
+      <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
         Envoyer ma candidature
       </button>
     </form>

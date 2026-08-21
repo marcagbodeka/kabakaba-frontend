@@ -4,8 +4,8 @@ import { Menu, X } from 'lucide-react';
 const NAV = [
   { label: 'Comment ça marche', href: '#comment-ca-marche' },
   { label: 'Pourquoi kabakaba', href: '#pourquoi' },
-  { label: 'Devenir partenaire', href: '#partenaire' },
-  { label: 'Ambassadeurs', href: '#ambassadeur' },
+  { label: 'Ambassadeur', href: '#ambassadeur' },
+  { label: 'Devenir vendeur', href: '#partenaire' },
 ];
 
 export default function SiteHeader() {
@@ -15,7 +15,16 @@ export default function SiteHeader() {
     <header className="site-header">
       <div className="site-header-inner">
         <a href="#top" className="site-logo">
-          kaba<span>kaba</span>
+          <img
+            src="/site/logo-64.webp"
+            width="32"
+            height="32"
+            alt="kabakaba"
+            className="site-logo-mark"
+          />
+          <span className="site-wordmark">
+            kaba<span>kaba</span>
+          </span>
         </a>
 
         <nav className="site-nav site-nav-desktop">

@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './layouts/DashboardLayout';
 import LoginPage from './pages/auth/LoginPage';
 import FirstLoginOnboarding from './pages/auth/FirstLoginOnboarding';
-import Home from './pages/site/Home';
 import { useAuth } from './context/AuthContext';
+
+// Site public chargé en lazy : les visiteurs de la page d'accueil ne
+// téléchargent pas tout le bundle du dashboard Supervision/Admin (pages,
+// graphiques, etc.) avant de voir la page. Vite génère un chunk séparé.
+const Home = lazy(() => import('./pages/site/Home'));
 
 import { navSections as supervisionNav } from './router/navConfigSupervision';
 import { navSections as adminNav } from './router/navConfigAdmin';
@@ -59,7 +63,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Site vitrine — page publique */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Suspense fallback={null}><Home /></Suspense>} />
 
         {/* ── Espace Supervision ─────────────────────────────── */}
         <Route
