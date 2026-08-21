@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Mail, Lock, Eye, EyeOff, Info, Smartphone, KeyRound, Copy, ShieldCheck,
-  ArrowRight, ArrowLeft, Check, Clock,
+  ArrowRight, ArrowLeft, Check, Clock, Moon, Sun,
 } from 'lucide-react';
 import styles from './FirstLoginOnboarding.module.css';
 import { useAuth } from '../../context/AuthContext';
 import * as webAuth from '../../services/webAuthService';
+import useAuthTheme from './useAuthTheme';
 
 const OTP_LENGTH = 6;
 const OTP_DURATION = 30;
@@ -36,22 +37,43 @@ function StepTracker({ internalStep }) {
   );
 }
 
-function Shell({ internalStep, footer, children }) {
+function Shell({ internalStep, footer, theme, onToggleTheme, children }) {
   return (
-    <div className={styles.wrap}>
-      <div className={styles.left}>
-        <div className={styles.leftGlow} />
-        <div className={styles.mark}>K</div>
-        <div className={styles.leftBottom}>
-          <div className={styles.leftTag}>Première connexion</div>
-          <h3 className={styles.leftHeadline}>Sécurisons ton compte avant de commencer.</h3>
-          <p className={styles.leftSub}>Trois étapes rapides, à faire une seule fois.</p>
-          <StepTracker internalStep={internalStep} />
-          {footer && <div className={styles.leftFooter}>{footer}</div>}
+    <div className={styles.wrap} data-theme={theme}>
+      <div className={`${styles.blob} ${styles.blob1}`} />
+      <div className={`${styles.blob} ${styles.blob2}`} />
+      <div className={`${styles.blob} ${styles.blob3}`} />
+
+      <button type="button" className={styles.themeToggle} onClick={onToggleTheme}>
+        <span className={styles.themeToggleKnob}>
+          {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+        </span>
+        <span>{theme === 'dark' ? 'Mode clair' : 'Mode sombre'}</span>
+      </button>
+
+      <div className={styles.card}>
+        <div className={styles.left}>
+          <div className={styles.brandRow}>
+            <picture>
+              <source srcSet="/site/logo-64.webp" type="image/webp" />
+              <img className={styles.logoImg} src="/site/logo-64.png" alt="kabakaba" />
+            </picture>
+            <div className={styles.brandWord}>
+              kaba<span>kaba</span>
+            </div>
+          </div>
+
+          <div className={styles.leftBottom}>
+            <div className={styles.leftTag}>Première connexion</div>
+            <h3 className={styles.leftHeadline}>Sécurisons ton compte avant de commencer.</h3>
+            <p className={styles.leftSub}>Trois étapes rapides, à faire une seule fois.</p>
+            <StepTracker internalStep={internalStep} />
+            {footer && <div className={styles.leftFooter}>{footer}</div>}
+          </div>
         </div>
-      </div>
-      <div className={styles.right}>
-        <div className={styles.form}>{children}</div>
+        <div className={styles.right}>
+          <div className={styles.form}>{children}</div>
+        </div>
       </div>
     </div>
   );
@@ -71,6 +93,7 @@ function checkPasswordStrength(pw) {
 
 export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone }) {
   const { applySession } = useAuth();
+  const [theme, toggleTheme] = useAuthTheme();
   const [internalStep, setInternalStep] = useState(1);
   const [email, setEmail] = useState('');
   const [tempPassword, setTempPassword] = useState('');
@@ -137,6 +160,8 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
     return (
       <Shell
         internalStep={1}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         footer={
           <>
             Vos identifiants vous ont été transmis par l&apos;équipe dirigeante de kabakaba.
@@ -221,6 +246,8 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
     return (
       <Shell
         internalStep={2}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         footer={
           <>
             Choisissez un mot de passe fort que vous n&apos;utilisez nulle part ailleurs.
@@ -333,6 +360,8 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
     return (
       <Shell
         internalStep={3}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         footer={
           <>
             Google Authenticator génère un code à 6 chiffres valide 30 secondes.
@@ -418,6 +447,8 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
     return (
       <Shell
         internalStep={4}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         footer={
           <>
             Le code change toutes les 30 secondes.
@@ -490,7 +521,12 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
 
   // ─── Étape 5 : succès ──────────────────────────────────────────────
   return (
-    <Shell internalStep={5} footer={<>Votre compte est maintenant sécurisé.<br />Conservez votre clé de secours 2FA dans un endroit sûr.</>}>
+    <Shell
+      internalStep={5}
+      theme={theme}
+      onToggleTheme={toggleTheme}
+      footer={<>Votre compte est maintenant sécurisé.<br />Conservez votre clé de secours 2FA dans un endroit sûr.</>}
+    >
       <div className={styles.successWrap}>
         <div className={styles.successRing}>
           <Check size={28} strokeWidth={2.5} />

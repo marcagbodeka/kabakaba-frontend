@@ -4,26 +4,12 @@ import styles from './Login.module.css';
 import { useAuth } from '../../context/AuthContext';
 import * as webAuth from '../../services/webAuthService';
 import { ApiError } from '../../services/httpClient';
+import useAuthTheme from './useAuthTheme';
 
 const OTP_LENGTH = 6;
 const OTP_DURATION = 30;
-const THEME_KEY = 'kabakaba-auth-theme';
 
 const STEPS = ['Identifiant', 'Vérification', 'Accès'];
-
-function useAuthTheme() {
-  const [theme, setTheme] = useState(() => {
-    if (typeof window === 'undefined') return 'light';
-    return window.localStorage.getItem(THEME_KEY) || 'light';
-  });
-
-  useEffect(() => {
-    window.localStorage.setItem(THEME_KEY, theme);
-  }, [theme]);
-
-  const toggle = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
-  return [theme, toggle];
-}
 
 function Stepper({ current }) {
   return (
