@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ShieldCheck, Loader2 } from 'lucide-react';
+import { ShieldCheck, Loader2, Mail, Lock, Moon, Sun } from 'lucide-react';
 import styles from './Login.module.css';
 import { useAuth } from '../../context/AuthContext';
 import * as webAuth from '../../services/webAuthService';
@@ -7,8 +7,23 @@ import { ApiError } from '../../services/httpClient';
 
 const OTP_LENGTH = 6;
 const OTP_DURATION = 30;
+const THEME_KEY = 'kabakaba-auth-theme';
 
 const STEPS = ['Identifiant', 'Vérification', 'Accès'];
+
+function useAuthTheme() {
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'light';
+    return window.localStorage.getItem(THEME_KEY) || 'light';
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
+
+  const toggle = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+  return [theme, toggle];
+}
 
 function Stepper({ current }) {
   return (
@@ -32,27 +47,82 @@ function Stepper({ current }) {
   );
 }
 
-function LoginShell({ subtitle, children }) {
+function SupervisionIllustration() {
   return (
-    <div className={styles.wrap}>
-      <div className={styles.left}>
-        <div className={styles.leftGlow} />
-        <div className={styles.mark}>K</div>
-        <div className={styles.leftBottom}>
-          <div className={styles.leftTag}>{subtitle}</div>
-          <h3 className={styles.leftHeadline}>Le pilotage de tes campus, en un seul endroit.</h3>
-          <p className={styles.leftSub}>Suivi des cantines, de la qualité et des paiements de l&apos;équipe, en temps réel.</p>
+    <svg viewBox="0 0 230 230" fill="none" aria-hidden="true">
+      <circle cx="115" cy="115" r="98" fill="var(--auth-illu-2)" />
+      <rect x="46" y="128" width="138" height="14" rx="7" fill="var(--peach)" />
+      <rect x="60" y="108" width="42" height="24" rx="6" fill="var(--orange)" />
+      <rect x="110" y="98" width="60" height="34" rx="6" fill="var(--indigo)" />
+      <circle cx="130" cy="115" r="7" fill="#fff" fillOpacity=".9" />
+      <g transform="translate(78,40)">
+        <path d="M37 0 L70 12 V38 C70 62 54 78 37 86 C20 78 4 62 4 38 V12 Z" fill="var(--indigo)" />
+        <path d="M37 6 L64 16 V38 C64 58 50 72 37 79 C24 72 10 58 10 38 V16 Z" fill="var(--indigo-dark)" />
+        <path
+          d="M22 40 L32 50 L54 26"
+          stroke="var(--orange)"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </g>
+      <circle cx="58" cy="70" r="5" fill="var(--orange)" />
+      <circle cx="172" cy="76" r="4" fill="var(--indigo)" />
+      <circle cx="180" cy="150" r="5" fill="var(--orange-dark)" />
+    </svg>
+  );
+}
+
+function LoginShell({ theme, onToggleTheme, children }) {
+  return (
+    <div className={styles.wrap} data-theme={theme}>
+      <div className={`${styles.blob} ${styles.blob1}`} />
+      <div className={`${styles.blob} ${styles.blob2}`} />
+      <div className={`${styles.blob} ${styles.blob3}`} />
+
+      <button type="button" className={styles.themeToggle} onClick={onToggleTheme}>
+        <span className={styles.themeToggleKnob}>
+          {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+        </span>
+        <span>{theme === 'dark' ? 'Mode clair' : 'Mode sombre'}</span>
+      </button>
+
+      <div className={styles.card}>
+        <div className={styles.illuSide}>
+          <div className={styles.brandRow}>
+            <picture>
+              <source srcSet="/site/logo-64.webp" type="image/webp" />
+              <img className={styles.logoImg} src="/site/logo-64.png" alt="kabakaba" />
+            </picture>
+            <div className={styles.brandWord}>
+              kaba<span>kaba</span>
+            </div>
+          </div>
+
+          <div className={styles.illuScene}>
+            <SupervisionIllustration />
+          </div>
+
+          <div className={styles.illuCopy}>
+            <div className={styles.illuEyebrow}>Accès restreint</div>
+            <div className={styles.illuTitle}>
+              Cet espace est réservé au personnel kabakaba autorisé.
+            </div>
+          </div>
         </div>
-      </div>
-      <div className={styles.right}>
-        <div className={styles.form}>{children}</div>
+
+        <div className={styles.right}>
+          <div className={styles.form}>{children}</div>
+        </div>
       </div>
     </div>
   );
 }
 
-export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }) {
+export default function Login({ onSuccess, onFirstLogin }) {
   const { applySession } = useAuth();
+  const [theme, toggleTheme] = useAuthTheme();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -128,42 +198,48 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
 
   if (step === 1) {
     return (
-      <LoginShell subtitle={subtitle}>
+      <LoginShell theme={theme} onToggleTheme={toggleTheme}>
         <Stepper current={1} />
-        <div className={styles.formTitle}>Se connecter</div>
-        <div className={styles.formSub}>Accédez à votre espace kabakaba</div>
+        <div className={styles.formTitle}>
+          Bienvenue<span className={styles.accent}>.</span>
+        </div>
+        <div className={styles.formSub}>Connecte-toi à ton espace kabakaba</div>
         <form onSubmit={handleCredentialsSubmit} className={styles.formStep}>
           <div className={styles.field}>
-            <label htmlFor="email">Adresse e-mail</label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="prenom.nom@kabakaba.app"
-            />
+            <div className={styles.inputWrap}>
+              <Mail size={16} />
+              <input
+                id="email"
+                type="email"
+                required
+                autoFocus
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Adresse e-mail"
+              />
+            </div>
           </div>
           <div className={styles.field}>
-            <label htmlFor="password">Mot de passe</label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••"
-            />
+            <div className={styles.inputWrap}>
+              <Lock size={16} />
+              <input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Mot de passe"
+              />
+            </div>
           </div>
           {error && <div className={styles.fieldError}>{error}</div>}
+          <a className={styles.linkSmall}>Mot de passe oublié ?</a>
           <button type="submit" className={styles.btnPrimary} disabled={loading}>
             {loading ? 'Connexion...' : 'Continuer'}
           </button>
-          <a className={styles.linkSmall}>Mot de passe oublié ?</a>
           {onFirstLogin && (
-            <a className={styles.linkCenter} onClick={onFirstLogin} style={{ marginTop: 4 }}>
-              Première connexion avec un mot de passe temporaire ?
+            <a className={styles.linkCenter} onClick={onFirstLogin}>
+              Première connexion avec un <b>mot de passe temporaire</b> ?
             </a>
           )}
         </form>
@@ -173,9 +249,12 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
 
   if (step === 2) {
     return (
-      <LoginShell subtitle={subtitle}>
+      <LoginShell theme={theme} onToggleTheme={toggleTheme}>
         <Stepper current={2} />
-        <div className={styles.formTitle}>{firstName ? `Bienvenue, ${firstName}` : 'Code de vérification'}</div>
+        <div className={styles.formTitle}>
+          {firstName ? `Bienvenue, ${firstName}` : 'Vérification'}
+          <span className={styles.accent}>.</span>
+        </div>
         <div className={styles.formSub}>
           Entrez le code à 6 chiffres généré par votre application d&apos;authentification.
         </div>
@@ -212,7 +291,7 @@ export default function Login({ subtitle = 'kabakaba', onSuccess, onFirstLogin }
   }
 
   return (
-    <LoginShell subtitle={subtitle}>
+    <LoginShell theme={theme} onToggleTheme={toggleTheme}>
       <Stepper current={3} />
       <div className={styles.redirecting}>
         <Loader2 size={20} className={styles.spinner} />
