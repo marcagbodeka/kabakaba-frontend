@@ -2,9 +2,23 @@ import { useEffect, useState } from 'react';
 import { Star, AlertTriangle } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import DateRangePicker from '../../components/DateRangePicker';
 import { getReviewsQuality } from '../../services/domain/analyticsService';
 
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
+
 export default function NotesAlertes() {
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,14 +28,14 @@ export default function NotesAlertes() {
       setLoading(true);
       setError(null);
       try {
-        setData(await getReviewsQuality(30));
+        setData(await getReviewsQuality(30, range));
       } catch (err) {
         setError(err.message || 'Impossible de charger les notes.');
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [range]);
 
   const summary = data?.summary;
   const vendors = data?.perVendor ?? [];
@@ -36,8 +50,10 @@ export default function NotesAlertes() {
       <Topbar
         icon={Star}
         breadcrumb={[{ label: 'Avis & qualité', path: '/supervision/qualite/notes' }, { label: 'Notes & alertes' }]}
-        badge={{ text: '30 derniers jours' }}
-      />
+        hidePeriodSelect
+      >
+        <DateRangePicker value={range} onChange={setRange} />
+      </Topbar>
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Supervision · Qualité</div>
@@ -57,13 +73,13 @@ export default function NotesAlertes() {
             <div className="kpi-value">{loading ? '—' : `${summary?.avgRating ?? '—'} / 5`}</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Avis collectés (30j)</div>
+            <div className="kpi-label">Avis collectés</div>
             <div className="kpi-value">{loading ? '—' : summary?.totalReviews}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Cantines en alerte</div>
             <div className="kpi-value">{loading ? '—' : summary?.alertCount}</div>
-            <div className="kpi-sub">note &lt; 3.5 sur 30 jours</div>
+            <div className="kpi-sub">note &lt; 3.5 sur la période</div>
           </div>
         </div>
 
@@ -96,7 +112,7 @@ export default function NotesAlertes() {
           <div className="table-scroll">
             <table>
               <thead>
-                <tr><th>Cantine</th><th>Campus</th><th>Note moyenne</th><th>Avis (30j)</th><th>Statut</th></tr>
+                <tr><th>Cantine</th><th>Campus</th><th>Note moyenne</th><th>Avis (période)</th><th>Statut</th></tr>
               </thead>
               <tbody>
                 {loading && <tr><td colSpan={5}>Chargement...</td></tr>}

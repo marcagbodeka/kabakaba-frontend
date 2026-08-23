@@ -93,10 +93,10 @@ export default function VueGenerale() {
   const acceptanceRate = vendorPerf?.summary?.avgAcceptanceRate ?? 0;
 
   const revenueBreakdown = [
-    { label: 'Surplus recharges', value: revSummary?.surplus ?? 0, sub: 'revenu principal' },
-    { label: 'Frais retrait non couverts', value: revSummary?.uncoveredFees ?? 0, sub: 'vendeurs sous seuil 10k' },
-    { label: 'Commissions ambassadeurs', value: -(revSummary?.commissions ?? 0), sub: 'déduit du surplus', color: 'var(--orange)' },
-    { label: 'Revenus nets', value: revSummary?.net ?? 0, sub: 'après déductions', color: 'var(--indigo)' },
+    { label: 'Revenus Générés', value: revSummary?.surplus ?? 0 },
+    { label: 'Retraits couverts', value: revSummary?.uncoveredFees ?? 0 },
+    { label: 'Revenus ambassadeurs', value: revSummary?.commissions ?? 0 },
+    { label: 'Bénéfices nets', value: revSummary?.net ?? 0, color: 'var(--indigo)' },
   ];
 
   const statusBars = [
@@ -152,19 +152,15 @@ export default function VueGenerale() {
         </div>
 
         <div className="card-title" style={{ marginTop: 4 }}>
-          Décomposition des revenus
+          Supervision des entrées et sorties
         </div>
-        <div className="card-sub">Ventilation par source (période sélectionnée)</div>
         <div className="kpi-grid">
           {revenueBreakdown.map((item) => (
             <div key={item.label} className="kpi-card">
               <div className="kpi-label">{item.label}</div>
               <div className="kpi-value kpi-value-sm" style={item.color ? { color: item.color } : undefined}>
-                {loading ? '—' : typeof item.value === 'number' && item.label.includes('Commissions')
-                  ? `${item.value <= 0 ? '− ' : ''}${Math.abs(item.value).toLocaleString('fr-FR')} FCFA`
-                  : formatFcfa(item.value)}
+                {loading ? '—' : formatFcfa(item.value)}
               </div>
-              <div className="kpi-sub">{item.sub}</div>
             </div>
           ))}
         </div>

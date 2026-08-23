@@ -2,13 +2,27 @@ import { useEffect, useState } from 'react';
 import { Wallet } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import DateRangePicker from '../../components/DateRangePicker';
 import { getVendorFinancials } from '../../services/domain/analyticsService';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
 }
 
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
+
 export default function SoldeCreances() {
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,14 +32,14 @@ export default function SoldeCreances() {
       setLoading(true);
       setError(null);
       try {
-        setData(await getVendorFinancials(30));
+        setData(await getVendorFinancials(30, range));
       } catch (err) {
         setError(err.message || 'Impossible de charger les données vendeurs.');
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [range]);
 
   const summary = data?.summary;
   const vendors = data?.vendors ?? [];
@@ -35,8 +49,10 @@ export default function SoldeCreances() {
       <Topbar
         icon={Wallet}
         breadcrumb={[{ label: 'Par cantine', path: '/supervision/cantines/performance' }, { label: 'Solde & créances' }]}
-        badge={{ text: '30 derniers jours' }}
-      />
+        hidePeriodSelect
+      >
+        <DateRangePicker value={range} onChange={setRange} />
+      </Topbar>
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Supervision · Analyse cantines</div>
@@ -71,7 +87,7 @@ export default function SoldeCreances() {
           <div className="table-scroll">
             <table>
               <thead>
-                <tr><th>Cantine</th><th>Campus</th><th>Solde</th><th>Créance</th><th>Retraits (30j)</th><th>Statut</th></tr>
+                <tr><th>Cantine</th><th>Campus</th><th>Solde</th><th>Créance</th><th>Retraits (période)</th><th>Statut</th></tr>
               </thead>
               <tbody>
                 {loading && <tr><td colSpan={6}>Chargement...</td></tr>}

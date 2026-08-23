@@ -2,17 +2,29 @@ import { useEffect, useState } from 'react';
 import { BarChart3 } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import DateRangePicker from '../../components/DateRangePicker';
 import { getRevenueBreakdown } from '../../services/domain/analyticsService';
 
-function formatFcfa(n, forceSign = false) {
-  const value = Number(n);
-  const sign = forceSign && value > 0 ? '+ ' : value < 0 ? '- ' : '';
-  return `${sign}${Math.abs(value).toLocaleString('fr-FR', { maximumFractionDigits: 0 })} FCFA`;
+function formatFcfa(n) {
+  return `${Math.round(Number(n)).toLocaleString('fr-FR')} FCFA`;
+}
+
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
 }
 
 const DAY_LABELS_FR = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 0: 'Dim' };
 
 export default function VolumeRevenus() {
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,14 +34,14 @@ export default function VolumeRevenus() {
       setLoading(true);
       setError(null);
       try {
-        setData(await getRevenueBreakdown(30));
+        setData(await getRevenueBreakdown(30, range));
       } catch (err) {
         setError(err.message || 'Impossible de charger les revenus.');
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [range]);
 
   const summary = data?.summary;
   const dailyValues = data?.dailyNet?.values ?? [];
@@ -41,8 +53,10 @@ export default function VolumeRevenus() {
       <Topbar
         icon={BarChart3}
         breadcrumb={[{ label: 'Par campus', path: '/supervision/campus' }, { label: 'Volume & revenus' }]}
-        badge={{ text: '30 derniers jours' }}
-      />
+        hidePeriodSelect
+      >
+        <DateRangePicker value={range} onChange={setRange} />
+      </Topbar>
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Supervision · Analyse campus</div>
@@ -57,28 +71,23 @@ export default function VolumeRevenus() {
         )}
 
         <div className="card">
-          <div className="card-title">Décomposition des revenus — tous campus</div>
-          <div className="card-sub">Sur les 30 derniers jours</div>
+          <div className="card-title">Supervision des entrées et sorties — tous campus</div>
           <div className="revenue-breakdown">
             <div className="revenue-cell">
-              <div className="revenue-cell-label">Surplus recharges</div>
+              <div className="revenue-cell-label">Revenus Générés</div>
               <div className="revenue-cell-value">{loading ? '—' : formatFcfa(summary?.surplus ?? 0)}</div>
-              <div className="revenue-cell-sub">Revenu principal</div>
             </div>
             <div className="revenue-cell">
-              <div className="revenue-cell-label">Frais retrait non couverts</div>
+              <div className="revenue-cell-label">Retraits couverts</div>
               <div className="revenue-cell-value orange">{loading ? '—' : formatFcfa(summary?.uncoveredFees ?? 0)}</div>
-              <div className="revenue-cell-sub">Vendeurs sous 10 000 F</div>
             </div>
             <div className="revenue-cell">
-              <div className="revenue-cell-label">Commissions ambassadeurs</div>
-              <div className="revenue-cell-value">{loading ? '—' : formatFcfa(-(summary?.commissions ?? 0), true)}</div>
-              <div className="revenue-cell-sub">Déduites du brut</div>
+              <div className="revenue-cell-label">Revenus ambassadeurs</div>
+              <div className="revenue-cell-value">{loading ? '—' : formatFcfa(summary?.commissions ?? 0)}</div>
             </div>
             <div className="revenue-cell highlight">
-              <div className="revenue-cell-label">Revenu net</div>
+              <div className="revenue-cell-label">Bénéfices nets</div>
               <div className="revenue-cell-value indigo">{loading ? '—' : formatFcfa(summary?.net ?? 0)}</div>
-              <div className="revenue-cell-sub">Après déductions</div>
             </div>
           </div>
         </div>

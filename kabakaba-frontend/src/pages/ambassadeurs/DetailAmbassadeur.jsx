@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Trophy, Phone, Mail, GraduationCap, IdCard } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import DateRangePicker from '../../components/DateRangePicker';
 import { getAmbassadorDetail } from '../../services/domain/analyticsService';
 
 function formatFcfa(n) {
@@ -23,6 +24,18 @@ function initials(firstName, lastName) {
   return `${(firstName || '?')[0]}${(lastName || '?')[0]}`.toUpperCase();
 }
 
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
+
 const levelLabel = { GOLD: 'Or', SILVER: 'Argent', BRONZE: 'Bronze' };
 const statusLabel = { PENDING: 'En attente', ACTIVE: 'Actif', SUSPENDED: 'Suspendu', REJECTED: 'Rejeté' };
 const statusBadge = { PENDING: 'badge-gray', ACTIVE: 'badge-green', SUSPENDED: 'badge-red', REJECTED: 'badge-red' };
@@ -30,6 +43,7 @@ const statusBadge = { PENDING: 'badge-gray', ACTIVE: 'badge-green', SUSPENDED: '
 export default function DetailAmbassadeur() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [tab, setTab] = useState('stats');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,19 +54,19 @@ export default function DetailAmbassadeur() {
       setLoading(true);
       setError(null);
       try {
-        setData(await getAmbassadorDetail(id, 30));
+        setData(await getAmbassadorDetail(id, 30, range));
       } catch (err) {
         setError(err.message || 'Impossible de charger cet ambassadeur.');
       } finally {
         setLoading(false);
       }
     })();
-  }, [id]);
+  }, [id, range]);
 
   if (loading) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/supervision/ambassadeurs' }, { label: '...' }]} />
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/supervision/ambassadeurs' }, { label: '...' }]} hidePeriodSelect />
         <PageContent><div className="card">Chargement...</div></PageContent>
       </>
     );
@@ -61,7 +75,7 @@ export default function DetailAmbassadeur() {
   if (error || !data) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/supervision/ambassadeurs' }, { label: 'Introuvable' }]}>
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/supervision/ambassadeurs' }, { label: 'Introuvable' }]} hidePeriodSelect>
           <button className="btn-secondary-sm" onClick={() => navigate('/supervision/ambassadeurs')}>← Retour</button>
         </Topbar>
         <PageContent>
@@ -81,7 +95,9 @@ export default function DetailAmbassadeur() {
         icon={Trophy}
         breadcrumb={[{ label: 'Ambassadeurs', path: '/supervision/ambassadeurs' }, { label: fullName }]}
         badge={{ text: levelLabel[identity.level] }}
+        hidePeriodSelect
       >
+        <DateRangePicker value={range} onChange={setRange} />
         <button className="btn-secondary-sm" onClick={() => navigate('/supervision/ambassadeurs')}>← Retour</button>
       </Topbar>
       <PageContent>
@@ -138,7 +154,7 @@ export default function DetailAmbassadeur() {
                 {stats.levelThreshold && <div className="kpi-sub">Seuil {levelLabel[stats.nextLevel]} : {formatFcfa(stats.levelThreshold)}</div>}
               </div>
               <div className="kpi-card">
-                <div className="kpi-label">Commission ce mois</div>
+                <div className="kpi-label">Commission (période)</div>
                 <div className="kpi-value" style={{ color: '#22C55E' }}>{formatFcfa(stats.commissionThisMonth)}</div>
                 <div className="kpi-sub">Taux {levelLabel[identity.level]} : {(stats.commissionRate * 100).toFixed(1)}%</div>
               </div>

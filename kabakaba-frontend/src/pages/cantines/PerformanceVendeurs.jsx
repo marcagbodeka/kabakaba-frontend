@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Utensils } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import DateRangePicker from '../../components/DateRangePicker';
 import { getVendorPerformance } from '../../services/domain/analyticsService';
 
 function formatDuration(seconds) {
@@ -11,7 +12,20 @@ function formatDuration(seconds) {
   return m > 0 ? `${m}min ${s}s` : `${s}s`;
 }
 
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
+
 export default function PerformanceVendeurs() {
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,14 +35,14 @@ export default function PerformanceVendeurs() {
       setLoading(true);
       setError(null);
       try {
-        setData(await getVendorPerformance(30));
+        setData(await getVendorPerformance(30, range));
       } catch (err) {
         setError(err.message || 'Impossible de charger les performances vendeurs.');
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [range]);
 
   const summary = data?.summary;
   const vendors = data?.vendors ?? [];
@@ -38,8 +52,10 @@ export default function PerformanceVendeurs() {
       <Topbar
         icon={Utensils}
         breadcrumb={[{ label: 'Par cantine', path: '/supervision/cantines/performance' }, { label: 'Performance vendeurs' }]}
-        badge={{ text: '30 derniers jours' }}
-      />
+        hidePeriodSelect
+      >
+        <DateRangePicker value={range} onChange={setRange} />
+      </Topbar>
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Supervision · Analyse cantines</div>

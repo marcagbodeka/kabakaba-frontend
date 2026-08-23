@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Building2, TrendingUp, TrendingDown } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import DateRangePicker from '../../components/DateRangePicker';
 import { getCampusComparison, getTopCanteens } from '../../services/domain/analyticsService';
 
 function formatFcfa(n) {
@@ -13,9 +14,22 @@ function pctChange(current, previous) {
   return Math.round(((current - previous) / previous) * 100);
 }
 
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
+
 const DAY_LABELS_FR = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 0: 'Dim' };
 
 export default function ComparaisonCampus() {
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [data, setData] = useState(null);
   const [topCanteens, setTopCanteens] = useState([]);
   const [selected, setSelected] = useState('Tous les campus');
@@ -27,7 +41,7 @@ export default function ComparaisonCampus() {
       setLoading(true);
       setError(null);
       try {
-        const [comparison, canteens] = await Promise.all([getCampusComparison(30), getTopCanteens(30, 10)]);
+        const [comparison, canteens] = await Promise.all([getCampusComparison(30, range), getTopCanteens(30, 10, range)]);
         setData(comparison);
         setTopCanteens(canteens);
       } catch (err) {
@@ -36,7 +50,7 @@ export default function ComparaisonCampus() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [range]);
 
   const summary = data?.summary;
   const ordersChange = summary ? pctChange(summary.totalOrders, summary.totalOrdersPrevPeriod) : null;
@@ -51,8 +65,10 @@ export default function ComparaisonCampus() {
       <Topbar
         icon={Building2}
         breadcrumb={[{ label: 'Par campus', path: '/supervision/campus' }, { label: 'Comparaison campus' }]}
-        badge={{ text: '30 derniers jours' }}
-      />
+        hidePeriodSelect
+      >
+        <DateRangePicker value={range} onChange={setRange} />
+      </Topbar>
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Supervision · Analyse campus</div>
@@ -82,7 +98,7 @@ export default function ComparaisonCampus() {
                 </span>
               )}
             </div>
-            <div className="kpi-sub">sur 30 jours</div>
+            <div className="kpi-sub">période sélectionnée</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Revenus générés</div>

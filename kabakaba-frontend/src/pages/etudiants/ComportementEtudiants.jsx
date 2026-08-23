@@ -2,15 +2,29 @@ import { useEffect, useState } from 'react';
 import { Users, TrendingUp, TrendingDown } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import DateRangePicker from '../../components/DateRangePicker';
 import { getStudentBehavior } from '../../services/domain/analyticsService';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
 }
 
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
+
 const DAY_LABELS_FR = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 0: 'Dim' };
 
 export default function ComportementEtudiants() {
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,14 +34,14 @@ export default function ComportementEtudiants() {
       setLoading(true);
       setError(null);
       try {
-        setData(await getStudentBehavior(30));
+        setData(await getStudentBehavior(30, range));
       } catch (err) {
         setError(err.message || 'Impossible de charger le comportement étudiants.');
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [range]);
 
   const summary = data?.summary;
   const perCampus = data?.perCampus ?? [];
@@ -40,8 +54,10 @@ export default function ComportementEtudiants() {
       <Topbar
         icon={Users}
         breadcrumb={[{ label: 'Étudiants', path: '/supervision/etudiants' }, { label: 'Comportement étudiants' }]}
-        badge={{ text: '30 derniers jours' }}
-      />
+        hidePeriodSelect
+      >
+        <DateRangePicker value={range} onChange={setRange} />
+      </Topbar>
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Supervision · Étudiants</div>
@@ -61,7 +77,7 @@ export default function ComportementEtudiants() {
             <div className="kpi-value">{loading ? '—' : summary?.totalEnrolled}</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Actifs (30 jours)</div>
+            <div className="kpi-label">Actifs (période)</div>
             <div className="kpi-value">
               {loading ? '—' : summary?.totalActive}{' '}
               {summary?.activeChangePct !== null && summary?.activeChangePct !== undefined && (
@@ -108,7 +124,7 @@ export default function ComportementEtudiants() {
           <div className="table-scroll">
             <table>
               <thead>
-                <tr><th>Campus</th><th>Inscrits</th><th>Actifs (30j)</th><th>Montant moyen rechargé</th><th>Fréquence moyenne</th></tr>
+                <tr><th>Campus</th><th>Inscrits</th><th>Actifs (période)</th><th>Montant moyen rechargé</th><th>Fréquence moyenne</th></tr>
               </thead>
               <tbody>
                 {loading && <tr><td colSpan={5}>Chargement...</td></tr>}

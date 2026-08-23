@@ -3,10 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { Trophy } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import DateRangePicker from '../../components/DateRangePicker';
 import { getAmbassadorRanking } from '../../services/domain/analyticsService';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
+}
+
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
 }
 
 const levelLabel = { GOLD: 'Or', SILVER: 'Argent', BRONZE: 'Bronze' };
@@ -14,6 +27,7 @@ const levelBadge = { GOLD: 'badge-amber', SILVER: 'badge-gray', BRONZE: 'badge-p
 
 export default function SupervisionAmbassadeurs() {
   const navigate = useNavigate();
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,14 +37,14 @@ export default function SupervisionAmbassadeurs() {
       setLoading(true);
       setError(null);
       try {
-        setData(await getAmbassadorRanking(30));
+        setData(await getAmbassadorRanking(30, range));
       } catch (err) {
         setError(err.message || 'Impossible de charger les ambassadeurs.');
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [range]);
 
   const summary = data?.summary;
   const ranking = data?.ranking ?? [];
@@ -44,7 +58,9 @@ export default function SupervisionAmbassadeurs() {
 
   return (
     <>
-      <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs' }]} badge={{ text: '30 derniers jours' }} />
+      <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs' }]} hidePeriodSelect>
+        <DateRangePicker value={range} onChange={setRange} />
+      </Topbar>
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Supervision · Ambassadeurs</div>
@@ -65,12 +81,13 @@ export default function SupervisionAmbassadeurs() {
             <div className="kpi-sub">{loading ? '' : `${summary?.campusCount} campus`}</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Volume parrainage (30j)</div>
+            <div className="kpi-label">Volume parrainage (30j glissants)</div>
             <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.totalVolume ?? 0)}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Commissions versées</div>
             <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.totalCommission ?? 0)}</div>
+            <div className="kpi-sub">sur la période sélectionnée</div>
           </div>
         </div>
 
@@ -101,7 +118,7 @@ export default function SupervisionAmbassadeurs() {
 
         <div className="card">
           <div className="card-title">Classement des ambassadeurs</div>
-          <div className="card-sub">Basé sur le volume de recharges des affiliés — 30 derniers jours glissants</div>
+          <div className="card-sub">Volume : 30 derniers jours glissants · Commission : période sélectionnée</div>
           <div className="table-scroll">
             <table>
               <thead>

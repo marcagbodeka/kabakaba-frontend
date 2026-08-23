@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { MessageSquare, Search } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
+import DateRangePicker from '../../components/DateRangePicker';
 import { findReviews } from '../../services/domain/reviewsService';
 import { getReviewsQuality } from '../../services/domain/analyticsService';
 
@@ -21,6 +22,18 @@ function initials(firstName, lastName) {
   return `${(firstName || '?')[0]}${(lastName || '?')[0]}`.toUpperCase();
 }
 
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
+
 const filters = ['Toutes', '5', '4', '3', '2', '1'];
 const sortOptions = [
   { value: 'recent', label: 'Plus récents' },
@@ -30,6 +43,7 @@ const sortOptions = [
 ];
 
 export default function Commentaires() {
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [quality, setQuality] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [ratingFilter, setRatingFilter] = useState('Toutes');
@@ -39,8 +53,8 @@ export default function Commentaires() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    getReviewsQuality(30).then(setQuality).catch(() => {});
-  }, []);
+    getReviewsQuality(30, range).then(setQuality).catch(() => {});
+  }, [range]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -73,7 +87,10 @@ export default function Commentaires() {
       <Topbar
         icon={MessageSquare}
         breadcrumb={[{ label: 'Avis & qualité', path: '/supervision/qualite/notes' }, { label: 'Commentaires' }]}
-      />
+        hidePeriodSelect
+      >
+        <DateRangePicker value={range} onChange={setRange} />
+      </Topbar>
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Supervision · Qualité</div>
@@ -83,11 +100,11 @@ export default function Commentaires() {
 
         <div className="kpi-grid">
           <div className="kpi-card">
-            <div className="kpi-label">Note moyenne (30j)</div>
+            <div className="kpi-label">Note moyenne</div>
             <div className="kpi-value">{quality?.summary?.avgRating ?? '—'} / 5</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Avis collectés (30j)</div>
+            <div className="kpi-label">Avis collectés</div>
             <div className="kpi-value">{quality?.summary?.totalReviews ?? '—'}</div>
           </div>
           <div className="kpi-card">
