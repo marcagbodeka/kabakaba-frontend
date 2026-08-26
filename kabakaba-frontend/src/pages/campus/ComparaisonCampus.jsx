@@ -86,7 +86,6 @@ export default function ComparaisonCampus() {
           <div className="kpi-card">
             <div className="kpi-label">Campus actifs</div>
             <div className="kpi-value">{loading ? '—' : summary?.activeCampuses}</div>
-            <div className="kpi-sub">{loading ? '' : `sur ${summary?.totalCampuses} enregistrés`}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Commandes totales</div>
@@ -98,7 +97,6 @@ export default function ComparaisonCampus() {
                 </span>
               )}
             </div>
-            <div className="kpi-sub">période sélectionnée</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Revenus générés</div>
@@ -114,19 +112,17 @@ export default function ComparaisonCampus() {
           <div className="kpi-card">
             <div className="kpi-label">Étudiants inscrits</div>
             <div className="kpi-value">{loading ? '—' : summary?.totalStudents}</div>
-            <div className="kpi-sub">{loading ? '' : `actifs : ${summary?.activeStudents}`}</div>
           </div>
         </div>
 
         <div className="card">
           <div className="card-title">Tous les campus</div>
-          <div className="card-sub">Comparaison détaillée des campus affiliés</div>
           <div className="table-scroll">
             <table>
               <thead>
                 <tr>
                   <th>Campus</th><th>Cantines</th><th>Commandes</th><th>Taux complétion</th>
-                  <th>Revenus (FCFA)</th><th>Inscrits</th><th>Actifs</th><th>Statut</th>
+                  <th>Revenus (FCFA)</th><th>Étudiants inscrits</th><th>Étudiants actifs</th><th>Statut</th>
                 </tr>
               </thead>
               <tbody>
