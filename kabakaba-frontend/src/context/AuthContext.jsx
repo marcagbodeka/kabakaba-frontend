@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { getStoredToken, setStoredToken } from '../services/httpClient';
+import { getStoredToken, setStoredToken, AUTH_EXPIRED_EVENT } from '../services/httpClient';
 import * as webAuth from '../services/webAuthService';
 
 const AuthContext = createContext(null);
@@ -35,6 +35,21 @@ export function AuthProvider({ children }) {
       setToken(null);
     });
   }, [token, user, refreshMe]);
+
+  // Écoute le signal global émis par httpClient dès qu'une requête reçoit
+  // un 401 (token expiré, invalidé côté serveur, etc.) — peu importe
+  // quelle page ou quel appel API l'a déclenché. Faire passer token à
+  // null bascule isAuthenticated à false, et App.jsx redirige alors
+  // automatiquement vers /supervision/login au lieu de laisser la page
+  // afficher une erreur "non autorisé".
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      setToken(null);
+      setUser(null);
+    };
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+  }, []);
 
   const value = { token, user, isAuthenticated, applySession, logout, refreshMe };
 
