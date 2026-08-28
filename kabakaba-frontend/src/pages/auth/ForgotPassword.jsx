@@ -281,7 +281,7 @@ export default function ForgotPassword({ onBackToLogin }) {
           </div>
 
           <div className={styles.field} style={{ marginTop: 16 }}>
-            <div className={styles.inputWrap}>
+            <div className={styles.inputWrap} style={{ position: 'relative' }}>
               <Lock size={16} />
               <input
                 type={showPw ? 'text' : 'password'}
@@ -290,6 +290,22 @@ export default function ForgotPassword({ onBackToLogin }) {
                 onChange={(e) => setConfirmPw(e.target.value)}
                 placeholder="Répétez le mot de passe"
               />
+              <button
+                type="button"
+                onClick={() => setShowPw((v) => !v)}
+                style={{
+                  position: 'absolute',
+                  right: 14,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--auth-muted-light)',
+                  cursor: 'pointer',
+                }}
+              >
+                {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
             {confirmPw.length > 0 && !passwordsMatch && (
               <div className={styles.fieldError}>Les mots de passe ne correspondent pas</div>
