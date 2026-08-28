@@ -106,7 +106,7 @@ function LoginShell({ theme, onToggleTheme, children }) {
   );
 }
 
-export default function Login({ onSuccess, onFirstLogin, onForgotPassword }) {
+export default function Login({ onSuccess, onFirstLogin, onForgotPassword, expectedRole }) {
   const { applySession } = useAuth();
   const [theme, toggleTheme] = useAuthTheme();
   const [step, setStep] = useState(1);
@@ -173,6 +173,19 @@ export default function Login({ onSuccess, onFirstLogin, onForgotPassword }) {
     try {
       const code = otp.join('');
       const result = await webAuth.verify2fa(challengeToken, code);
+
+      // Contrôle de rôle : un compte Supervision qui se connecte par erreur
+      // (ou volontairement) sur l'espace Admin, ou l'inverse, ne doit
+      // jamais atterrir sur le mauvais dashboard. On ne stocke la session
+      // que si le rôle correspond à l'espace visité — sinon le jeton reçu
+      // est simplement ignoré côté client, jamais persisté.
+      if (expectedRole && result.webUser?.role !== expectedRole) {
+        setError(
+          `Ce compte n'a pas accès à cet espace (rôle "${result.webUser?.role}"). Utilisez l'espace correspondant à votre rôle.`,
+        );
+        return;
+      }
+
       applySession(result.accessToken, result.webUser);
       setStep(3);
     } catch (err) {

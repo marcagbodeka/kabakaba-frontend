@@ -17,11 +17,11 @@ import ForgotPassword from './ForgotPassword';
  * identifiants temporaires, et on basculera automatiquement vers
  * FirstLoginOnboarding sans que la personne ait à cliquer sur le lien.
  */
-export default function LoginPage({ subtitle, onSuccess, userName }) {
+export default function LoginPage({ subtitle, onSuccess, userName, expectedRole }) {
   const [mode, setMode] = useState('standard');
 
   if (mode === 'first') {
-    return <FirstLoginOnboarding userName={userName} onDone={onSuccess} />;
+    return <FirstLoginOnboarding userName={userName} onDone={onSuccess} expectedRole={expectedRole} />;
   }
 
   if (mode === 'forgot') {
@@ -34,6 +34,7 @@ export default function LoginPage({ subtitle, onSuccess, userName }) {
       onSuccess={onSuccess}
       onFirstLogin={() => setMode('first')}
       onForgotPassword={() => setMode('forgot')}
+      expectedRole={expectedRole}
     />
   );
 }

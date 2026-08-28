@@ -91,7 +91,7 @@ function checkPasswordStrength(pw) {
   return { reqs, score, label };
 }
 
-export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone }) {
+export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone, expectedRole }) {
   const { applySession } = useAuth();
   const [theme, toggleTheme] = useAuthTheme();
   const [internalStep, setInternalStep] = useState(1);
@@ -115,7 +115,7 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
   const [onboardingToken, setOnboardingToken] = useState(null);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState(null);
   const [manualKey, setManualKey] = useState(null);
-  const [backupCode, setBackupCode] = useState(null);
+  const [backupCodes, setBackupCodes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState(null);
 
@@ -477,8 +477,18 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
             try {
               const code = otp.join('');
               const result = await webAuth.verifyTwoFactorSetup(onboardingToken, code);
+
+              // Même contrôle de rôle que sur le login classique — voir
+              // Login.jsx pour le raisonnement complet.
+              if (expectedRole && result.webUser?.role !== expectedRole) {
+                setFormError(
+                  `Ce compte n'a pas accès à cet espace (rôle "${result.webUser?.role}"). Utilisez l'espace correspondant à votre rôle.`,
+                );
+                return;
+              }
+
               applySession(result.accessToken, result.webUser);
-              setBackupCode(result.backupCode);
+              setBackupCodes(result.backupCodes || []);
               setInternalStep(5);
             } catch (err) {
               setFormError(err.message || 'Code invalide.');
@@ -540,12 +550,31 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone 
 
         <div className={styles.infoBox} style={{ textAlign: 'left' }}>
           <KeyRound size={16} />
-          <div>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Clé de secours 2FA</div>
-            <div className={styles.backupKey}>{backupCode || '—'}</div>
-            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
-              Conservez cette clé en lieu sûr. Elle vous permettra de récupérer l&apos;accès si vous
-              perdez votre téléphone. Elle ne sera plus jamais réaffichée.
+          <div style={{ width: '100%' }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Clés de secours 2FA (10)</div>
+            <div
+              className={styles.keyBox}
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', textAlign: 'left' }}
+            >
+              {backupCodes.length > 0 ? (
+                backupCodes.map((c) => <span key={c}>{c}</span>)
+              ) : (
+                <span>—</span>
+              )}
+            </div>
+            {backupCodes.length > 0 && (
+              <button
+                type="button"
+                className={styles.copyBtn}
+                style={{ marginTop: 8 }}
+                onClick={() => navigator.clipboard?.writeText(backupCodes.join('\n'))}
+              >
+                <Copy size={13} /> Copier les 10 clés
+              </button>
+            )}
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8 }}>
+              Conservez ces clés en lieu sûr. Chacune ne peut être utilisée qu'une seule fois pour récupérer
+              l&apos;accès si vous perdez votre téléphone. Elles ne seront plus jamais réaffichées.
             </div>
           </div>
         </div>

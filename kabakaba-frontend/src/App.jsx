@@ -1,8 +1,7 @@
-import { useState, lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './layouts/DashboardLayout';
 import LoginPage from './pages/auth/LoginPage';
-import FirstLoginOnboarding from './pages/auth/FirstLoginOnboarding';
 import { useAuth } from './context/AuthContext';
 
 // Site public chargé en lazy : les visiteurs de la page d'accueil ne
@@ -48,15 +47,18 @@ import Transactions from './pages/admin/transactions/Transactions';
 import TransactionDetail from './pages/admin/transactions/TransactionDetail';
 import ParametresAdmin from './pages/admin/parametres/ParametresAdmin';
 
-const fakeAdminUser = { name: 'Kofi Mensah', role: 'Admin web' };
-
 export default function App() {
-  // Admin web : toujours en mock pour l'instant — hors périmètre du câblage
-  // API en cours (on ne fait que Supervision pour le moment).
-  const [adminAuth, setAdminAuth] = useState(false);
-
-  // Supervision : branché sur le vrai AuthContext (session réelle via /web-auth/*)
+  // Une seule source de vérité pour la session, partagée entre les deux
+  // espaces (même compte WebUser, même JWT, même /web-auth/*). Ce qui
+  // distingue Supervision d'Admin, c'est le rôle du compte connecté — pas
+  // une session séparée. Voir plus bas : chaque zone protégée vérifie
+  // isAuthenticated ET user.role, pas seulement isAuthenticated, pour
+  // qu'un compte Supervision ne puisse jamais atterrir sur le dashboard
+  // Admin (et inversement) même en connaissant l'URL.
   const { isAuthenticated, user, logout } = useAuth();
+
+  const isSupervision = isAuthenticated && user?.role === 'SUPERVISION';
+  const isAdmin = isAuthenticated && user?.role === 'ADMIN';
 
   return (
     <BrowserRouter>
@@ -68,20 +70,25 @@ export default function App() {
         <Route
           path="/supervision/login"
           element={
-            isAuthenticated ? (
+            isSupervision ? (
               <Navigate to="/supervision/dashboard" replace />
             ) : (
-              <LoginPage subtitle="Supervision" userName="Directeur général" onSuccess={() => {}} />
+              <LoginPage
+                subtitle="Supervision"
+                userName="Directeur général"
+                expectedRole="SUPERVISION"
+                onSuccess={() => {}}
+              />
             )
           }
         />
         <Route
           path="/supervision"
-          element={<Navigate to={isAuthenticated ? '/supervision/dashboard' : '/supervision/login'} replace />}
+          element={<Navigate to={isSupervision ? '/supervision/dashboard' : '/supervision/login'} replace />}
         />
         <Route
           element={
-            isAuthenticated ? (
+            isSupervision ? (
               <DashboardLayout
                 user={user ? { name: `${user.firstName} ${user.lastName}`, role: 'Supervision' } : { name: 'Supervision', role: 'Supervision' }}
                 onLogout={logout}
@@ -111,27 +118,28 @@ export default function App() {
           <Route path="/supervision/parametres" element={<ParametresSupervision />} />
         </Route>
 
-        {/* ── Espace Admin web (toujours mock pour l'instant) ── */}
+        {/* ── Espace Admin web ──────────────────────────────────
+            Même mécanique que Supervision : LoginPage gère les 3 modes
+            (connexion classique, première connexion, mot de passe
+            oublié), branché sur le vrai AuthContext. Seule la valeur de
+            expectedRole ("ADMIN") change. */}
         <Route
           path="/admin/login"
           element={
-            adminAuth ? (
+            isAdmin ? (
               <Navigate to="/admin/dashboard" replace />
             ) : (
-              <FirstLoginOnboarding userName="Kofi Mensah" onDone={() => setAdminAuth(true)} />
+              <LoginPage subtitle="Admin web" userName="Administrateur" expectedRole="ADMIN" onSuccess={() => {}} />
             )
           }
         />
-        <Route
-          path="/admin"
-          element={<Navigate to={adminAuth ? '/admin/dashboard' : '/admin/login'} replace />}
-        />
+        <Route path="/admin" element={<Navigate to={isAdmin ? '/admin/dashboard' : '/admin/login'} replace />} />
         <Route
           element={
-            adminAuth ? (
+            isAdmin ? (
               <DashboardLayout
-                user={fakeAdminUser}
-                onLogout={() => setAdminAuth(false)}
+                user={user ? { name: `${user.firstName} ${user.lastName}`, role: 'Admin web' } : { name: 'Admin web', role: 'Admin web' }}
+                onLogout={logout}
                 navSections={adminNav}
                 subtitle="Admin web"
                 loginPath="/admin/login"

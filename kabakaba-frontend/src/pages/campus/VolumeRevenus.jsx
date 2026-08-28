@@ -61,7 +61,7 @@ export default function VolumeRevenus() {
         <div className="page-header">
       <div className="eyebrow">Supervision · Analyse campus</div>
           <h1>Volume & revenus</h1>
-          <p>Détails financiers de l'application</p>
+          <p>Détail des recharges, surplus et commissions par campus et par période</p>
         </div>
 
         {error && (
@@ -70,19 +70,24 @@ export default function VolumeRevenus() {
           </div>
         )}
 
-        <div className="kpi-grid">
-          <div className="kpi-card">
-            <div className="kpi-label">Revenus Générés</div>
-            <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.surplus ?? 0)}</div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Revenus ambassadeurs</div>
-            <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.commissions ?? 0)}</div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Bénéfices nets</div>
-            <div className="kpi-value kpi-value-sm" style={{ color: 'var(--indigo)' }}>
-              {loading ? '—' : formatFcfa(summary?.net ?? 0)}
+        <div className="card">
+          <div className="card-title">Supervision des entrées et sorties — tous campus</div>
+          <div className="revenue-breakdown">
+            <div className="revenue-cell">
+              <div className="revenue-cell-label">Revenus Générés</div>
+              <div className="revenue-cell-value">{loading ? '—' : formatFcfa(summary?.surplus ?? 0)}</div>
+            </div>
+            <div className="revenue-cell">
+              <div className="revenue-cell-label">Retraits couverts</div>
+              <div className="revenue-cell-value orange">{loading ? '—' : formatFcfa(summary?.uncoveredFees ?? 0)}</div>
+            </div>
+            <div className="revenue-cell">
+              <div className="revenue-cell-label">Revenus ambassadeurs</div>
+              <div className="revenue-cell-value">{loading ? '—' : formatFcfa(summary?.commissions ?? 0)}</div>
+            </div>
+            <div className="revenue-cell highlight">
+              <div className="revenue-cell-label">Bénéfices nets</div>
+              <div className="revenue-cell-value indigo">{loading ? '—' : formatFcfa(summary?.net ?? 0)}</div>
             </div>
           </div>
         </div>
@@ -90,23 +95,18 @@ export default function VolumeRevenus() {
         <div className="card">
           <div className="card-title">Détail par campus</div>
           <div className="table-scroll">
-            <table style={{ tableLayout: 'fixed' }}>
-              <colgroup>
-                <col style={{ width: '34%' }} />
-                <col style={{ width: '22%' }} />
-                <col style={{ width: '22%' }} />
-                <col style={{ width: '22%' }} />
-              </colgroup>
+            <table>
               <thead>
-                <tr><th>Campus</th><th>Recharges (brut)</th><th>Commissions versées</th><th>Net</th></tr>
+                <tr><th>Campus</th><th>Recharges (brut)</th><th>Surplus</th><th>Commissions versées</th><th>Net</th></tr>
               </thead>
               <tbody>
-                {loading && <tr><td colSpan={4}>Chargement...</td></tr>}
-                {!loading && (data?.perCampus?.length ?? 0) === 0 && <tr><td colSpan={4}>Aucune donnée.</td></tr>}
+                {loading && <tr><td colSpan={5}>Chargement...</td></tr>}
+                {!loading && (data?.perCampus?.length ?? 0) === 0 && <tr><td colSpan={5}>Aucune donnée.</td></tr>}
                 {!loading && data?.perCampus?.map((c) => (
                   <tr key={c.id}>
                     <td><strong>{c.name}</strong></td>
                     <td>{formatFcfa(c.rechargesGross)}</td>
+                    <td>{formatFcfa(c.surplus)}</td>
                     <td>{formatFcfa(c.commissions)}</td>
                     <td>{formatFcfa(c.net)}</td>
                   </tr>
