@@ -106,7 +106,7 @@ function LoginShell({ theme, onToggleTheme, children }) {
   );
 }
 
-export default function Login({ onSuccess, onFirstLogin }) {
+export default function Login({ onSuccess, onFirstLogin, onForgotPassword }) {
   const { applySession } = useAuth();
   const [theme, toggleTheme] = useAuthTheme();
   const [step, setStep] = useState(1);
@@ -219,7 +219,7 @@ export default function Login({ onSuccess, onFirstLogin }) {
             </div>
           </div>
           {error && <div className={styles.fieldError}>{error}</div>}
-          <a className={styles.linkSmall}>Mot de passe oublié ?</a>
+          <a className={styles.linkSmall} onClick={onForgotPassword}>Mot de passe oublié ?</a>
           <button type="submit" className={styles.btnPrimary} disabled={loading}>
             {loading ? 'Connexion...' : 'Continuer'}
           </button>

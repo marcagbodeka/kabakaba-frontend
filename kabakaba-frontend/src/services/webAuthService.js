@@ -41,3 +41,19 @@ export function verifyTwoFactorSetup(onboardingToken, code) {
 export function getMe() {
   return apiFetch('/web-auth/me');
 }
+
+// ─── Réinitialisation de mot de passe (TOTP ou clé de secours) ──────
+// Facteur unique volontaire : voir web-auth.service.ts côté backend pour
+// le détail du compromis de sécurité (pas de canal externe email/SMS).
+
+export function verifyPasswordReset(email, code) {
+  return apiFetch('/web-auth/password-reset/verify', { method: 'POST', body: { email, code }, auth: false });
+}
+
+export function confirmPasswordReset(resetSessionToken, newPassword) {
+  return apiFetch('/web-auth/password-reset/confirm', {
+    method: 'POST',
+    body: { resetSessionToken, newPassword },
+    auth: false,
+  });
+}
