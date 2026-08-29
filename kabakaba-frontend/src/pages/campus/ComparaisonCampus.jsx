@@ -4,6 +4,7 @@ import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import { getCampusComparison, getTopCanteens } from '../../services/domain/analyticsService';
+import { formatChartDayLabels, chartPeriodTitle } from '../../utils/chartLabels';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
@@ -25,8 +26,6 @@ function daysAgo(n) {
   d.setDate(d.getDate() - n);
   return startOfDay(d);
 }
-
-const DAY_LABELS_FR = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 0: 'Dim' };
 
 export default function ComparaisonCampus() {
   const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
@@ -58,7 +57,7 @@ export default function ComparaisonCampus() {
 
   const dailySeries = data?.dailyVolume?.series?.[selected] ?? [];
   const maxDaily = Math.max(1, ...dailySeries);
-  const dayLabels = (data?.dailyVolume?.labels ?? []).map((d) => DAY_LABELS_FR[new Date(d).getDay()]);
+  const dayLabels = formatChartDayLabels(data?.dailyVolume?.labels);
 
   return (
     <>
@@ -149,7 +148,7 @@ export default function ComparaisonCampus() {
 
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-            <div className="card-title" style={{ marginBottom: 0 }}>Volume commandes / 7 jours</div>
+            <div className="card-title" style={{ marginBottom: 0 }}>{chartPeriodTitle('Volume commandes', dayLabels.length)}</div>
             <select
               value={selected}
               onChange={(e) => setSelected(e.target.value)}

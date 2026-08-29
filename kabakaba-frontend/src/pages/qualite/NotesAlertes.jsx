@@ -4,6 +4,7 @@ import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import { getReviewsQuality } from '../../services/domain/analyticsService';
+import { formatChartDayLabels, chartPeriodTitle } from '../../utils/chartLabels';
 
 function startOfDay(d) {
   const copy = new Date(d);
@@ -40,9 +41,7 @@ export default function NotesAlertes() {
   const summary = data?.summary;
   const vendors = data?.perVendor ?? [];
   const dailyAvg = data?.dailyTrend?.avgRating ?? [];
-  const dayLabels = (data?.dailyTrend?.labels ?? []).map((d) =>
-    new Date(d).toLocaleDateString('fr-FR', { weekday: 'short' }),
-  );
+  const dayLabels = formatChartDayLabels(data?.dailyTrend?.labels);
   const maxRating = 5;
 
   return (
@@ -84,7 +83,7 @@ export default function NotesAlertes() {
         </div>
 
         <div className="card">
-          <div className="card-title">Tendance de la note moyenne (7 jours)</div>
+          <div className="card-title">{chartPeriodTitle('Tendance de la note moyenne', dayLabels.length)}</div>
           <div className="chart-wrap">
             <div className="chart-bars" style={{ marginTop: 12 }}>
               {dailyAvg.map((v, i) => (

@@ -4,6 +4,7 @@ import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import { getStudentBehavior } from '../../services/domain/analyticsService';
+import { formatChartDayLabels, chartPeriodTitle } from '../../utils/chartLabels';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
@@ -20,8 +21,6 @@ function daysAgo(n) {
   d.setDate(d.getDate() - n);
   return startOfDay(d);
 }
-
-const DAY_LABELS_FR = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 0: 'Dim' };
 
 export default function ComportementEtudiants() {
   const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
@@ -44,10 +43,14 @@ export default function ComportementEtudiants() {
   }, [range]);
 
   const summary = data?.summary;
-  const perCampus = data?.perCampus ?? [];
-  const dailyValues = data?.dailyRegistrations?.values ?? [];
-  const maxDaily = Math.max(1, ...dailyValues);
-  const dayLabels = (data?.dailyRegistrations?.labels ?? []).map((d) => DAY_LABELS_FR[new Date(d).getDay()]);
+
+  const registrationValues = data?.dailyRegistrations?.values ?? [];
+  const maxRegistrations = Math.max(1, ...registrationValues);
+  const registrationLabels = formatChartDayLabels(data?.dailyRegistrations?.labels);
+
+  const rechargeValues = data?.dailyRecharges?.values ?? [];
+  const maxRecharge = Math.max(1, ...rechargeValues);
+  const rechargeLabels = formatChartDayLabels(data?.dailyRecharges?.labels);
 
   return (
     <>
@@ -62,7 +65,7 @@ export default function ComportementEtudiants() {
         <div className="page-header">
       <div className="eyebrow">Supervision · Étudiants</div>
           <h1>Comportement étudiants</h1>
-          <p>Fréquence de commande, montant moyen rechargé, nombre d&apos;inscrits par campus</p>
+          <p>Recharges, montant moyen, nombre d&apos;inscrits par campus</p>
         </div>
 
         {error && (
@@ -77,7 +80,7 @@ export default function ComportementEtudiants() {
             <div className="kpi-value">{loading ? '—' : summary?.totalEnrolled}</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Actifs (période)</div>
+            <div className="kpi-label">Actifs</div>
             <div className="kpi-value">
               {loading ? '—' : summary?.totalActive}{' '}
               {summary?.activeChangePct !== null && summary?.activeChangePct !== undefined && (
@@ -87,59 +90,60 @@ export default function ComportementEtudiants() {
                 </span>
               )}
             </div>
-            <div className="kpi-sub">{loading ? '' : `${summary?.activeShare}% des inscrits`}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Montant moyen rechargé</div>
             <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.avgRecharge ?? 0)}</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Fréquence moyenne</div>
-            <div className="kpi-value kpi-value-sm">{loading ? '—' : `${summary?.avgFrequency} / semaine`}</div>
+            <div className="kpi-label">Recharge minimale</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.minRecharge ?? 0)}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Recharge maximale</div>
+            <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.maxRecharge ?? 0)}</div>
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-title">Évolution des inscriptions (7 jours)</div>
-          <div className="chart-wrap">
-            <div className="chart-bars" style={{ marginTop: 12 }}>
-              {dailyValues.map((v, i) => (
-                <div
-                  key={i}
-                  className="bar"
-                  style={{ height: `${Math.max(4, (v / maxDaily) * 100)}%`, background: '#F07840', opacity: 0.55 + v / (maxDaily * 2.5) }}
-                />
+        <div className="two-col">
+          <div className="card">
+            <div className="card-title">{chartPeriodTitle('Évolution des inscriptions', registrationLabels.length)}</div>
+            <div className="chart-wrap">
+              <div className="chart-bars" style={{ marginTop: 12 }}>
+                {registrationValues.map((v, i) => (
+                  <div
+                    key={i}
+                    className="bar"
+                    style={{ height: `${Math.max(4, (v / maxRegistrations) * 100)}%`, background: '#F07840', opacity: 0.55 + v / (maxRegistrations * 2.5) }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="bar-labels">
+              {registrationLabels.map((d, i) => (
+                <div key={i} className="bar-label">{d}</div>
               ))}
             </div>
           </div>
-          <div className="bar-labels">
-            {dayLabels.map((d, i) => (
-              <div key={i} className="bar-label">{d}</div>
-            ))}
-          </div>
-        </div>
 
-        <div className="card">
-          <div className="card-title">Détail par campus</div>
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr><th>Campus</th><th>Inscrits</th><th>Actifs (période)</th><th>Montant moyen rechargé</th><th>Fréquence moyenne</th></tr>
-              </thead>
-              <tbody>
-                {loading && <tr><td colSpan={5}>Chargement...</td></tr>}
-                {!loading && perCampus.length === 0 && <tr><td colSpan={5}>Aucune donnée.</td></tr>}
-                {!loading && perCampus.map((c) => (
-                  <tr key={c.id}>
-                    <td><strong>{c.name}</strong></td>
-                    <td>{c.enrolled}</td>
-                    <td>{c.active}</td>
-                    <td>{formatFcfa(c.avgRecharge)}</td>
-                    <td>{c.avgFrequency} / semaine</td>
-                  </tr>
+          <div className="card">
+            <div className="card-title">{chartPeriodTitle('Évolution des recharges', rechargeLabels.length)}</div>
+            <div className="chart-wrap">
+              <div className="chart-bars" style={{ marginTop: 12 }}>
+                {rechargeValues.map((v, i) => (
+                  <div
+                    key={i}
+                    className="bar"
+                    style={{ height: `${Math.max(4, (v / maxRecharge) * 100)}%`, background: '#1B2A6B', opacity: 0.55 + v / (maxRecharge * 2.5) }}
+                  />
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
+            <div className="bar-labels">
+              {rechargeLabels.map((d, i) => (
+                <div key={i} className="bar-label">{d}</div>
+              ))}
+            </div>
           </div>
         </div>
       </PageContent>

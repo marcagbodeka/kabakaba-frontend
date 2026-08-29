@@ -3,10 +3,9 @@ import { LayoutDashboard, TrendingDown, TrendingUp } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
+import { formatChartDayLabels, chartPeriodTitle } from '../../utils/chartLabels';
 import { getCampusComparison, getRevenueBreakdown, getVendorPerformance } from '../../services/domain/analyticsService';
 import { getSupervisionStats } from '../../services/domain/adminStatsService';
-
-const DAY_LABELS_FR = { 1: 'Lun', 2: 'Mar', 3: 'Mer', 4: 'Jeu', 5: 'Ven', 6: 'Sam', 0: 'Dim' };
 
 function startOfDay(d) {
   const copy = new Date(d);
@@ -79,7 +78,7 @@ export default function VueGenerale() {
 
   const dailySeries = campus?.dailyVolume?.series?.['Tous les campus'] ?? [];
   const maxDaily = Math.max(1, ...dailySeries);
-  const dayLabels = (campus?.dailyVolume?.labels ?? []).map((d) => DAY_LABELS_FR[new Date(d).getDay()]);
+  const dayLabels = formatChartDayLabels(campus?.dailyVolume?.labels);
 
   let completedOrders = 0;
   for (const c of campus?.campuses ?? []) {
@@ -167,7 +166,7 @@ export default function VueGenerale() {
 
         <div className="two-col">
           <div className="card">
-            <div className="card-title">Commandes / jour</div>
+            <div className="card-title">{chartPeriodTitle('Commandes / jour', dayLabels.length)}</div>
             <div className="chart-wrap">
               <div className="chart-bars" style={{ marginTop: 12 }}>
                 {dailySeries.map((count, i) => (
