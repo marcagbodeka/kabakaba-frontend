@@ -24,6 +24,29 @@
   flex-shrink: 0;
 }
 
+.menuBtn {
+  display: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  align-items: center;
+  justify-content: center;
+  color: var(--indigo);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.menuBtn:hover {
+  background: #f8fafc;
+}
+
+.menuBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
 .breadcrumb {
   font-size: 13.5px;
   color: var(--muted);
@@ -235,6 +258,10 @@
     gap: 8px;
     flex-wrap: wrap;
     align-items: center;
+  }
+
+  .menuBtn {
+    display: flex;
   }
 
   .iconWrap {

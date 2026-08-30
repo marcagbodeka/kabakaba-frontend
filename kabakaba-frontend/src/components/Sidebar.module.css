@@ -337,3 +337,83 @@
   outline: none;
   box-shadow: 0 0 0 2px rgba(240, 120, 64, 0.5);
 }
+
+/* ── Tiroir mobile ──────────────────────────────────────
+   Sous 768px, la sidebar quitte le flux normal (elle recouvrirait tout
+   l'écran sinon) : hors-écran par défaut, glisse à l'écran par-dessus le
+   contenu quand ouverte via le bouton hamburger de Topbar. Le mode
+   "replié en icônes" (desktop) n'a pas de sens ici — sur mobile la
+   sidebar est soit fermée, soit ouverte en pleine largeur. */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 272px;
+    transform: translateX(-100%);
+    transition: transform 220ms ease;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .sidebar.collapsed {
+    width: 272px;
+  }
+
+  .sidebar.mobileOpen {
+    transform: translateX(0);
+  }
+
+  .collapseBtn {
+    display: none;
+  }
+
+  /* Neutralise les styles "icônes seules" desktop : sur mobile, le
+     contenu (libellés) est déjà présent dans le DOM (voir showLabels
+     dans Sidebar.jsx) — il ne reste qu'à corriger l'alignement/padding
+     que .collapsed impose normalement pour un mode centré-icônes. */
+  .sidebar.collapsed .logo {
+    padding: 22px 20px 16px;
+    justify-content: flex-start;
+  }
+
+  .sidebar.collapsed .sectionLabel {
+    height: auto;
+    padding: 0 12px;
+    margin-bottom: 6px;
+    background: none;
+    overflow: visible;
+  }
+
+  .sidebar.collapsed .navItem {
+    justify-content: flex-start;
+    padding: 11px 12px;
+  }
+
+  .sidebar.collapsed .navItem.active::before {
+    left: -12px;
+    right: auto;
+  }
+
+  .sidebar.collapsed .userInfo {
+    display: block;
+  }
+
+  .sidebar.collapsed .bottom {
+    justify-content: flex-start;
+  }
+
+  .sidebar.collapsed .logoutBtn {
+    margin-left: auto;
+  }
+}
+
+.backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 20, 56, 0.5);
+    z-index: 99;
+  }
+}

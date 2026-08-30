@@ -3,6 +3,12 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { ChevronDown, ChevronLeft, LogOut } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
+// Événement global qui permet à Topbar (rendue par chaque page, pas un
+// parent direct de Sidebar) de déclencher l'ouverture/fermeture du tiroir
+// mobile sans avoir à faire remonter cet état jusqu'à DashboardLayout —
+// même principe que AUTH_EXPIRED_EVENT dans httpClient.js.
+export const TOGGLE_MOBILE_NAV_EVENT = 'kbb:toggle-mobile-nav';
+
 function getInitials(name = '') {
   return name
     .split(' ')
@@ -28,6 +34,11 @@ export default function Sidebar({ sections, subtitle, user, onLogout }) {
       return false;
     }
   });
+  // Tiroir mobile : état séparé de "collapsed" (qui n'a de sens que sur
+  // desktop, où la sidebar reste dans le flux normal en bande fine). Sur
+  // mobile, la sidebar est soit totalement hors-écran, soit ouverte en
+  // recouvrement plein — jamais "repliée en icônes".
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState(() => {
     const initial = {};
     sections.forEach((section) => {
@@ -63,9 +74,12 @@ export default function Sidebar({ sections, subtitle, user, onLogout }) {
   }, [collapsed]);
 
   const toggleGroup = (label) => {
-    // Si le menu est replié, un clic sur un groupe le déplie d'abord pour
-    // que le libellé et les sous-items redeviennent visibles.
-    if (collapsed) {
+    // "collapsed" (icônes seules) n'a de sens que sur desktop. Sur mobile,
+    // le tiroir ouvert affiche toujours les libellés, peu importe la
+    // préférence desktop persistée — donc on ne déclenche l'auto-dépliage
+    // (qui modifierait cette préférence) que si on n'est PAS dans le
+    // tiroir mobile.
+    if (collapsed && !mobileOpen) {
       toggleCollapsed();
       setOpenGroups((prev) => ({ ...prev, [label]: true }));
       return;
@@ -73,15 +87,38 @@ export default function Sidebar({ sections, subtitle, user, onLogout }) {
     setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
   };
 
+  // Écoute le déclencheur (bouton hamburger dans Topbar, sur mobile).
+  useEffect(() => {
+    const handleToggle = () => setMobileOpen((v) => !v);
+    window.addEventListener(TOGGLE_MOBILE_NAV_EVENT, handleToggle);
+    return () => window.removeEventListener(TOGGLE_MOBILE_NAV_EVENT, handleToggle);
+  }, []);
+
+  // Ferme automatiquement le tiroir mobile à chaque changement de page —
+  // sans ça, la sidebar resterait ouverte par-dessus le contenu après
+  // avoir cliqué un lien.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
   const handleLinkClick = () => {
-    if (collapsed) toggleCollapsed();
+    if (collapsed && !mobileOpen) toggleCollapsed();
   };
+
+  // Libellés visibles dès qu'on n'est pas en mode "replié icônes" desktop
+  // — et TOUJOURS visibles dans le tiroir mobile, même si "collapsed" est
+  // resté vrai depuis une session desktop précédente (localStorage).
+  const showLabels = mobileOpen || !collapsed;
 
   const isChildActive = (children) =>
     children?.some((c) => location.pathname.startsWith(c.path));
 
   return (
-    <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''}`}>
+    <>
+      {mobileOpen && (
+        <div className={styles.backdrop} onClick={() => setMobileOpen(false)} aria-hidden="true" />
+      )}
+      <aside className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''} ${mobileOpen ? styles.mobileOpen : ''}`}>
       <button
         type="button"
         className={`${styles.collapseBtn} ${collapsed ? styles.collapsed : ''}`}
@@ -97,7 +134,7 @@ export default function Sidebar({ sections, subtitle, user, onLogout }) {
           <source srcSet="/site/logo-64.webp" type="image/webp" />
           <img className={styles.logoMark} src="/site/logo-64.png" alt="kabakaba" />
         </picture>
-        {!collapsed && (
+        {showLabels && (
           <div>
             <div className={styles.logoText}>
               kaba<span>kaba</span>
@@ -110,7 +147,7 @@ export default function Sidebar({ sections, subtitle, user, onLogout }) {
       <nav className={styles.nav}>
         {sections.map((section) => (
           <div className={styles.section} key={section.label}>
-            <div className={styles.sectionLabel}>{!collapsed && section.label}</div>
+            <div className={styles.sectionLabel}>{showLabels && section.label}</div>
             {section.items.map((item) => {
               const Icon = item.icon;
 
@@ -119,25 +156,25 @@ export default function Sidebar({ sections, subtitle, user, onLogout }) {
                   <NavLink
                     key={item.label}
                     to={item.path}
-                    title={collapsed ? item.label : undefined}
+                    title={!showLabels ? item.label : undefined}
                     onClick={handleLinkClick}
                     className={({ isActive }) =>
                       `${styles.navItem} ${isActive ? styles.active : ''}`
                     }
                   >
                     <Icon size={18} strokeWidth={2} className={styles.navIcon} />
-                    {!collapsed && <span className={styles.navLabel}>{item.label}</span>}
+                    {showLabels && <span className={styles.navLabel}>{item.label}</span>}
                   </NavLink>
                 );
               }
 
-              const open = !collapsed && !!openGroups[item.label];
+              const open = showLabels && !!openGroups[item.label];
               const parentActive = isChildActive(item.children);
               return (
                 <div key={item.label}>
                   <button
                     type="button"
-                    title={collapsed ? item.label : undefined}
+                    title={!showLabels ? item.label : undefined}
                     className={`${styles.navItem} ${styles.navItemButton} ${
                       parentActive ? styles.parentActive : ''
                     }`}
@@ -145,7 +182,7 @@ export default function Sidebar({ sections, subtitle, user, onLogout }) {
                     aria-expanded={open}
                   >
                     <Icon size={18} strokeWidth={2} className={styles.navIcon} />
-                    {!collapsed && (
+                    {showLabels && (
                       <>
                         <span className={styles.navLabel}>{item.label}</span>
                         <ChevronDown
@@ -155,12 +192,13 @@ export default function Sidebar({ sections, subtitle, user, onLogout }) {
                       </>
                     )}
                   </button>
-                  {!collapsed && (
+                  {showLabels && (
                     <div className={styles.subNav} style={{ maxHeight: open ? '240px' : '0' }}>
                       {item.children.map((child) => (
                         <NavLink
                           key={child.path}
                           to={child.path}
+                          onClick={handleLinkClick}
                           className={({ isActive }) =>
                             `${styles.subNavItem} ${isActive ? styles.active : ''}`
                           }
@@ -182,7 +220,7 @@ export default function Sidebar({ sections, subtitle, user, onLogout }) {
 
       <div className={styles.bottom}>
         <div className={styles.avatar}>{getInitials(user?.name || 'U')}</div>
-        {!collapsed && (
+        {showLabels && (
           <div className={styles.userInfo}>
             <div className={styles.userName}>{user?.name || 'Utilisateur'}</div>
             <div className={styles.userRole}>{user?.role || ''}</div>
@@ -193,5 +231,6 @@ export default function Sidebar({ sections, subtitle, user, onLogout }) {
         </button>
       </div>
     </aside>
+    </>
   );
 }

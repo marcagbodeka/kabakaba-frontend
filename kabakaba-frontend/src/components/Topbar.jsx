@@ -8,9 +8,11 @@ import {
   ShieldAlert,
   Trophy,
   CheckCircle2,
+  Menu,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getTodayEvents } from '../services/domain/adminStatsService';
+import { TOGGLE_MOBILE_NAV_EVENT } from './Sidebar';
 import styles from './Topbar.module.css';
 
 const PERIOD_OPTIONS = ['Aujourd\'hui', '7 jours', '30 jours'];
@@ -129,6 +131,16 @@ export default function Topbar({
 }) {
   return (
     <div className={styles.topbar}>
+      <button
+        type="button"
+        className={styles.menuBtn}
+        onClick={() => window.dispatchEvent(new CustomEvent(TOGGLE_MOBILE_NAV_EVENT))}
+        title="Ouvrir le menu"
+        aria-label="Ouvrir le menu"
+      >
+        <Menu size={20} />
+      </button>
+
       {Icon && (
         <span className={styles.iconWrap}>
           <Icon size={18} />
