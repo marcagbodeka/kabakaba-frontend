@@ -4,7 +4,8 @@ import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import { getRevenueBreakdown } from '../../services/domain/analyticsService';
-import { formatChartDayLabels, chartPeriodTitle } from '../../utils/chartLabels';
+import LineChart from '../../components/LineChart';
+import { chartPeriodTitle, formatChartDate } from '../../utils/chartLabels';
 
 function formatFcfa(n) {
   return `${Math.round(Number(n)).toLocaleString('fr-FR')} FCFA`;
@@ -44,8 +45,7 @@ export default function VolumeRevenus() {
 
   const summary = data?.summary;
   const dailyValues = data?.dailyNet?.values ?? [];
-  const maxAbs = Math.max(1, ...dailyValues.map((v) => Math.abs(v)));
-  const dayLabels = formatChartDayLabels(data?.dailyNet?.labels);
+  const dayLabels = data?.dailyNet?.labels ?? [];
 
   return (
     <>
@@ -117,26 +117,13 @@ export default function VolumeRevenus() {
 
         <div className="card">
           <div className="card-title">{chartPeriodTitle('Évolution du revenu net', dayLabels.length)}</div>
-          <div className="chart-wrap">
-            <div className="chart-bars" style={{ marginTop: 12 }}>
-              {dailyValues.map((v, i) => (
-                <div
-                  key={i}
-                  className="bar"
-                  style={{
-                    height: `${Math.max(4, (Math.abs(v) / maxAbs) * 100)}%`,
-                    background: v < 0 ? '#EF4444' : '#1B2A6B',
-                    opacity: 0.55 + Math.abs(v) / (maxAbs * 2.5),
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="bar-labels">
-            {dayLabels.map((d, i) => (
-              <div key={i} className="bar-label">{d}</div>
-            ))}
-          </div>
+          <LineChart
+            labels={data?.dailyNet?.labels ?? []}
+            values={dailyValues}
+            color="#1B2A6B"
+            formatLabel={formatChartDate}
+            formatValue={(v) => formatFcfa(v)}
+          />
         </div>
       </PageContent>
     </>

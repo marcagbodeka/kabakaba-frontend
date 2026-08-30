@@ -3,8 +3,9 @@ import { Star, AlertTriangle } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
+import LineChart from '../../components/LineChart';
 import { getReviewsQuality } from '../../services/domain/analyticsService';
-import { formatChartDayLabels, chartPeriodTitle } from '../../utils/chartLabels';
+import { chartPeriodTitle, formatChartDate } from '../../utils/chartLabels';
 
 function startOfDay(d) {
   const copy = new Date(d);
@@ -40,9 +41,18 @@ export default function NotesAlertes() {
 
   const summary = data?.summary;
   const vendors = data?.perVendor ?? [];
-  const dailyAvg = data?.dailyTrend?.avgRating ?? [];
-  const dayLabels = formatChartDayLabels(data?.dailyTrend?.labels);
-  const maxRating = 5;
+  const rawDailyAvg = data?.dailyTrend?.avgRating ?? [];
+  const rawDayLabels = data?.dailyTrend?.labels ?? [];
+  // On ne trace que les jours où au moins un avis a été laissé — un jour
+  // sans avis n'est pas une note de 0, c'est une absence de donnée.
+  const dailyAvg = [];
+  const dayLabels = [];
+  rawDailyAvg.forEach((v, i) => {
+    if (v !== null && v !== undefined) {
+      dailyAvg.push(v);
+      dayLabels.push(rawDayLabels[i]);
+    }
+  });
 
   return (
     <>
@@ -84,26 +94,17 @@ export default function NotesAlertes() {
 
         <div className="card">
           <div className="card-title">{chartPeriodTitle('Tendance de la note moyenne', dayLabels.length)}</div>
-          <div className="chart-wrap">
-            <div className="chart-bars" style={{ marginTop: 12 }}>
-              {dailyAvg.map((v, i) => (
-                <div
-                  key={i}
-                  className="bar"
-                  style={{
-                    height: v !== null ? `${(v / maxRating) * 100}%` : '2%',
-                    background: '#F59E0B',
-                    opacity: v !== null ? 0.5 + v / 10 : 0.15,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="bar-labels">
-            {dayLabels.map((d, i) => (
-              <div key={i} className="bar-label">{d}</div>
-            ))}
-          </div>
+          {dailyAvg.length === 0 ? (
+            <p style={{ color: 'var(--muted)', fontSize: 13.5, marginTop: 8 }}>Aucun avis sur la période.</p>
+          ) : (
+            <LineChart
+              labels={dayLabels}
+              values={dailyAvg}
+              color="#F59E0B"
+              formatLabel={formatChartDate}
+              formatValue={(v) => `${v} / 5`}
+            />
+          )}
         </div>
 
         <div className="card">

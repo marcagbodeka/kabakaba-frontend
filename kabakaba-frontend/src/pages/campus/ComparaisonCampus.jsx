@@ -4,7 +4,8 @@ import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import { getCampusComparison, getTopCanteens } from '../../services/domain/analyticsService';
-import { formatChartDayLabels, chartPeriodTitle } from '../../utils/chartLabels';
+import LineChart from '../../components/LineChart';
+import { chartPeriodTitle, formatChartDate } from '../../utils/chartLabels';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
@@ -56,8 +57,7 @@ export default function ComparaisonCampus() {
   const revenueChange = summary ? pctChange(summary.totalRevenue, summary.totalRevenuePrevPeriod) : null;
 
   const dailySeries = data?.dailyVolume?.series?.[selected] ?? [];
-  const maxDaily = Math.max(1, ...dailySeries);
-  const dayLabels = formatChartDayLabels(data?.dailyVolume?.labels);
+  const dayLabels = data?.dailyVolume?.labels ?? [];
 
   return (
     <>
@@ -163,18 +163,13 @@ export default function ComparaisonCampus() {
               ))}
             </select>
           </div>
-          <div className="chart-wrap">
-            <div className="chart-bars" style={{ marginTop: 12 }}>
-              {dailySeries.map((v, i) => (
-                <div key={i} className="bar" style={{ height: `${(v / maxDaily) * 100}%`, background: '#1B2A6B', opacity: 0.55 + v / (maxDaily * 2.5) }} />
-              ))}
-            </div>
-          </div>
-          <div className="bar-labels">
-            {dayLabels.map((d, i) => (
-              <div key={i} className="bar-label">{d}</div>
-            ))}
-          </div>
+          <LineChart
+            labels={data?.dailyVolume?.labels ?? []}
+            values={dailySeries}
+            color="#1B2A6B"
+            formatLabel={formatChartDate}
+            formatValue={(v) => `${v}`}
+          />
         </div>
 
         <div className="card">

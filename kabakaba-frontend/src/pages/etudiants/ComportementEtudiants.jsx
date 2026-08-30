@@ -3,8 +3,9 @@ import { Users, TrendingUp, TrendingDown } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
+import LineChart from '../../components/LineChart';
 import { getStudentBehavior } from '../../services/domain/analyticsService';
-import { formatChartDayLabels, chartPeriodTitle } from '../../utils/chartLabels';
+import { chartPeriodTitle, formatChartDate } from '../../utils/chartLabels';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
@@ -45,12 +46,10 @@ export default function ComportementEtudiants() {
   const summary = data?.summary;
 
   const registrationValues = data?.dailyRegistrations?.values ?? [];
-  const maxRegistrations = Math.max(1, ...registrationValues);
-  const registrationLabels = formatChartDayLabels(data?.dailyRegistrations?.labels);
+  const registrationLabels = data?.dailyRegistrations?.labels ?? [];
 
   const rechargeValues = data?.dailyRecharges?.values ?? [];
-  const maxRecharge = Math.max(1, ...rechargeValues);
-  const rechargeLabels = formatChartDayLabels(data?.dailyRecharges?.labels);
+  const rechargeLabels = data?.dailyRecharges?.labels ?? [];
 
   return (
     <>
@@ -108,42 +107,24 @@ export default function ComportementEtudiants() {
         <div className="two-col">
           <div className="card">
             <div className="card-title">{chartPeriodTitle('Évolution des inscriptions', registrationLabels.length)}</div>
-            <div className="chart-wrap">
-              <div className="chart-bars" style={{ marginTop: 12 }}>
-                {registrationValues.map((v, i) => (
-                  <div
-                    key={i}
-                    className="bar"
-                    style={{ height: `${Math.max(4, (v / maxRegistrations) * 100)}%`, background: '#F07840', opacity: 0.55 + v / (maxRegistrations * 2.5) }}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="bar-labels">
-              {registrationLabels.map((d, i) => (
-                <div key={i} className="bar-label">{d}</div>
-              ))}
-            </div>
+            <LineChart
+              labels={registrationLabels}
+              values={registrationValues}
+              color="#F07840"
+              formatLabel={formatChartDate}
+              formatValue={(v) => `${v}`}
+            />
           </div>
 
           <div className="card">
             <div className="card-title">{chartPeriodTitle('Évolution des recharges', rechargeLabels.length)}</div>
-            <div className="chart-wrap">
-              <div className="chart-bars" style={{ marginTop: 12 }}>
-                {rechargeValues.map((v, i) => (
-                  <div
-                    key={i}
-                    className="bar"
-                    style={{ height: `${Math.max(4, (v / maxRecharge) * 100)}%`, background: '#1B2A6B', opacity: 0.55 + v / (maxRecharge * 2.5) }}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="bar-labels">
-              {rechargeLabels.map((d, i) => (
-                <div key={i} className="bar-label">{d}</div>
-              ))}
-            </div>
+            <LineChart
+              labels={rechargeLabels}
+              values={rechargeValues}
+              color="#1B2A6B"
+              formatLabel={formatChartDate}
+              formatValue={(v) => formatFcfa(v)}
+            />
           </div>
         </div>
       </PageContent>
