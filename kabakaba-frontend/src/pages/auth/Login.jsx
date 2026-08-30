@@ -138,7 +138,7 @@ export default function Login({ onSuccess, onFirstLogin, onForgotPassword, expec
     setError(null);
     setLoading(true);
     try {
-      const result = await webAuth.login(email, password);
+      const result = await webAuth.login(email, password, expectedRole);
       setChallengeToken(result.challengeToken);
       setFirstName(result.firstName || result.webUser?.firstName || result.user?.firstName || null);
       setStep(2);
@@ -174,18 +174,11 @@ export default function Login({ onSuccess, onFirstLogin, onForgotPassword, expec
       const code = otp.join('');
       const result = await webAuth.verify2fa(challengeToken, code);
 
-      // Contrôle de rôle : un compte Supervision qui se connecte par erreur
-      // (ou volontairement) sur l'espace Admin, ou l'inverse, ne doit
-      // jamais atterrir sur le mauvais dashboard. On ne stocke la session
-      // que si le rôle correspond à l'espace visité — sinon le jeton reçu
-      // est simplement ignoré côté client, jamais persisté.
-      if (expectedRole && result.webUser?.role !== expectedRole) {
-        setError(
-          `Ce compte n'a pas accès à cet espace (rôle "${result.webUser?.role}"). Utilisez l'espace correspondant à votre rôle.`,
-        );
-        return;
-      }
-
+      // Le contrôle d'espace (Supervision vs Admin) est fait côté backend,
+      // dès l'étape identifiants (voir web-auth.service.ts) — un compte du
+      // mauvais espace ne reçoit jamais de challengeToken et n'atteint donc
+      // jamais cette étape. Rien à revérifier ici, et surtout rien à
+      // afficher qui mentionnerait le rôle réel du compte.
       applySession(result.accessToken, result.webUser);
       setStep(3);
     } catch (err) {

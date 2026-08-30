@@ -187,7 +187,7 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone,
             setFormError(null);
             setLoading(true);
             try {
-              const result = await webAuth.firstLogin(email, tempPassword);
+              const result = await webAuth.firstLogin(email, tempPassword, expectedRole);
               setOnboardingToken(result.onboardingToken);
               setInternalStep(2);
             } catch (err) {
@@ -478,15 +478,10 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone,
               const code = otp.join('');
               const result = await webAuth.verifyTwoFactorSetup(onboardingToken, code);
 
-              // Même contrôle de rôle que sur le login classique — voir
-              // Login.jsx pour le raisonnement complet.
-              if (expectedRole && result.webUser?.role !== expectedRole) {
-                setFormError(
-                  `Ce compte n'a pas accès à cet espace (rôle "${result.webUser?.role}"). Utilisez l'espace correspondant à votre rôle.`,
-                );
-                return;
-              }
-
+              // Le contrôle d'espace est fait côté backend, dès l'étape
+              // mot de passe temporaire (firstLogin) — voir Login.jsx pour
+              // le raisonnement complet. Rien à revérifier ni à afficher
+              // ici qui mentionnerait le rôle réel du compte.
               applySession(result.accessToken, result.webUser);
               setBackupCodes(result.backupCodes || []);
               setInternalStep(5);
