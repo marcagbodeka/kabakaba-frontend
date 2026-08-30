@@ -93,7 +93,10 @@ export default function Sidebar({ sections, subtitle, user, onLogout }) {
       </button>
 
       <div className={styles.logo}>
-        <div className={styles.logoMark}>K</div>
+        <picture>
+          <source srcSet="/site/logo-64.webp" type="image/webp" />
+          <img className={styles.logoMark} src="/site/logo-64.png" alt="kabakaba" />
+        </picture>
         {!collapsed && (
           <div>
             <div className={styles.logoText}>
