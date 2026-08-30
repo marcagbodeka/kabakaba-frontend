@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 
+// Même règle que le backend (@IsPhoneNumber(), format E.164) : "+" suivi
+// de l'indicatif pays puis le numéro, sans espaces ni "00".
+const PHONE_REGEX = /^\+[1-9]\d{7,14}$/;
+
 const initialForm = {
   structure: '',
   contact: '',
@@ -13,11 +17,19 @@ const initialForm = {
 export default function PartnerForm() {
   const [form, setForm] = useState(initialForm);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleChange = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError(null);
+
+    if (!PHONE_REGEX.test(form.telephone.trim())) {
+      setError('Numéro invalide — utilisez le format international, ex. +22890000000 (pas de 00, pas d\'espaces).');
+      return;
+    }
+
     // TODO: POST /public/partner-applications une fois l'API prête
     setSubmitted(true);
   };
@@ -51,7 +63,14 @@ export default function PartnerForm() {
       <div className="partner-form-row">
         <div className="field">
           <label htmlFor="telephone">Téléphone</label>
-          <input id="telephone" type="tel" required value={form.telephone} onChange={handleChange('telephone')} />
+          <input
+            id="telephone"
+            type="tel"
+            required
+            placeholder="+22890000000"
+            value={form.telephone}
+            onChange={handleChange('telephone')}
+          />
         </div>
         <div className="field">
           <label htmlFor="email">E-mail</label>
@@ -69,6 +88,7 @@ export default function PartnerForm() {
       <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
         Envoyer ma candidature
       </button>
+      {error && <p style={{ color: '#EF4444', fontSize: 13.5, marginTop: 10 }}>{error}</p>}
     </form>
   );
 }

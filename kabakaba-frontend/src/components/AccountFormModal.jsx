@@ -3,6 +3,13 @@ import { X, Copy, Check, RefreshCw } from 'lucide-react';
 import { provisionWebUser, generateTemporaryPassword } from '../services/domain/webUsersService';
 import './AccountModals.css';
 
+// Format international obligatoire (E.164) — la même règle que le backend
+// (@IsPhoneNumber(), sans indicatif régional par défaut) : un "+" suivi de
+// l'indicatif pays puis le numéro, sans espaces ni "00". On la revalide
+// ici pour donner un message clair avant l'appel API plutôt que de laisser
+// échouer une requête sur un format que l'utilisateur ne comprendrait pas.
+const PHONE_REGEX = /^\+[1-9]\d{7,14}$/;
+
 export default function AccountFormModal({ role, roleLabel, onClose, onCreated }) {
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '' });
   const [tempPassword, setTempPassword] = useState(generateTemporaryPassword());
@@ -13,10 +20,26 @@ export default function AccountFormModal({ role, roleLabel, onClose, onCreated }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setCreating(true);
     setError(null);
+
+    const phone = form.phone.trim();
+    if (phone && !PHONE_REGEX.test(phone)) {
+      setError('Numéro invalide — utilisez le format international, ex. +22890000000 (pas de 00, pas d\'espaces).');
+      return;
+    }
+
+    setCreating(true);
     try {
-      const result = await provisionWebUser({ ...form, role, temporaryPassword: tempPassword });
+      // phone omis (undefined) si vide, plutôt qu'une chaîne vide : côté
+      // backend, @IsOptional() ne saute la validation que pour
+      // undefined/null, pas pour '' — envoyer '' ferait échouer
+      // @IsPhoneNumber() même quand le champ est censé être facultatif.
+      const result = await provisionWebUser({
+        ...form,
+        phone: phone || undefined,
+        role,
+        temporaryPassword: tempPassword,
+      });
       setCreated({ email: result.email, password: tempPassword });
       onCreated?.();
     } catch (err) {
@@ -62,7 +85,12 @@ export default function AccountFormModal({ role, roleLabel, onClose, onCreated }
               </div>
               <div className="acct-field">
                 <label>Téléphone <span className="acct-optional">(optionnel)</span></label>
-                <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                <input
+                  type="tel"
+                  placeholder="+22890000000"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
               </div>
               <div className="acct-field">
                 <label>Mot de passe temporaire</label>
