@@ -67,7 +67,7 @@ export default function VueVendeurs() {
         ] = await Promise.all([
           getVendors(1, 100),
           getTopCanteens(1, 5),
-          getTopCanteens(7, 100),
+          getTopCanteens(7, 50),
           getVendorPerformance(1),
           getVendorPerformance(7),
           getVendorFinancials(),
