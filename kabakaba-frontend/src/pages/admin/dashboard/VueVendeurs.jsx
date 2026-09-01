@@ -166,7 +166,7 @@ export default function VueVendeurs() {
     });
 
   const blockedVendors = financials.vendors.filter((v) => v.blocked);
-  const lowAcceptanceVendors = weekPerf.rows.filter((v) => v.acceptanceRate < ACCEPTANCE_ALERT_THRESHOLD);
+  const lowAcceptanceVendors = weekPerf.vendors.filter((v) => v.acceptanceRate < ACCEPTANCE_ALERT_THRESHOLD);
 
   const alertes = [
     ...blockedVendors.map((v) => ({
