@@ -79,43 +79,43 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Technologies partenaires ─────────────────────────── */}
-      <section id="technologies" className="site-section tech-section">
-        <div className="section-head">
-          <div className="eyebrow">Notre stack</div>
-          <h2>Nos technologies partenaires</h2>
-          <p>kabakaba s&apos;appuie sur des outils fiables pour le paiement, l&apos;hébergement et la distribution de l&apos;app.</p>
-        </div>
-        <TechPartners />
-      </section>
-
-      {/* ── Suivi en temps réel ──────────────────────────────── */}
-      <section id="pourquoi" className="site-section" style={{ paddingTop: 0 }}>
-        <div className="feature-block">
-          <PhoneShot src="/site/screen-tracking.webp" alt="Suivi de commande en temps réel" width={230} height={497} />
-          <div>
-            <div className="tag">🔔 Suivi en temps réel</div>
-            <h3>Ne rate plus jamais ta commande prête</h3>
-            <p className="desc">
-              kabakaba te tient informé à chaque étape, de la validation par la cantine jusqu&apos;à
-              la confirmation de réception — directement dans l&apos;app.
-            </p>
-            <ul className="check-list">
-              <li><span className="ck">✓</span> Commande acceptée par la cantine</li>
-              <li><span className="ck">✓</span> Suivi de la préparation en direct</li>
-              <li><span className="ck">✓</span> Confirmation de réception en un tap</li>
-              <li><span className="ck">✓</span> Historique de toutes tes commandes</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Fonctionnalités ──────────────────────────────────── */}
-      <section className="site-section" style={{ paddingTop: '20px' }}>
+      {/* ── Pourquoi kabakaba ─────────────────────────────────── */}
+      <section id="pourquoi" className="site-section why-section">
         <div className="section-head">
           <div className="eyebrow">Pourquoi kabakaba</div>
-          <h2>Fait pour la vie de campus</h2>
+          <h2>Une méthode, pas juste une appli</h2>
+          <p>kabakaba existe pour un seul problème : trop de temps perdu autour d&apos;un repas.</p>
         </div>
+
+        <div className="why-grid">
+          <div className="why-card">
+            <div className="tag">🎓 Pour les étudiants</div>
+            <h3>Tu ne fais plus jamais la queue</h3>
+            <p className="desc">
+              Tu précommandes ton repas quand ça t&apos;arrange — avant le cours, entre deux
+              amphis, la veille au soir — et tu payes directement dans l&apos;app. Plus de
+              monnaie à chercher, plus d&apos;attente au comptoir : ta commande t&apos;attend,
+              prête, au moment où tu arrives.
+            </p>
+          </div>
+
+          <div className="why-card">
+            <div className="tag amber">📈 Pour les vendeurs</div>
+            <h3>Vous servez plus vite, vous vendez plus</h3>
+            <p className="desc">
+              Chaque commande est déjà payée et préparée avant l&apos;arrivée du client : plus
+              de file d&apos;attente qui bloque votre cuisine. Vous écoulez vos plats plus
+              vite, vous servez beaucoup plus d&apos;étudiants sur la même plage horaire —
+              et certains vendeurs kabakaba doublent leur chiffre d&apos;affaires rien qu&apos;en
+              augmentant le nombre de clients servis par jour.
+            </p>
+          </div>
+        </div>
+
+        <div className="why-tagline">
+          kabakaba n&apos;est pas simplement une application. <span>C&apos;est une méthode : plus vite, plus d&apos;argent.</span>
+        </div>
+
         <div className="feat-grid">
           {FEATURES.map((f) => (
             <div className="feat-card" key={f.title}>
@@ -125,6 +125,16 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ── Technologies partenaires ─────────────────────────── */}
+      <section id="technologies" className="site-section tech-section">
+        <div className="section-head">
+          <div className="eyebrow">Notre stack</div>
+          <h2>Nos technologies partenaires</h2>
+          <p>kabakaba s&apos;appuie sur des outils fiables pour le paiement, l&apos;hébergement et la distribution de l&apos;app.</p>
+        </div>
+        <TechPartners />
       </section>
 
       {/* ── Ambassadeur ──────────────────────────────────────── */}
