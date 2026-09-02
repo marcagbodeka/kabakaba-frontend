@@ -424,27 +424,59 @@
 .section-head h2 { font-size: clamp(24px, 3vw, 29px); margin: 0 0 8px; }
 .section-head p { font-size: 14.5px; color: var(--muted); margin: 0; }
 
-/* ── Galerie ──────────────────────────────────────────────── */
-.gallery {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
+/* ── Technologies partenaires ─────────────────────────────── */
+.tech-section { padding-top: 48px; padding-bottom: 56px; }
 
-.gallery-card {
-  flex: 1 1 260px;
-  border-radius: 20px;
-  padding: 26px 22px 0;
+.tech-strip {
   overflow: hidden;
+  /* estompe les bords de la piste pour suggérer qu'elle continue au-delà
+     du cadre visible, sans bordure ni carte autour de la bande */
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 
-.gallery-card.c1 { background: var(--indigo-soft, #eef0fa); }
-.gallery-card.c2 { background: var(--peach); }
-.gallery-card.c3 { background: #f1f3f9; }
+.tech-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  gap: 64px;
+  animation: tech-scroll 22s linear infinite;
+}
 
-.gallery-card h3 { font-size: 16px; font-weight: 800; color: var(--indigo-dark); margin: 0 0 8px; }
-.gallery-card p { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin: 0 0 18px; }
-.gallery-card .phone-frame { width: 170px; margin: 0 auto; }
+.tech-strip:hover .tech-track { animation-play-state: paused; }
+
+.tech-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  height: 40px;
+  color: var(--muted);
+  opacity: 0.75;
+  transition: color var(--t), opacity var(--t);
+}
+
+.tech-item:hover { color: var(--indigo-dark); opacity: 1; }
+
+.tech-icon { width: 34px; height: 34px; fill: currentColor; }
+
+.tech-wordmark {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: currentColor;
+  white-space: nowrap;
+}
+
+@keyframes tech-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tech-track { animation: none; flex-wrap: wrap; justify-content: center; }
+  .tech-strip { mask-image: none; -webkit-mask-image: none; }
+}
 
 /* ── Bloc « suivi en temps réel » ─────────────────────────── */
 .feature-block {
@@ -621,7 +653,6 @@
   .hero { flex-direction: column; padding-top: 32px; text-align: center; }
   .hero-text { text-align: left; }
   .hero-phones { width: 100%; }
-  .gallery { flex-direction: column; }
   .feature-block { flex-direction: column; text-align: center; }
   .feature-block .phone-frame { flex: none; }
   .feature-block .check-list { align-items: center; }

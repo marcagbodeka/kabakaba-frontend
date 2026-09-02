@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 
 const NAV = [
-  { label: 'Comment ça marche', href: '#comment-ca-marche' },
+  { label: 'Nos technologies', href: '#technologies' },
   { label: 'Pourquoi kabakaba', href: '#pourquoi' },
   { label: 'Ambassadeur', href: '#ambassadeur' },
   { label: 'Devenir vendeur', href: '#partenaire' },

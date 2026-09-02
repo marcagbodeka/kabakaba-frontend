@@ -4,28 +4,8 @@ import SiteFooter from '../../components/site/SiteFooter';
 import StoreBadges from '../../components/site/StoreBadges';
 import PhoneShot from '../../components/site/PhoneShot';
 import PartnerForm from '../../components/site/PartnerForm';
+import TechPartners from '../../components/site/TechPartners';
 import '../../styles/site.css';
-
-const GALLERY = [
-  {
-    tone: 'c1',
-    title: 'Ton portefeuille en un coup d\u2019œil',
-    text: 'Solde de tickets, commandes en cours et accès rapide aux cantines.',
-    src: '/site/screen-home.webp',
-  },
-  {
-    tone: 'c2',
-    title: 'Suis ta commande en direct',
-    text: 'Acceptée, en préparation, prête — tu confirmes la réception en un tap.',
-    src: '/site/screen-tracking.webp',
-  },
-  {
-    tone: 'c3',
-    title: 'Toutes les cantines de ton campus',
-    text: 'Filtre par campus, horaires d\u2019ouverture, spécialités — tout est là.',
-    src: '/site/screen-cantines.webp',
-  },
-];
 
 const FEATURES = [
   { icon: Ticket, tone: 'peach', title: 'Paiement anticipé simple', text: 'Recharge via Moov Flooz ou Mixx by Yas, sans complication.' },
@@ -99,22 +79,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Galerie ──────────────────────────────────────────── */}
-      <section id="comment-ca-marche" className="site-section">
+      {/* ── Technologies partenaires ─────────────────────────── */}
+      <section id="technologies" className="site-section tech-section">
         <div className="section-head">
-          <div className="eyebrow">Découvre l&apos;app en images</div>
-          <h2>Tout ce qu&apos;il te faut pour ta vie de campus</h2>
-          <p>De la commande à la récupération, en toute simplicité, depuis ton téléphone.</p>
+          <div className="eyebrow">Notre stack</div>
+          <h2>Nos technologies partenaires</h2>
+          <p>kabakaba s&apos;appuie sur des outils fiables pour le paiement, l&apos;hébergement et la distribution de l&apos;app.</p>
         </div>
-        <div className="gallery">
-          {GALLERY.map((g) => (
-            <div className={`gallery-card ${g.tone}`} key={g.title}>
-              <h3>{g.title}</h3>
-              <p>{g.text}</p>
-              <PhoneShot src={g.src} alt={g.title} width={170} height={368} />
-            </div>
-          ))}
-        </div>
+        <TechPartners />
       </section>
 
       {/* ── Suivi en temps réel ──────────────────────────────── */}
