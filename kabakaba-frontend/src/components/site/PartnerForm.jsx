@@ -9,7 +9,6 @@ const initialForm = {
   structure: '',
   contact: '',
   telephone: '',
-  email: '',
   campus: '',
   message: '',
 };
@@ -41,7 +40,7 @@ export default function PartnerForm() {
         <div>
           <div className="partner-success-title">Candidature envoyée</div>
           <div className="partner-success-sub">
-            Notre équipe revient vers vous sous peu à l&apos;adresse indiquée.
+            Notre équipe revient vers vous sous peu au numéro indiqué.
           </div>
         </div>
       </div>
@@ -73,13 +72,9 @@ export default function PartnerForm() {
           />
         </div>
         <div className="field">
-          <label htmlFor="email">E-mail</label>
-          <input id="email" type="email" required value={form.email} onChange={handleChange('email')} />
+          <label htmlFor="campus">Vous êtes sur quel campus ?</label>
+          <input id="campus" required value={form.campus} onChange={handleChange('campus')} placeholder="Ex. UCAO, Université de Lomé..." />
         </div>
-      </div>
-      <div className="field">
-        <label htmlFor="campus">Campus visé</label>
-        <input id="campus" required value={form.campus} onChange={handleChange('campus')} placeholder="Ex. UCAO, Université de Lomé..." />
       </div>
       <div className="field">
         <label htmlFor="message">Message (optionnel)</label>

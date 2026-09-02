@@ -1,10 +1,12 @@
-import { ShieldCheck, Bell, Ticket } from 'lucide-react';
+import { useState } from 'react';
+import { ShieldCheck, Bell, Ticket, ChevronRight } from 'lucide-react';
 import SiteHeader from '../../components/site/SiteHeader';
 import SiteFooter from '../../components/site/SiteFooter';
 import StoreBadges from '../../components/site/StoreBadges';
 import PhoneShot from '../../components/site/PhoneShot';
 import PartnerForm from '../../components/site/PartnerForm';
 import TechPartners from '../../components/site/TechPartners';
+import AppOnlyModal from '../../components/site/AppOnlyModal';
 import '../../styles/site.css';
 
 const FEATURES = [
@@ -13,13 +15,11 @@ const FEATURES = [
   { icon: Bell, tone: 'peach', title: 'Suivi en temps réel', text: 'Notifications à chaque étape, jusqu\u2019à la confirmation de réception.' },
 ];
 
-const TIERS = [
-  { name: 'Bronze', rate: '0,5%' },
-  { name: 'Argent', rate: '0,8%' },
-  { name: 'Or', rate: '1,2%' },
-];
+const TIERS = ['Bronze', 'Argent', 'Or'];
 
 export default function Home() {
+  const [showAmbassadorModal, setShowAmbassadorModal] = useState(false);
+
   return (
     <div id="top">
       <SiteHeader />
@@ -109,11 +109,14 @@ export default function Home() {
             </p>
           </div>
         </div>
+      </section>
 
-        <div className="why-subhead">
-          <h3>Un procédé simple</h3>
+      {/* ── Un procédé simple ────────────────────────────────── */}
+      <section className="site-section procede-section">
+        <div className="section-head">
+          <div className="eyebrow">Comment ça marche</div>
+          <h2>Un procédé simple</h2>
         </div>
-
         <div className="feat-grid">
           {FEATURES.map((f) => (
             <div className="feat-card" key={f.title}>
@@ -122,45 +125,6 @@ export default function Home() {
               <p>{f.text}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* ── Technologies partenaires ─────────────────────────── */}
-      <section id="technologies" className="site-section tech-section">
-        <div className="section-head">
-          <div className="eyebrow">Notre stack</div>
-          <h2>Nos technologies partenaires</h2>
-          <p>kabakaba s&apos;appuie sur des outils fiables pour le paiement, l&apos;hébergement et la distribution de l&apos;app.</p>
-        </div>
-        <TechPartners />
-      </section>
-
-      {/* ── Ambassadeur ──────────────────────────────────────── */}
-      <section id="ambassadeur" className="site-section">
-        <div className="amb-section">
-          <div className="amb-grid">
-            <div>
-              <div className="amb-tag">🏆 Programme ambassadeur</div>
-              <h2>Partage ton code, gagne des commissions</h2>
-              <p className="desc">
-                Deviens ambassadeur directement depuis l&apos;app. Tu touches une commission sur
-                chaque recharge de tes affiliés, avec un niveau qui progresse selon ton volume.
-              </p>
-              <div className="tier-row">
-                {TIERS.map((t) => (
-                  <div className={`tier tier-${t.name.toLowerCase()}`} key={t.name}>
-                    <div className="tname">{t.name}</div>
-                    <div className="tval">{t.rate}</div>
-                  </div>
-                ))}
-              </div>
-              <a href="#telecharger" className="btn-accent">Devenir ambassadeur</a>
-            </div>
-            <div className="amb-phones">
-              <PhoneShot src="/site/screen-ambassadeur-dashboard.webp" alt="Tableau de bord ambassadeur" width={210} height={454} />
-              <PhoneShot src="/site/screen-ambassadeur-historique.webp" alt="Historique des commissions" width={210} height={454} />
-            </div>
-          </div>
         </div>
       </section>
 
@@ -186,7 +150,58 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Technologies partenaires ─────────────────────────── */}
+      <section id="technologies" className="site-section tech-section">
+        <div className="section-head">
+          <div className="eyebrow">Notre stack</div>
+          <h2>Nos technologies partenaires</h2>
+          <p>kabakaba s&apos;appuie sur des outils fiables pour le paiement, l&apos;hébergement et la distribution de l&apos;app.</p>
+        </div>
+        <TechPartners />
+      </section>
+
+      {/* ── Ambassadeur ──────────────────────────────────────── */}
+      <section id="ambassadeur" className="site-section">
+        <div className="amb-section">
+          <div className="amb-grid">
+            <div>
+              <div className="amb-tag">🏆 Programme ambassadeur</div>
+              <h2>Partage ton code, gagne des commissions</h2>
+              <p className="desc">
+                Deviens ambassadeur directement depuis l&apos;app. Tu touches une commission sur
+                chaque recharge de tes affiliés, avec un niveau qui progresse selon ton volume.
+              </p>
+              <div className="tier-row">
+                {TIERS.map((name, i) => (
+                  <div className="tier-step" key={name}>
+                    <div className={`tier tier-${name.toLowerCase()}`}>{name}</div>
+                    {i < TIERS.length - 1 && <ChevronRight size={16} className="tier-arrow" />}
+                  </div>
+                ))}
+              </div>
+              <p className="tier-caption">
+                Plus tu es actif, plus tu montes de niveau — et plus ta commission grimpe.
+              </p>
+              <button type="button" className="btn-accent" onClick={() => setShowAmbassadorModal(true)}>
+                Devenir ambassadeur
+              </button>
+            </div>
+            <div className="amb-phones">
+              <PhoneShot src="/site/screen-ambassadeur-dashboard.webp" alt="Tableau de bord ambassadeur" width={210} height={454} />
+              <PhoneShot src="/site/screen-ambassadeur-historique.webp" alt="Historique des commissions" width={210} height={454} />
+            </div>
+          </div>
+        </div>
+      </section>
+
       <SiteFooter />
+
+      <AppOnlyModal
+        open={showAmbassadorModal}
+        onClose={() => setShowAmbassadorModal(false)}
+        title="Disponible uniquement sur l'app"
+        text="Le programme ambassadeur s'active directement dans l'application kabakaba. Télécharge-la pour générer ton code et commencer à gagner des commissions."
+      />
     </div>
   );
 }
