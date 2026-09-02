@@ -495,7 +495,7 @@
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
-  margin-bottom: 28px;
+  margin-bottom: 8px;
 }
 
 .why-card {
@@ -520,18 +520,19 @@
 
 .why-card .tag.amber { color: var(--amber, #c9820a); }
 
-.why-card h3 { font-size: clamp(19px, 2.2vw, 22px); margin: 0 0 12px; line-height: 1.3; color: var(--indigo-dark); }
-.why-card p.desc { font-size: 14.5px; color: var(--muted); line-height: 1.65; margin: 0 0 16px; }
-
-.why-quote {
-  font-size: 14.5px;
+.why-hook {
+  font-size: clamp(17px, 2vw, 19px);
   font-weight: 800;
   color: var(--indigo-dark);
-  line-height: 1.5;
-  margin: 0;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-strong);
+  line-height: 1.4;
+  margin: 0 0 14px;
 }
+
+.why-card h3 { font-size: 15px; font-weight: 700; color: var(--orange-dark, #d9612c); margin: 0 0 10px; line-height: 1.3; }
+.why-card p.desc { font-size: 14.5px; color: var(--muted); line-height: 1.65; margin: 0; }
+
+.why-subhead { text-align: center; margin: 12px 0 24px; }
+.why-subhead h3 { font-size: clamp(18px, 2.2vw, 21px); font-weight: 800; color: var(--indigo-dark); margin: 0; }
 
 .check-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
 .check-list li { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--indigo-dark); }
