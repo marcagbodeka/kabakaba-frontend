@@ -1,4 +1,4 @@
-import { Wallet, ShieldCheck, MapPin, Bell, Award, UtensilsCrossed, Ticket } from 'lucide-react';
+import { ShieldCheck, Bell, UtensilsCrossed, Ticket } from 'lucide-react';
 import SiteHeader from '../../components/site/SiteHeader';
 import SiteFooter from '../../components/site/SiteFooter';
 import StoreBadges from '../../components/site/StoreBadges';
@@ -10,9 +10,7 @@ import '../../styles/site.css';
 const FEATURES = [
   { icon: Ticket, tone: 'peach', title: 'Paiement anticipé simple', text: 'Recharge via Moov Flooz ou Mixx by Yas, sans complication.' },
   { icon: ShieldCheck, tone: 'indigo', title: 'Séquestre sécurisé', text: 'Tes tickets ne sont débités qu\u2019une fois ta commande prête.' },
-  { icon: MapPin, tone: 'green', title: 'Pensé pour ton campus', text: 'Seules les cantines de ton campus s\u2019affichent, rien d\u2019inutile.' },
   { icon: Bell, tone: 'peach', title: 'Suivi en temps réel', text: 'Notifications à chaque étape, jusqu\u2019à la confirmation de réception.' },
-  { icon: Award, tone: 'indigo', title: 'Programme ambassadeur', text: 'Partage ton code et gagne une commission sur chaque recharge de tes affiliés.' },
   { icon: UtensilsCrossed, tone: 'green', title: 'Réseau de cantines', text: 'De plus en plus de cantines rejoignent kabakaba sur ton campus.' },
 ];
 
@@ -84,7 +82,7 @@ export default function Home() {
         <div className="section-head">
           <div className="eyebrow">Pourquoi kabakaba</div>
           <h2>Une méthode, pas juste une appli</h2>
-          <p>kabakaba existe pour un seul problème : trop de temps perdu autour d&apos;un repas.</p>
+          <p>kabakaba existe pour un seul problème : trop de temps perdu à attendre un repas.</p>
         </div>
 
         <div className="why-grid">
@@ -92,28 +90,25 @@ export default function Home() {
             <div className="tag">🎓 Pour les étudiants</div>
             <h3>Tu ne fais plus jamais la queue</h3>
             <p className="desc">
-              Tu précommandes ton repas quand ça t&apos;arrange — avant le cours, entre deux
-              amphis, la veille au soir — et tu payes directement dans l&apos;app. Plus de
-              monnaie à chercher, plus d&apos;attente au comptoir : ta commande t&apos;attend,
-              prête, au moment où tu arrives.
+              Tu précommandes ton repas quand ça t&apos;arrange, avant le cours, entre deux
+              amphis, ou la veille au soir. Tu payes directement dans l&apos;app, sans avoir
+              à chercher de la monnaie, sans attendre au comptoir. Ta commande t&apos;attend,
+              prête, dès que tu arrives.
             </p>
+            <p className="why-quote">Jeune roi, jeune reine, ton temps est précieux.</p>
           </div>
 
           <div className="why-card">
             <div className="tag amber">📈 Pour les vendeurs</div>
             <h3>Vous servez plus vite, vous vendez plus</h3>
             <p className="desc">
-              Chaque commande est déjà payée et préparée avant l&apos;arrivée du client : plus
-              de file d&apos;attente qui bloque votre cuisine. Vous écoulez vos plats plus
-              vite, vous servez beaucoup plus d&apos;étudiants sur la même plage horaire —
-              et certains vendeurs kabakaba doublent leur chiffre d&apos;affaires rien qu&apos;en
-              augmentant le nombre de clients servis par jour.
+              Chaque commande est déjà payée et préparée avant l&apos;arrivée du client, donc
+              plus de file d&apos;attente qui bloque votre cuisine. Vous écoulez vos plats plus
+              vite et vous servez beaucoup plus d&apos;étudiants sur la même plage horaire.
+              Résultat, vous gagnez plus, tout simplement.
             </p>
+            <p className="why-quote">kabakaba n&apos;est pas simplement une application. C&apos;est une méthode : plus vite, plus d&apos;argent.</p>
           </div>
-        </div>
-
-        <div className="why-tagline">
-          kabakaba n&apos;est pas simplement une application. <span>C&apos;est une méthode : plus vite, plus d&apos;argent.</span>
         </div>
 
         <div className="feat-grid">
