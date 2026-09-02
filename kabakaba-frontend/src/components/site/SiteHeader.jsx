@@ -6,6 +6,7 @@ const NAV = [
   { label: 'Pourquoi kabakaba', href: '#pourquoi' },
   { label: 'Ambassadeur', href: '#ambassadeur' },
   { label: 'Devenir vendeur', href: '#partenaire' },
+  { label: 'Nos campus', href: '#campus' },
 ];
 
 export default function SiteHeader() {

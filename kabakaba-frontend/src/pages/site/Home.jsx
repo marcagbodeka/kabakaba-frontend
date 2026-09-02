@@ -7,6 +7,7 @@ import PhoneShot from '../../components/site/PhoneShot';
 import PartnerForm from '../../components/site/PartnerForm';
 import TechPartners from '../../components/site/TechPartners';
 import AppOnlyModal from '../../components/site/AppOnlyModal';
+import CampusSection from '../../components/site/CampusSection';
 import '../../styles/site.css';
 
 const FEATURES = [
@@ -193,6 +194,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <CampusSection />
 
       <SiteFooter />
 

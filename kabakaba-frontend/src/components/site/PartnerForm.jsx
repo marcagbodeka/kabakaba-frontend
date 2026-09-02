@@ -73,7 +73,7 @@ export default function PartnerForm() {
         </div>
         <div className="field">
           <label htmlFor="campus">Vous êtes sur quel campus ?</label>
-          <input id="campus" required value={form.campus} onChange={handleChange('campus')} placeholder="Ex. UCAO, Université de Lomé..." />
+          <input id="campus" required value={form.campus} onChange={handleChange('campus')} placeholder="Ex. UCAO-UUT, Lomé..." />
         </div>
       </div>
       <div className="field">

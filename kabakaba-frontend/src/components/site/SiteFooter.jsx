@@ -1,10 +1,8 @@
 import { Mail, Phone, MapPin } from 'lucide-react';
 import StoreBadges from './StoreBadges';
 
-const CAMPUSES = [
-  { code: 'UCAO', name: 'UCAO-UUT, Lomé', gradient: 'linear-gradient(135deg,#3A4CA8,#232F72)' },
-  { code: 'UL', name: 'Université de Lomé', gradient: 'linear-gradient(135deg,var(--orange),var(--orange-dark))' },
-];
+const TIKTOK_PATH =
+  'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z';
 
 export default function SiteFooter() {
   return (
@@ -19,42 +17,44 @@ export default function SiteFooter() {
               </span>
             </a>
             <p>
-              La restauration de campus, simplifiée. Commande, paye et suis tes repas depuis ton
-              téléphone.
+              Kabakaba, ce n&apos;est pas simplement une app, c&apos;est une méthode, c&apos;est un choix
+              de vie stratégique.
             </p>
             <StoreBadges />
           </div>
 
           <div className="footer-col">
             <h5>Navigation</h5>
-            <a href="#comment-ca-marche">Comment ça marche</a>
+            <a href="#technologies">Nos technologies</a>
             <a href="#pourquoi">Pourquoi kabakaba</a>
             <a href="#ambassadeur">Programme ambassadeur</a>
             <a href="#partenaire">Devenir vendeur</a>
-          </div>
-
-          <div className="footer-col">
-            <h5>Nos campus</h5>
-            {CAMPUSES.map((c) => (
-              <div className="footer-campus-row" key={c.code}>
-                <div className="footer-campus-badge" style={{ background: c.gradient }}>{c.code}</div>
-                <span>{c.name}</span>
-              </div>
-            ))}
-            <p className="footer-note">De nouveaux campus rejoignent le réseau régulièrement.</p>
+            <a href="#campus">Nos campus</a>
           </div>
 
           <div className="footer-col">
             <h5>Nous contacter</h5>
             <div className="footer-contact-row"><Mail size={14} /><span>contact@kabakaba.app</span></div>
-            <div className="footer-contact-row"><Phone size={14} /><span>+228 90 00 00 00</span></div>
+            <div className="footer-contact-row"><Phone size={14} /><span>+228 71 54 39 09</span></div>
             <div className="footer-contact-row"><MapPin size={14} /><span>Lomé, Togo</span></div>
+          </div>
+
+          <div className="footer-col">
+            <h5>Suivez-nous</h5>
+            <a
+              href="https://www.tiktok.com/@kabakaba.app.officiel"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-social-row"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d={TIKTOK_PATH} fill="currentColor" /></svg>
+              <span>TikTok</span>
+            </a>
           </div>
         </div>
 
         <div className="footer-bottom">
           <span>© {new Date().getFullYear()} kabakaba. Tous droits réservés.</span>
-          <span>Fait avec ❤️ à Lomé, Togo</span>
         </div>
       </div>
     </footer>
