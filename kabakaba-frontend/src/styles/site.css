@@ -202,8 +202,11 @@
   color: #fff;
   padding: 7px 14px 7px 12px;
   border-radius: 9px;
+  border: none;
   text-decoration: none;
   flex-shrink: 0;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .store-badge .sb-text {

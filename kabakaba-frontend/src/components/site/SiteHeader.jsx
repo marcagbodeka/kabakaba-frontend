@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { handleAnchorClick } from '../../utils/scrollTo';
+import ComingSoonModal from './ComingSoonModal';
 
 // Ordre conforme à celui des sections dans la page (Home.jsx) :
 // Pourquoi kabakaba → Devenir vendeur → Nos technologies → Ambassadeur → Nos campus.
@@ -14,6 +15,7 @@ const NAV = [
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   return (
     <header className="site-header">
@@ -38,7 +40,9 @@ export default function SiteHeader() {
         </nav>
 
         <div className="site-header-actions">
-          <a href="#telecharger" className="site-btn-primary" onClick={handleAnchorClick('telecharger')}>Télécharger l&apos;app</a>
+          <button type="button" className="site-btn-primary" onClick={() => setShowComingSoon(true)}>
+            Télécharger l&apos;app
+          </button>
         </div>
 
         <button className="site-burger" onClick={() => setOpen(!open)} aria-label="Menu">
@@ -59,6 +63,8 @@ export default function SiteHeader() {
           ))}
         </nav>
       )}
+
+      <ComingSoonModal open={showComingSoon} onClose={() => setShowComingSoon(false)} />
     </header>
   );
 }
