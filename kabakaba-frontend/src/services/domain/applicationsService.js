@@ -12,3 +12,11 @@ export function getPendingAmbassadors(limit = 20) {
 export function getNewPartnerApplications(limit = 20) {
   return apiFetch(`/partner-applications?status=NEW&page=1&limit=${limit}`);
 }
+
+// PATCH /ambassadors/:id — suspendre un ambassadeur avec motif obligatoire.
+export function suspendAmbassador(id, decisionReason) {
+  return apiFetch(`/ambassadors/${id}`, {
+    method: 'PATCH',
+    body: { status: 'SUSPENDED', decisionReason, suspendedAt: new Date().toISOString() },
+  });
+}
