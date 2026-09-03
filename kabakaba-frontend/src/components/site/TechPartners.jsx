@@ -1,8 +1,6 @@
+import ScrollingLogos from './ScrollingLogos';
+
 /**
- * Bande horizontale défilante des technologies partenaires (Vercel, Neon,
- * Google Play, FedaPay). SVG inline, couleurs officielles de marque, nom
- * affiché sous chaque logo.
- *
  * Sources des tracés et couleurs :
  * - Vercel : noir #000000 (charte officielle).
  * - Neon : teal #00E0D9 (charte officielle, extrait de leur logo SVG).
@@ -12,10 +10,6 @@
  *   rendu en wordmark texte plutôt qu'une icône inventée qui serait
  *   inexacte. Couleur neutre (indigo du site) faute de couleur de marque
  *   officielle confirmée — à corriger si vous avez leur charte graphique.
- *
- * La liste est dupliquée une fois pour permettre une boucle d'animation
- * continue (translateX -50%) sans coupure visible. L'animation est
- * suspendue au survol et respecte prefers-reduced-motion (voir site.css).
  */
 const PARTNERS = [
   {
@@ -49,36 +43,19 @@ const PARTNERS = [
   { name: 'FedaPay', type: 'wordmark' },
 ];
 
-function TechLogo({ partner }) {
-  return (
-    <div className="tech-item">
-      {partner.type === 'svg' ? (
-        <svg viewBox={partner.viewBox} className="tech-icon" role="img" aria-label={partner.name}>
-          {partner.paths.map((p, i) => (
-            <path key={i} d={p.d} fill={p.fill} />
-          ))}
-        </svg>
-      ) : (
-        <span className="tech-wordmark">{partner.name}</span>
-      )}
-      <span className="tech-name">{partner.name}</span>
-    </div>
-  );
+function renderTechLogo(partner) {
+  if (partner.type === 'svg') {
+    return (
+      <svg viewBox={partner.viewBox} className="tech-icon" role="img" aria-label={partner.name}>
+        {partner.paths.map((p, i) => (
+          <path key={i} d={p.d} fill={p.fill} />
+        ))}
+      </svg>
+    );
+  }
+  return <span className="tech-wordmark">{partner.name}</span>;
 }
 
 export default function TechPartners() {
-  // Deux passes du même tableau : la piste anime de 0 à -50%, la seconde
-  // moitié prend le relais visuellement à l'identique → boucle infinie.
-  const track = [...PARTNERS, ...PARTNERS];
-
-  return (
-    <div className="tech-strip">
-      <div className="tech-track">
-        {track.map((p, i) => (
-          <TechLogo partner={p} key={`${p.name}-${i}`} />
-        ))}
-      </div>
-    </div>
-  );
+  return <ScrollingLogos items={PARTNERS} renderLogo={renderTechLogo} />;
 }
-

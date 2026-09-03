@@ -162,14 +162,23 @@ export default function Home() {
 
       {/* ── Ambassadeur ──────────────────────────────────────── */}
       <section id="ambassadeur" className="site-section">
-        <div className="amb-section amb-simple">
-          <div className="amb-tag">🏆 Programme ambassadeur</div>
-          <h2>Arrondis tes fins de mois avec kabakaba</h2>
-          <p className="desc">
-            kabakaba a pensé à toi. Partage ton code avec tes amis et touche une commission
-            à chaque recharge qu&apos;ils font sur l&apos;app. Plus tu partages, plus tu gagnes.
+        <div className="amb-section amb-poster">
+          <div className="amb-eyebrow">
+            Rejoins la communauté <span className="amb-brand">kaba<span>kaba</span></span>
+          </div>
+          <h2>Gagne jusqu&apos;à</h2>
+          <div className="amb-highlight-wrap">
+            <span className="amb-highlight">10 000 FCFA / semaine</span>
+          </div>
+          <p className="amb-poster-desc">
+            Gagne <span className="amb-underline">de l&apos;argent</span> en partageant ton code avec tes amis.
           </p>
-          <div className="amb-hook">Gagne jusqu&apos;à 10 000 FCFA par semaine</div>
+          <p className="amb-poster-desc">Sois récompensé via&nbsp;:</p>
+          <div className="amb-channels">
+            <span>Moov Flooz</span>
+            <span>Mixx by Yas</span>
+            <span>Portefeuille kabakaba</span>
+          </div>
           <button type="button" className="btn-accent" onClick={() => setShowAmbassadorModal(true)}>
             Devenir ambassadeur
           </button>

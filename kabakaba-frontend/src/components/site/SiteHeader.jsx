@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { handleAnchorClick } from '../../utils/scrollTo';
 
+// Ordre conforme à celui des sections dans la page (Home.jsx) :
+// Pourquoi kabakaba → Devenir vendeur → Nos technologies → Ambassadeur → Nos campus.
 const NAV = [
-  { label: 'Nos technologies', href: '#technologies' },
-  { label: 'Pourquoi kabakaba', href: '#pourquoi' },
-  { label: 'Ambassadeur', href: '#ambassadeur' },
-  { label: 'Devenir vendeur', href: '#partenaire' },
-  { label: 'Nos campus', href: '#campus' },
+  { label: 'Pourquoi kabakaba', id: 'pourquoi' },
+  { label: 'Devenir vendeur', id: 'partenaire' },
+  { label: 'Nos technologies', id: 'technologies' },
+  { label: 'Ambassadeur', id: 'ambassadeur' },
+  { label: 'Nos campus', id: 'campus' },
 ];
 
 export default function SiteHeader() {
@@ -15,7 +18,7 @@ export default function SiteHeader() {
   return (
     <header className="site-header">
       <div className="site-header-inner">
-        <a href="#top" className="site-logo">
+        <a href="#top" className="site-logo" onClick={handleAnchorClick('top')}>
           <img
             src="/site/logo-64.webp"
             width="32"
@@ -30,12 +33,12 @@ export default function SiteHeader() {
 
         <nav className="site-nav site-nav-desktop">
           {NAV.map((item) => (
-            <a key={item.href} href={item.href}>{item.label}</a>
+            <a key={item.id} href={`#${item.id}`} onClick={handleAnchorClick(item.id)}>{item.label}</a>
           ))}
         </nav>
 
         <div className="site-header-actions">
-          <a href="#telecharger" className="site-btn-primary">Télécharger l&apos;app</a>
+          <a href="#telecharger" className="site-btn-primary" onClick={handleAnchorClick('telecharger')}>Télécharger l&apos;app</a>
         </div>
 
         <button className="site-burger" onClick={() => setOpen(!open)} aria-label="Menu">
@@ -46,7 +49,11 @@ export default function SiteHeader() {
       {open && (
         <nav className="site-nav-mobile">
           {NAV.map((item) => (
-            <a key={item.href} href={item.href} onClick={() => setOpen(false)}>
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              onClick={(e) => { handleAnchorClick(item.id)(e); setOpen(false); }}
+            >
               {item.label}
             </a>
           ))}
