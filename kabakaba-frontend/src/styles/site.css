@@ -779,4 +779,5 @@
   .partner-text { text-align: left; }
   .partner-form-card { flex: 1 1 auto; width: 100%; }
   .partner-form-row { flex-direction: column; gap: 0; }
+  .partner-form-row > .field { flex: none; }
 }
