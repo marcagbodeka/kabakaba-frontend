@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShieldCheck, Bell, Ticket, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Bell, Ticket } from 'lucide-react';
 import SiteHeader from '../../components/site/SiteHeader';
 import SiteFooter from '../../components/site/SiteFooter';
 import StoreBadges from '../../components/site/StoreBadges';
@@ -16,7 +16,6 @@ const FEATURES = [
   { icon: Bell, tone: 'peach', title: 'Suivi en temps réel', text: 'Notifications à chaque étape, jusqu\u2019à la confirmation de réception.' },
 ];
 
-const TIERS = ['Bronze', 'Argent', 'Or'];
 
 export default function Home() {
   const [showAmbassadorModal, setShowAmbassadorModal] = useState(false);
@@ -163,35 +162,17 @@ export default function Home() {
 
       {/* ── Ambassadeur ──────────────────────────────────────── */}
       <section id="ambassadeur" className="site-section">
-        <div className="amb-section">
-          <div className="amb-grid">
-            <div>
-              <div className="amb-tag">🏆 Programme ambassadeur</div>
-              <h2>Partage ton code, gagne des commissions</h2>
-              <p className="desc">
-                Deviens ambassadeur directement depuis l&apos;app. Tu touches une commission sur
-                chaque recharge de tes affiliés, avec un niveau qui progresse selon ton volume.
-              </p>
-              <div className="tier-row">
-                {TIERS.map((name, i) => (
-                  <div className="tier-step" key={name}>
-                    <div className={`tier tier-${name.toLowerCase()}`}>{name}</div>
-                    {i < TIERS.length - 1 && <ChevronRight size={16} className="tier-arrow" />}
-                  </div>
-                ))}
-              </div>
-              <p className="tier-caption">
-                Plus tu es actif, plus tu montes de niveau — et plus ta commission grimpe.
-              </p>
-              <button type="button" className="btn-accent" onClick={() => setShowAmbassadorModal(true)}>
-                Devenir ambassadeur
-              </button>
-            </div>
-            <div className="amb-phones">
-              <PhoneShot src="/site/screen-ambassadeur-dashboard.webp" alt="Tableau de bord ambassadeur" width={210} height={454} />
-              <PhoneShot src="/site/screen-ambassadeur-historique.webp" alt="Historique des commissions" width={210} height={454} />
-            </div>
-          </div>
+        <div className="amb-section amb-simple">
+          <div className="amb-tag">🏆 Programme ambassadeur</div>
+          <h2>Arrondis tes fins de mois avec kabakaba</h2>
+          <p className="desc">
+            kabakaba a pensé à toi. Partage ton code avec tes amis et touche une commission
+            à chaque recharge qu&apos;ils font sur l&apos;app. Plus tu partages, plus tu gagnes.
+          </p>
+          <div className="amb-hook">Gagne jusqu&apos;à 10 000 FCFA par semaine</div>
+          <button type="button" className="btn-accent" onClick={() => setShowAmbassadorModal(true)}>
+            Devenir ambassadeur
+          </button>
         </div>
       </section>
 
