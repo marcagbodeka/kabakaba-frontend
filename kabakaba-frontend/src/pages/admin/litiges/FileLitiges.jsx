@@ -1,23 +1,82 @@
+import { useEffect, useState } from 'react';
 import { AlertTriangle, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
+import { getDisputesStats, getDisputes } from '../../../services/domain/disputesService';
+import { findAllCampuses } from '../../../services/domain/campusesService';
 
-const litiges = [
-  { id: 'LIT-0041', student: 'Ama Kokou', init: 'init-indigo', initials: 'AK', vendor: 'Cantine Centrale', campus: 'UCAO', campusTone: 'badge-blue', motif: 'Commande préparée mais non reçue', amount: '800 tickets', status: 'Ouvert', time: 'Il y a 1h', urgency: '#EF4444', action: 'Traiter →' },
-  { id: 'LIT-0040', student: 'Komi Dodzi', init: 'init-orange', initials: 'KD', vendor: 'Snack Resto', campus: 'UCAO', campusTone: 'badge-blue', motif: 'Article manquant dans la commande', amount: '200 tickets', status: 'Ouvert', time: 'Il y a 2h', urgency: '#EF4444', action: 'Traiter →' },
-  { id: 'LIT-0039', student: 'Efua Fianu', init: 'init-gray', initials: 'EF', vendor: 'Bistro UL', campus: 'UL', campusTone: 'badge-gray', motif: 'Débit effectué sans livraison', amount: '1 200 tickets', status: 'En cours', time: 'Il y a 4h', urgency: 'var(--orange)', action: 'Continuer →' },
-  { id: 'LIT-0038', student: 'Yawa Agbo', init: 'init-gray', initials: 'YA', vendor: 'Cantine Centrale', campus: 'UCAO', campusTone: 'badge-blue', motif: 'Commande annulée sans remboursement', amount: '500 tickets', status: 'Traité', time: 'Hier', urgency: '#22C55E', action: 'Voir →' },
-  { id: 'LIT-0037', student: 'Mawuli Sossou', init: 'init-gray', initials: 'MS', vendor: 'Kiosque Plus', campus: 'UL', campusTone: 'badge-gray', motif: 'Qualité non conforme', amount: null, status: 'Traité', time: 'Hier', urgency: '#22C55E', action: 'Voir →' },
+const PAGE_SIZE = 10;
+
+const STATUS_PILLS = [
+  { key: 'all', label: 'Tous' },
+  { key: 'OPEN', label: 'Ouverts' },
+  { key: 'IN_PROGRESS', label: 'En cours' },
+  { key: 'RESOLVED', label: 'Traités' },
 ];
-
-const statusStyle = {
-  Ouvert: { background: '#FEE2E2', color: '#B91C1C' },
-  'En cours': { background: '#FFEDD5', color: '#C2410C' },
+const STATUS_LABEL = { OPEN: 'Ouvert', IN_PROGRESS: 'En cours', RESOLVED: 'Traité' };
+const STATUS_STYLE = {
+  OPEN: { background: '#FEE2E2', color: '#B91C1C' },
+  IN_PROGRESS: { background: '#FFEDD5', color: '#C2410C' },
 };
+const URGENCY_COLOR = { OPEN: '#EF4444', IN_PROGRESS: 'var(--orange)', RESOLVED: '#22C55E' };
+const ACTION_LABEL = { OPEN: 'Traiter →', IN_PROGRESS: 'Continuer →', RESOLVED: 'Voir →' };
+
+function initialsOf(name) {
+  return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?';
+}
+function formatAmount(n) {
+  return n != null ? `${Number(n).toLocaleString('fr-FR')} tickets` : '—';
+}
+function timeAgo(iso) {
+  const hours = Math.floor((Date.now() - new Date(iso).getTime()) / 3600000);
+  if (hours < 1) return "À l'instant";
+  if (hours < 24) return `Il y a ${hours}h`;
+  const days = Math.floor(hours / 24);
+  return days === 1 ? 'Hier' : `Il y a ${days}j`;
+}
+function formatDelay(minutes) {
+  if (minutes == null) return '—';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${m} min`;
+}
 
 export default function FileLitiges() {
   const navigate = useNavigate();
+
+  const [stats, setStats] = useState(null);
+  const [campuses, setCampuses] = useState([]);
+
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [campusFilter, setCampusFilter] = useState('all');
+  const [days, setDays] = useState(undefined); // undefined = pas de filtre période
+  const [page, setPage] = useState(1);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [litiges, setLitiges] = useState([]);
+  const [meta, setMeta] = useState({ total: 0, totalPages: 1 });
+
+  useEffect(() => {
+    getDisputesStats().then(setStats).catch(() => setStats(null));
+    findAllCampuses().then(setCampuses).catch(() => setCampuses([]));
+  }, []);
+
+  useEffect(() => { setPage(1); }, [statusFilter, campusFilter, days]);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    getDisputes(page, PAGE_SIZE, {
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      campusId: campusFilter !== 'all' ? campusFilter : undefined,
+      days,
+    })
+      .then((res) => { setLitiges(res.data); setMeta(res.meta); })
+      .catch((err) => setError(err.message || 'Impossible de charger les litiges.'))
+      .finally(() => setLoading(false));
+  }, [page, statusFilter, campusFilter, days]);
 
   return (
     <>
@@ -27,7 +86,9 @@ export default function FileLitiges() {
           <div className="page-header" style={{ marginBottom: 0 }}>
             <div className="eyebrow">Admin web · Litiges</div>
             <h1>Litiges</h1>
-            <p>8 litiges ouverts · 3 en cours de traitement · 47 traités ce mois</p>
+            <p>
+              {stats ? `${stats.open} litige${stats.open === 1 ? '' : 's'} ouvert${stats.open === 1 ? '' : 's'} · ${stats.inProgress} en cours de traitement · ${stats.resolvedThisMonth} traité${stats.resolvedThisMonth === 1 ? '' : 's'} ce mois` : '…'}
+            </p>
           </div>
           <button className="btn-secondary-sm" onClick={() => navigate('/admin/litiges/suspensions')}>
             <ShieldAlert size={15} /> Comptes suspendus
@@ -37,23 +98,23 @@ export default function FileLitiges() {
         <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
           <div className="kpi-card">
             <div className="kpi-label">Ouverts</div>
-            <div className="kpi-value" style={{ color: '#DC2626' }}>8</div>
-            <div className="kpi-sub">dont 2 urgents</div>
+            <div className="kpi-value" style={{ color: '#DC2626' }}>{stats ? stats.open : '…'}</div>
+            <div className="kpi-sub">à traiter</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">En cours</div>
-            <div className="kpi-value" style={{ color: 'var(--orange)' }}>3</div>
+            <div className="kpi-value" style={{ color: 'var(--orange)' }}>{stats ? stats.inProgress : '…'}</div>
             <div className="kpi-sub">prise en charge</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Traités ce mois</div>
-            <div className="kpi-value">47</div>
-            <div className="kpi-sub">dont 38 remboursés</div>
+            <div className="kpi-value">{stats ? stats.resolvedThisMonth : '…'}</div>
+            <div className="kpi-sub">{stats ? `dont ${stats.refundedThisMonth} remboursés` : '—'}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Délai moyen</div>
-            <div className="kpi-value">2h14</div>
-            <div className="kpi-sub">de résolution</div>
+            <div className="kpi-value">{stats ? formatDelay(stats.avgResolutionMinutes) : '…'}</div>
+            <div className="kpi-sub">de résolution ce mois</div>
           </div>
         </div>
 
@@ -61,27 +122,26 @@ export default function FileLitiges() {
           <div className="filter-group">
             <label className="filter-label">Statut</label>
             <div className="tab-pills">
-              <button className="pill active">Tous</button>
-              <button className="pill">Ouverts</button>
-              <button className="pill">En cours</button>
-              <button className="pill">Traités</button>
+              {STATUS_PILLS.map((p) => (
+                <button key={p.key} className={`pill${statusFilter === p.key ? ' active' : ''}`} onClick={() => setStatusFilter(p.key)}>{p.label}</button>
+              ))}
             </div>
           </div>
           <div className="filter-group">
             <label className="filter-label">Campus</label>
-            <select className="filter-select"><option>Tous les campus</option><option>UCAO</option><option>UL</option></select>
+            <select className="filter-select" value={campusFilter} onChange={(e) => setCampusFilter(e.target.value)}>
+              <option value="all">Tous les campus</option>
+              {campuses.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
           </div>
           <div className="filter-group">
             <label className="filter-label">Période</label>
-            <select className="filter-select"><option>Aujourd&apos;hui</option><option>7 jours</option><option>30 jours</option></select>
-          </div>
-          <div className="filter-group">
-            <label className="filter-label">Type</label>
-            <div className="tab-pills">
-              <button className="pill active">Tous</button>
-              <button className="pill">Commande</button>
-              <button className="pill">Remboursement</button>
-            </div>
+            <select className="filter-select" value={days ?? ''} onChange={(e) => setDays(e.target.value ? Number(e.target.value) : undefined)}>
+              <option value="">Toutes</option>
+              <option value="1">Aujourd&apos;hui</option>
+              <option value="7">7 jours</option>
+              <option value="30">30 jours</option>
+            </select>
           </div>
         </div>
 
@@ -95,55 +155,64 @@ export default function FileLitiges() {
                 </tr>
               </thead>
               <tbody>
-                {litiges.map((l) => (
-                  <tr
-                    key={l.id}
-                    onClick={() => navigate(`/admin/litiges/${l.id}`)}
-                    style={{ cursor: 'pointer', borderLeft: `3px solid ${l.urgency}` }}
-                  >
-                    <td style={{ fontWeight: 700, color: 'var(--indigo)' }}>#{l.id}</td>
-                    <td className="name-cell">
-                      <span className={`initials ${l.init}`} style={{ width: 28, height: 28, fontSize: 11 }}>{l.initials}</span>
-                      {l.student}
-                    </td>
-                    <td style={{ fontWeight: 500 }}>{l.vendor}</td>
-                    <td><span className={l.campusTone}>{l.campus}</span></td>
-                    <td style={{ maxWidth: 160, fontSize: 13, color: '#475569' }}>{l.motif}</td>
-                    <td style={{ fontWeight: l.status === 'Traité' ? 500 : 700, color: l.status === 'Traité' ? 'var(--muted)' : '#DC2626' }}>
-                      {l.amount || '—'}
-                    </td>
-                    <td>
-                      {l.status === 'Traité' ? (
-                        <span className="badge-green">Traité</span>
-                      ) : (
-                        <span style={{ ...statusStyle[l.status], fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20 }}>
-                          {l.status}
-                        </span>
-                      )}
-                    </td>
-                    <td style={{ fontSize: 13, color: 'var(--muted)' }}>{l.time}</td>
-                    <td>
-                      <button
-                        className="action-btn"
-                        style={l.status === 'Traité' ? { color: 'var(--muted)', borderColor: 'var(--border)' } : undefined}
-                        onClick={(e) => { e.stopPropagation(); navigate(`/admin/litiges/${l.id}`); }}
-                      >
-                        {l.action}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {loading && <tr><td colSpan={9} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
+                {error && <tr><td colSpan={9} style={{ textAlign: 'center', padding: '24px 0', color: '#DC2626' }}>{error}</td></tr>}
+                {!loading && !error && litiges.length === 0 && (
+                  <tr><td colSpan={9} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Aucun litige ne correspond à ces filtres.</td></tr>
+                )}
+                {!loading && !error && litiges.map((l) => {
+                  const studentName = `${l.student?.firstName ?? ''} ${l.student?.lastName ?? ''}`.trim() || '—';
+                  const shortRef = l.id.slice(0, 8).toUpperCase();
+                  return (
+                    <tr
+                      key={l.id}
+                      onClick={() => navigate(`/admin/litiges/${l.id}`)}
+                      style={{ cursor: 'pointer', borderLeft: `3px solid ${URGENCY_COLOR[l.status]}` }}
+                    >
+                      <td style={{ fontWeight: 700, color: 'var(--indigo)' }}>#{shortRef}</td>
+                      <td className="name-cell">
+                        <span className="initials init-indigo" style={{ width: 28, height: 28, fontSize: 11 }}>{initialsOf(studentName)}</span>
+                        {studentName}
+                      </td>
+                      <td style={{ fontWeight: 500 }}>{l.vendor?.canteenName || '—'}</td>
+                      <td>{l.student?.campus?.name ? <span className="badge-blue">{l.student.campus.name}</span> : <span style={{ color: 'var(--muted)' }}>—</span>}</td>
+                      <td style={{ maxWidth: 160, fontSize: 13, color: '#475569' }}>{l.reason}</td>
+                      <td style={{ fontWeight: l.status === 'RESOLVED' ? 500 : 700, color: l.status === 'RESOLVED' ? 'var(--muted)' : '#DC2626' }}>
+                        {formatAmount(l.ticketAmount)}
+                      </td>
+                      <td>
+                        {l.status === 'RESOLVED' ? (
+                          <span className="badge-green">Traité</span>
+                        ) : (
+                          <span style={{ ...STATUS_STYLE[l.status], fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20 }}>
+                            {STATUS_LABEL[l.status]}
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ fontSize: 13, color: 'var(--muted)' }}>{timeAgo(l.createdAt)}</td>
+                      <td>
+                        <button
+                          className="action-btn"
+                          style={l.status === 'RESOLVED' ? { color: 'var(--muted)', borderColor: 'var(--border)' } : undefined}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/admin/litiges/${l.id}`); }}
+                        >
+                          {ACTION_LABEL[l.status]}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
           <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, color: 'var(--muted)' }}>
-            <span>Affichage 1–5 sur 58 litiges</span>
+            <span>Affichage {meta.total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, meta.total)} sur {meta.total} litige{meta.total === 1 ? '' : 's'}</span>
             <div style={{ display: 'flex', gap: 6 }}>
-              <button className="icon-btn">←</button>
-              <button className="icon-btn" style={{ background: 'var(--indigo)', color: '#fff', borderColor: 'var(--indigo)' }}>1</button>
-              <button className="icon-btn">2</button>
-              <button className="icon-btn">3</button>
-              <button className="icon-btn">→</button>
+              <button className="icon-btn" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>←</button>
+              {Array.from({ length: Math.min(meta.totalPages, 7) }, (_, i) => i + 1).map((n) => (
+                <button key={n} className="icon-btn" style={n === page ? { background: 'var(--indigo)', color: '#fff', borderColor: 'var(--indigo)' } : undefined} onClick={() => setPage(n)}>{n}</button>
+              ))}
+              <button className="icon-btn" disabled={page >= meta.totalPages} onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}>→</button>
             </div>
           </div>
         </div>
