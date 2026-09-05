@@ -9,7 +9,10 @@ import { findAllCampuses } from '../../../services/domain/campusesService';
 import { getVendors } from '../../../services/domain/vendorsService';
 
 const PAGE_SIZE = 10;
-const ESCROWED_STATUSES = ['PENDING', 'ACCEPTED', 'IN_PREPARATION', 'READY'];
+// La libération d'escrow (crédit du vendeur) se produit dès READY, pas à
+// RECEIVED/AUTO_RECEIVED — voir orders.service.ts (backend). READY est donc
+// exclu d'ici : une commande prête n'est plus en séquestre.
+const ESCROWED_STATUSES = ['PENDING', 'ACCEPTED', 'IN_PREPARATION'];
 
 const TYPE_LABEL = {
   DEPOSIT: 'Recharge', ESCROW_LOCK: 'Séquestre', ESCROW_RELEASE: 'Libération séquestre',

@@ -16,6 +16,11 @@ export function getDisputes(page = 1, limit = 10, filters = {}) {
   return apiFetch(`/disputes?${params.toString()}`);
 }
 
+// GET /disputes/:id/context — détail enrichi (parties, timeline, signaux).
+export function getDisputeContext(id) {
+  return apiFetch(`/disputes/${id}/context`);
+}
+
 // GET /disputes/:id
 export function getDispute(id) {
   return apiFetch(`/disputes/${id}`);
