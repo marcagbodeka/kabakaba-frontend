@@ -123,11 +123,9 @@ export default function AmbassadeurFiche() {
               <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-.02em' }}>{fullName}</h1>
               <span className={`level-badge ${LEVEL_KEY[identity.level]}`}>{LEVEL_LABEL[identity.level]}</span>
               {isActive ? (
-                <span className="badge-green"><span className="status-dot dot-green" style={{ marginRight: 4 }} />Actif</span>
+                <span className="badge-green">Actif</span>
               ) : (
-                <span style={{ background: '#FEE2E2', color: '#B91C1C', fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                  <span className="status-dot" style={{ background: '#EF4444' }} />Suspendu
-                </span>
+                <span className="badge-red">Suspendu</span>
               )}
             </div>
             <p style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>

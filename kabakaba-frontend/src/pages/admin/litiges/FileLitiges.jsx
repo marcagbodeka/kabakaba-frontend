@@ -3,6 +3,7 @@ import { AlertTriangle, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
+import DateRangePicker from '../../../components/DateRangePicker';
 import { getDisputesStats, getDisputes } from '../../../services/domain/disputesService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
 
@@ -15,10 +16,10 @@ const STATUS_PILLS = [
   { key: 'RESOLVED', label: 'Traités' },
 ];
 const STATUS_LABEL = { OPEN: 'Ouvert', IN_PROGRESS: 'En cours', RESOLVED: 'Traité' };
-const STATUS_STYLE = {
-  OPEN: { background: '#FEE2E2', color: '#B91C1C' },
-  IN_PROGRESS: { background: '#FFEDD5', color: '#C2410C' },
-};
+// Classes de badge partagées (styles/dashboard.css) — remplace les styles
+// inline ad hoc qui n'avaient ni le point de statut ni le même padding que
+// badge-green (colonne "Statut" désalignée selon la ligne).
+const STATUS_BADGE_CLASS = { OPEN: 'badge-red', IN_PROGRESS: 'badge-orange', RESOLVED: 'badge-green' };
 const URGENCY_COLOR = { OPEN: '#EF4444', IN_PROGRESS: 'var(--orange)', RESOLVED: '#22C55E' };
 const ACTION_LABEL = { OPEN: 'Traiter →', IN_PROGRESS: 'Continuer →', RESOLVED: 'Voir →' };
 
@@ -41,6 +42,16 @@ function formatDelay(minutes) {
   const m = minutes % 60;
   return h > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${m} min`;
 }
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
 
 export default function FileLitiges() {
   const navigate = useNavigate();
@@ -50,7 +61,8 @@ export default function FileLitiges() {
 
   const [statusFilter, setStatusFilter] = useState('all');
   const [campusFilter, setCampusFilter] = useState('all');
-  const [days, setDays] = useState(undefined); // undefined = pas de filtre période
+  // undefined = pas de filtre période (tous les litiges, quelle que soit la date)
+  const [range, setRange] = useState(undefined);
   const [page, setPage] = useState(1);
 
   const [loading, setLoading] = useState(true);
@@ -63,7 +75,7 @@ export default function FileLitiges() {
     findAllCampuses().then(setCampuses).catch(() => setCampuses([]));
   }, []);
 
-  useEffect(() => { setPage(1); }, [statusFilter, campusFilter, days]);
+  useEffect(() => { setPage(1); }, [statusFilter, campusFilter, range]);
 
   useEffect(() => {
     setLoading(true);
@@ -71,16 +83,23 @@ export default function FileLitiges() {
     getDisputes(page, PAGE_SIZE, {
       status: statusFilter !== 'all' ? statusFilter : undefined,
       campusId: campusFilter !== 'all' ? campusFilter : undefined,
-      days,
-    })
+    }, range)
       .then((res) => { setLitiges(res.data); setMeta(res.meta); })
       .catch((err) => setError(err.message || 'Impossible de charger les litiges.'))
       .finally(() => setLoading(false));
-  }, [page, statusFilter, campusFilter, days]);
+  }, [page, statusFilter, campusFilter, range]);
 
   return (
     <>
-      <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Gestion' }, { label: 'Litiges' }]} />
+      <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Gestion' }, { label: 'Litiges' }]} hidePeriodSelect>
+        <DateRangePicker
+          value={range ?? { from: daysAgo(29), to: startOfDay(new Date()) }}
+          onChange={setRange}
+        />
+        {range && (
+          <button className="btn-secondary-sm" onClick={() => setRange(undefined)}>Toutes périodes</button>
+        )}
+      </Topbar>
       <PageContent>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div className="page-header" style={{ marginBottom: 0 }}>
@@ -134,15 +153,6 @@ export default function FileLitiges() {
               {campuses.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
-          <div className="filter-group">
-            <label className="filter-label">Période</label>
-            <select className="filter-select" value={days ?? ''} onChange={(e) => setDays(e.target.value ? Number(e.target.value) : undefined)}>
-              <option value="">Toutes</option>
-              <option value="1">Aujourd&apos;hui</option>
-              <option value="7">7 jours</option>
-              <option value="30">30 jours</option>
-            </select>
-          </div>
         </div>
 
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -171,23 +181,17 @@ export default function FileLitiges() {
                     >
                       <td style={{ fontWeight: 700, color: 'var(--indigo)' }}>#{shortRef}</td>
                       <td className="name-cell">
-                        <span className="initials init-indigo" style={{ width: 28, height: 28, fontSize: 11 }}>{initialsOf(studentName)}</span>
+                        <span className="initials init-indigo">{initialsOf(studentName)}</span>
                         {studentName}
                       </td>
                       <td style={{ fontWeight: 500 }}>{l.vendor?.canteenName || '—'}</td>
                       <td>{l.student?.campus?.name ? <span className="badge-blue">{l.student.campus.name}</span> : <span style={{ color: 'var(--muted)' }}>—</span>}</td>
-                      <td style={{ maxWidth: 160, fontSize: 13, color: '#475569' }}>{l.reason}</td>
+                      <td style={{ maxWidth: 220, minWidth: 160, whiteSpace: 'normal', wordBreak: 'break-word', fontSize: 13, color: '#475569', lineHeight: 1.4 }}>{l.reason}</td>
                       <td style={{ fontWeight: l.status === 'RESOLVED' ? 500 : 700, color: l.status === 'RESOLVED' ? 'var(--muted)' : '#DC2626' }}>
                         {formatAmount(l.ticketAmount)}
                       </td>
                       <td>
-                        {l.status === 'RESOLVED' ? (
-                          <span className="badge-green">Traité</span>
-                        ) : (
-                          <span style={{ ...STATUS_STYLE[l.status], fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20 }}>
-                            {STATUS_LABEL[l.status]}
-                          </span>
-                        )}
+                        <span className={STATUS_BADGE_CLASS[l.status]}>{STATUS_LABEL[l.status]}</span>
                       </td>
                       <td style={{ fontSize: 13, color: 'var(--muted)' }}>{timeAgo(l.createdAt)}</td>
                       <td>

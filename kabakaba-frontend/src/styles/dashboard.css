@@ -139,7 +139,8 @@
 .badge-orange,
 .badge-red,
 .badge-amber,
-.badge-gray {
+.badge-gray,
+.badge-blue {
   font-size: 11.5px;
   font-weight: 700;
   padding: 4px 10px 4px 8px;
@@ -154,7 +155,8 @@
 .badge-orange::before,
 .badge-red::before,
 .badge-amber::before,
-.badge-gray::before {
+.badge-gray::before,
+.badge-blue::before {
   content: "";
   width: 6px;
   height: 6px;
@@ -176,6 +178,11 @@
 
 .badge-gray { background: #EEF0F4; color: #5B6577; }
 .badge-gray::before { background: #94A0B4; }
+
+/* Utilisé pour les tags "campus" dans les tableaux — manquait ici alors
+   qu'il est référencé dans une douzaine de pages (badges non stylés). */
+.badge-blue { background: var(--indigo-soft); color: var(--indigo); }
+.badge-blue::before { background: var(--indigo); }
 
 .badge-black { background: var(--indigo-dark); color: #fff; padding: 3px 9px; border-radius: 6px; font-size: 12px; }
 
@@ -803,6 +810,45 @@ table tr.rank1 td {
   color: var(--text);
   font-family: inherit;
   background: var(--surface);
+}
+
+/* Barre de recherche générique (Topbar ou filter-bar) — utilisée dans
+   plusieurs pages mais jusqu'ici jamais stylée : les champs de recherche
+   s'affichaient sans bordure ni icône positionnée. */
+.global-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.global-search-input {
+  height: 34px;
+  width: 200px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0 12px 0 32px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: inherit;
+  background: var(--surface);
+}
+
+.global-search-input:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-color: var(--border-strong);
+}
+
+.global-search-input:disabled {
+  color: var(--muted);
+  background: #F8FAFC;
+}
+
+.global-search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--muted-light);
+  pointer-events: none;
 }
 
 .tab-pills {

@@ -3,6 +3,8 @@ import { Trophy, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
+import DateRangePicker from '../../../components/DateRangePicker';
+import { chartPeriodTitle } from '../../../utils/chartLabels';
 import { getAmbassadorRanking } from '../../../services/domain/analyticsService';
 import { getPendingAmbassadors } from '../../../services/domain/applicationsService';
 
@@ -24,6 +26,18 @@ function formatFcfa(n) {
   return `${Number(n || 0).toLocaleString('fr-FR')} FCFA`;
 }
 
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
+
 export default function ListeAmbassadeurs() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -32,6 +46,7 @@ export default function ListeAmbassadeurs() {
   const [ranking, setRanking] = useState([]);
   const [pendingCount, setPendingCount] = useState(0);
 
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [levelFilter, setLevelFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [campusFilter, setCampusFilter] = useState('all');
@@ -43,7 +58,7 @@ export default function ListeAmbassadeurs() {
       setError(null);
       try {
         const [rankingRes, pending] = await Promise.all([
-          getAmbassadorRanking(30),
+          getAmbassadorRanking(undefined, range),
           getPendingAmbassadors(),
         ]);
         setSummary(rankingRes.summary);
@@ -55,7 +70,7 @@ export default function ListeAmbassadeurs() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [range]);
 
   const campuses = useMemo(
     () => Array.from(new Set(ranking.map((a) => a.campusName).filter(Boolean))).sort(),
@@ -80,6 +95,8 @@ export default function ListeAmbassadeurs() {
     setPage(1);
   };
 
+  const rangeDays = Math.max(1, Math.round((range.to - range.from) / 86400000) + 1);
+
   if (loading) {
     return (
       <>
@@ -100,16 +117,17 @@ export default function ListeAmbassadeurs() {
 
   return (
     <>
-      <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]}>
+      <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]} hidePeriodSelect>
+        <DateRangePicker value={range} onChange={(r) => { setRange(r); setPage(1); }} />
         <button className="btn-primary-sm" onClick={() => navigate('/admin/ambassadeurs/demandes')}>
           {pendingCount} demande{pendingCount === 1 ? '' : 's'} en attente
         </button>
       </Topbar>
       <PageContent>
         <div className="page-header">
-      <div className="eyebrow">Admin web · Ambassadeurs</div>
+          <div className="eyebrow">Admin web · Ambassadeurs</div>
           <h1>Ambassadeurs</h1>
-          <p>{summary.activeAmbassadors} ambassadeurs actifs · {summary.suspendedAmbassadors} suspendus · {pendingCount} demande{pendingCount === 1 ? '' : 's'} en attente</p>
+          <p>{chartPeriodTitle(`${summary.activeAmbassadors} actifs · ${summary.suspendedAmbassadors} suspendus · ${pendingCount} demande${pendingCount === 1 ? '' : 's'} en attente`, rangeDays)}</p>
         </div>
 
         <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
@@ -121,7 +139,7 @@ export default function ListeAmbassadeurs() {
           <div className="kpi-card">
             <div className="kpi-label">Niveau Or</div>
             <div className="kpi-value" style={{ color: '#F59E0B' }}>{summary.levelCounts.GOLD}</div>
-            <div className="kpi-sub">vol. 30j &gt; 150 000 FCFA</div>
+            <div className="kpi-sub">vol. période &gt; 150 000 FCFA</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Niveau Argent</div>
@@ -185,7 +203,7 @@ export default function ListeAmbassadeurs() {
                   return (
                     <tr key={a.id} onClick={() => navigate(`/admin/ambassadeurs/${a.id}`)} style={{ cursor: 'pointer', opacity: isActive ? 1 : 0.7 }}>
                       <td className="name-cell">
-                        <span className="initials init-indigo" style={{ width: 34, height: 34, borderRadius: 10 }}>{initialsOf(a.name)}</span>
+                        <span className="initials init-indigo">{initialsOf(a.name)}</span>
                         <div>
                           <div style={{ fontWeight: 600 }}>{a.name}</div>
                           <div style={{ fontSize: 12, color: 'var(--muted)' }}>{a.phone || '—'}</div>
@@ -198,11 +216,9 @@ export default function ListeAmbassadeurs() {
                       <td><span className={isActive ? 'badge-green' : 'badge-gray'}>{a.activeAffiliates} actif{a.activeAffiliates === 1 ? '' : 's'}</span></td>
                       <td>
                         {isActive ? (
-                          <span className="badge-green"><span className="status-dot dot-green" style={{ marginRight: 4 }} />Actif</span>
+                          <span className="badge-green">Actif</span>
                         ) : (
-                          <span style={{ background: '#FEE2E2', color: '#B91C1C', fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                            <span className="status-dot" style={{ background: '#EF4444' }} />Suspendu
-                          </span>
+                          <span className="badge-red">Suspendu</span>
                         )}
                       </td>
                       <td onClick={(e) => e.stopPropagation()}>

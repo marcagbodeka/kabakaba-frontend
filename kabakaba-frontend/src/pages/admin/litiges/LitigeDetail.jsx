@@ -8,7 +8,10 @@ import { updateUser } from '../../../services/domain/usersService';
 import { useAuth } from '../../../context/AuthContext';
 
 const STATUS_LABEL = { OPEN: 'Ouvert', IN_PROGRESS: 'En cours', RESOLVED: 'Traité' };
-const STATUS_TONE = { OPEN: { background: '#FEE2E2', color: '#B91C1C' }, IN_PROGRESS: { background: '#FFEDD5', color: '#C2410C' } };
+// Classes de badge partagées (styles/dashboard.css) — cohérentes avec la
+// liste des litiges, plutôt que des styles inline qui n'avaient ni le
+// point de statut ni le padding des autres badges de la page.
+const STATUS_BADGE_CLASS = { OPEN: 'badge-red', IN_PROGRESS: 'badge-orange', RESOLVED: 'badge-green' };
 
 const ORDER_STEP_LABEL = {
   PENDING: 'Commande passée', ACCEPTED: 'Acceptée par le vendeur', IN_PREPARATION: 'En préparation',
@@ -118,7 +121,7 @@ export default function LitigeDetail() {
       <Topbar
         icon={AlertTriangle}
         breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }, { label: `#${shortRef}` }]}
-        badge={{ text: STATUS_LABEL[dispute.status] }}
+        badge={{ text: STATUS_LABEL[dispute.status], tone: dispute.status === 'OPEN' ? 'red' : 'default' }}
       >
         <button className="btn-secondary-sm" onClick={() => navigate('/admin/litiges')}>← Retour</button>
       </Topbar>
@@ -128,9 +131,7 @@ export default function LitigeDetail() {
           {isResolved ? (
             <span className="badge-green">Traité</span>
           ) : (
-            <span style={{ ...STATUS_TONE[dispute.status], fontSize: 13, fontWeight: 600, padding: '5px 12px', borderRadius: 20 }}>
-              {STATUS_LABEL[dispute.status]}
-            </span>
+            <span className={STATUS_BADGE_CLASS[dispute.status]}>{STATUS_LABEL[dispute.status]}</span>
           )}
           <span style={{ fontSize: 14, color: 'var(--muted)' }}>Signalé {timeAgo(dispute.createdAt)} · {vendor.canteenName} · {vendor.campusName}</span>
         </div>

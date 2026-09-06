@@ -3,6 +3,7 @@ import { Monitor, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
+import DateRangePicker from '../../../components/DateRangePicker';
 import { getTransactionsStats, getActiveDebts, getTransactions } from '../../../services/domain/transactionsService';
 import { getOrders } from '../../../services/domain/ordersService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
@@ -19,6 +20,17 @@ const TYPE_LABEL = {
   PAYMENT: 'Commande', REFUND: 'Remboursement', WITHDRAWAL: 'Retrait',
   COMMISSION: 'Commission', AMBASSADOR_COMMISSION: 'Commission ambassadeur',
   DEBT_RECOVERY: 'Recouvrement créance', TRANSFER: 'Transfert',
+};
+// Classe de badge par type — cohérent avec les badges utilisés partout
+// ailleurs dans le dashboard (styles/dashboard.css), plus de styles inline
+// ad hoc qui dupliquaient (mal) badge-red / badge-green.
+const TYPE_BADGE_CLASS = {
+  REFUND: 'badge-red',
+  WITHDRAWAL: 'badge-green',
+  DEPOSIT: 'badge-peach',
+  ESCROW_LOCK: 'badge-amber',
+  ESCROW_RELEASE: 'badge-amber',
+  PAYMENT: 'badge-blue',
 };
 // Unité d'affichage par type : les mouvements d'argent (recharge, retrait,
 // commissions) sont en FCFA ; les mouvements liés aux commandes (séquestre,
@@ -47,14 +59,19 @@ function formatDateTime(iso) {
 function minutesAgo(iso) {
   return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
 }
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
 
 function typeBadge(type) {
-  if (type === 'REFUND') return <span style={{ background: '#FEE2E2', color: '#B91C1C', fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20 }}>{TYPE_LABEL[type]}</span>;
-  if (type === 'WITHDRAWAL') return <span style={{ background: '#DCFCE7', color: '#166534', fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20 }}>{TYPE_LABEL[type]}</span>;
-  if (type === 'DEPOSIT') return <span className="badge-peach">{TYPE_LABEL[type]}</span>;
-  if (type === 'ESCROW_LOCK' || type === 'ESCROW_RELEASE') return <span className="badge-amber">{TYPE_LABEL[type]}</span>;
-  if (type === 'PAYMENT') return <span className="badge-blue">{TYPE_LABEL[type]}</span>;
-  return <span className="badge-gray">{TYPE_LABEL[type] || type}</span>;
+  return <span className={TYPE_BADGE_CLASS[type] || 'badge-gray'}>{TYPE_LABEL[type] || type}</span>;
 }
 
 export default function Transactions() {
@@ -66,6 +83,11 @@ export default function Transactions() {
 
   const [campuses, setCampuses] = useState([]);
   const [vendors, setVendors] = useState([]);
+
+  // Plage de dates — s'applique aux onglets basés sur un historique
+  // ("Toutes", "Remboursements"). Séquestres et Créances sont des positions
+  // ouvertes actuelles : la notion de période ne s'y applique pas.
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
 
   // Onglet "Toutes"
   const [typeFilter, setTypeFilter] = useState('all');
@@ -83,6 +105,7 @@ export default function Transactions() {
 
   // Onglet "Remboursements"
   const [refundLoading, setRefundLoading] = useState(true);
+  const [refundError, setRefundError] = useState(null);
   const [refundOrders, setRefundOrders] = useState([]);
 
   // Onglet "Créances"
@@ -95,7 +118,7 @@ export default function Transactions() {
     getVendors(1, 100).then((res) => setVendors(res.data)).catch(() => setVendors([]));
   }, []);
 
-  useEffect(() => { setPage(1); }, [typeFilter, campusFilter, vendorFilter]);
+  useEffect(() => { setPage(1); }, [typeFilter, campusFilter, vendorFilter, range]);
 
   useEffect(() => {
     if (tab !== 'all') return;
@@ -105,11 +128,11 @@ export default function Transactions() {
       type: typeFilter !== 'all' ? typeFilter : undefined,
       campusId: campusFilter !== 'all' ? campusFilter : undefined,
       vendorId: vendorFilter !== 'all' ? vendorFilter : undefined,
-    })
+    }, range)
       .then((res) => { setTransactions(res.data); setTxMeta(res.meta); })
       .catch((err) => setTxError(err.message || 'Impossible de charger les transactions.'))
       .finally(() => setTxLoading(false));
-  }, [tab, page, typeFilter, campusFilter, vendorFilter]);
+  }, [tab, page, typeFilter, campusFilter, vendorFilter, range]);
 
   useEffect(() => {
     if (tab !== 'seq') return;
@@ -122,10 +145,12 @@ export default function Transactions() {
   useEffect(() => {
     if (tab !== 'remb') return;
     setRefundLoading(true);
-    getOrders(1, 50, { status: 'REFUNDED' })
+    setRefundError(null);
+    getOrders(1, 50, { status: 'REFUNDED' }, range)
       .then((res) => setRefundOrders(res.data))
+      .catch((err) => setRefundError(err.message || 'Impossible de charger les remboursements.'))
       .finally(() => setRefundLoading(false));
-  }, [tab]);
+  }, [tab, range]);
 
   useEffect(() => {
     if (tab !== 'creances') return;
@@ -134,18 +159,21 @@ export default function Transactions() {
   }, [tab]);
 
   const escrowTotal = useMemo(() => escrowOrders.reduce((s, o) => s + Number(o.escrowAmount), 0), [escrowOrders]);
+  const showDateFilter = tab === 'all' || tab === 'remb';
 
   return (
     <>
-      <Topbar icon={Monitor} breadcrumb={[{ label: 'Transactions' }]} />
+      <Topbar icon={Monitor} breadcrumb={[{ label: 'Transactions' }]} hidePeriodSelect>
+        {showDateFilter && <DateRangePicker value={range} onChange={setRange} />}
+      </Topbar>
       <PageContent>
         <div className="page-header">
-      <div className="eyebrow">Admin web · Transactions</div>
+          <div className="eyebrow">Admin web · Transactions</div>
           <h1>Transactions</h1>
           <p>Suivi en temps réel · Séquestres, débits, remboursements, créances</p>
         </div>
 
-        {statsError && <p style={{ color: '#DC2626', fontSize: 13, marginBottom: 12 }}>{statsError}</p>}
+        {statsError && <div className="notice-banner notice-error" style={{ marginBottom: 12 }}>{statsError}</div>}
 
         <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
           <div className="kpi-card">
@@ -231,7 +259,7 @@ export default function Transactions() {
                         <tr key={t.id} onClick={() => navigate(`/admin/transactions/${t.id}`)} style={{ cursor: 'pointer' }}>
                           <td style={{ fontWeight: 700, color: 'var(--indigo)', fontFamily: 'monospace', fontSize: 12 }}>#{t.id.slice(0, 8)}</td>
                           <td>{typeBadge(t.type)}</td>
-                          <td className="name-cell"><span className="initials init-indigo" style={{ width: 24, height: 24, borderRadius: 6, fontSize: 10 }}>{initialsOf(personName)}</span>{personName}</td>
+                          <td className="name-cell"><span className="initials init-indigo">{initialsOf(personName)}</span>{personName}</td>
                           <td style={{ fontSize: 13, color: t.relatedOrder?.vendor?.canteenName ? 'inherit' : 'var(--muted)' }}>{t.relatedOrder?.vendor?.canteenName || '—'}</td>
                           <td style={{ fontWeight: 700, color: t.type === 'REFUND' ? '#DC2626' : t.type === 'WITHDRAWAL' ? '#22C55E' : 'var(--indigo)' }}>
                             {t.type === 'REFUND' ? '−' : ''}{formatAmount(t.amount, t.type)}
@@ -297,12 +325,16 @@ export default function Transactions() {
 
         {tab === 'remb' && (
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-            <div className="table-scroll">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 22px 0' }}>
+              <div className="card-title" style={{ marginBottom: 0 }}>Remboursements</div>
+            </div>
+            {refundError && <div className="notice-banner notice-error" style={{ margin: '14px 22px 0' }}>{refundError}</div>}
+            <div className="table-scroll" style={{ marginTop: 16 }}>
               <table>
                 <thead><tr><th>Réf.</th><th>Étudiant</th><th>Vendeur</th><th>Montant</th><th>Date</th><th>Motif</th></tr></thead>
                 <tbody>
                   {refundLoading && <tr><td colSpan={6} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
-                  {!refundLoading && refundOrders.length === 0 && <tr><td colSpan={6} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Aucun remboursement.</td></tr>}
+                  {!refundLoading && !refundError && refundOrders.length === 0 && <tr><td colSpan={6} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Aucun remboursement sur cette période.</td></tr>}
                   {refundOrders.map((o) => {
                     const studentName = `${o.student?.firstName ?? ''} ${o.student?.lastName ?? ''}`.trim() || '—';
                     return (
@@ -319,6 +351,7 @@ export default function Transactions() {
                 </tbody>
               </table>
             </div>
+            <div style={{ height: 20 }} />
           </div>
         )}
 

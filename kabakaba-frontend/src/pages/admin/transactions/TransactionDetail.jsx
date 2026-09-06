@@ -13,7 +13,8 @@ const TYPE_LABEL = {
 };
 const TICKET_TYPES = new Set(['ESCROW_LOCK', 'ESCROW_RELEASE', 'PAYMENT', 'REFUND', 'TRANSFER']);
 const TYPE_BADGE_CLASS = {
-  DEPOSIT: 'badge-peach', PAYMENT: 'badge-blue', ESCROW_LOCK: 'badge-amber', ESCROW_RELEASE: 'badge-amber',
+  REFUND: 'badge-red', WITHDRAWAL: 'badge-green', DEPOSIT: 'badge-peach',
+  PAYMENT: 'badge-blue', ESCROW_LOCK: 'badge-amber', ESCROW_RELEASE: 'badge-amber',
 };
 const COMPLETED_LABEL = {
   PAYMENT: 'Débité', DEPOSIT: 'Confirmé', REFUND: 'Effectué', WITHDRAWAL: 'Versé',

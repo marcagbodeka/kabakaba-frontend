@@ -216,7 +216,7 @@ export default function CantineFiche() {
       <Topbar
         icon={Utensils}
         breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: vendor.canteenName }]}
-        badge={{ text: `${vendor.isActive ? 'Actif' : 'Suspendu'} · ${vendor.isOpen ? 'Ouverte' : 'Fermée'}` }}
+        badge={{ text: `${vendor.isActive ? 'Actif' : 'Suspendu'} · ${vendor.isOpen ? 'Ouverte' : 'Fermée'}`, tone: vendor.isActive ? 'default' : 'red' }}
       >
         <button className="btn-secondary-sm" onClick={() => navigate('/admin/cantines')}>← Retour à la liste</button>
       </Topbar>
@@ -327,7 +327,7 @@ export default function CantineFiche() {
                 <div style={{ padding: '14px 16px', background: '#F8FAFC', borderRadius: 10, border: '1px solid var(--border)' }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>Statut du compte</div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                    <span className={vendor.isActive ? 'badge-green' : 'badge-gray'}>{vendor.isActive ? 'Actif' : 'Suspendu'}</span>
+                    <span className={vendor.isActive ? 'badge-green' : 'badge-red'}>{vendor.isActive ? 'Actif' : 'Suspendu'}</span>
                     {vendor.isActive ? (
                       <button className="btn-secondary-sm" style={{ fontSize: 13 }} onClick={() => setModalOpen(true)}>Suspendre</button>
                     ) : (

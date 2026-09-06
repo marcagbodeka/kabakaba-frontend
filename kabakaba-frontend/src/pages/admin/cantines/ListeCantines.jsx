@@ -146,7 +146,7 @@ export default function ListeCantines() {
                 {!loading && !error && vendors.map((c, i) => (
                   <tr key={c.id} onClick={() => navigate(`/admin/cantines/${c.id}`)} style={{ cursor: 'pointer' }}>
                     <td className="name-cell">
-                      <span className={`initials ${INIT_CLASSES[i % INIT_CLASSES.length]}`} style={{ width: 36, height: 36, borderRadius: 10 }}>{initialsOf(c.name)}</span>
+                      <span className={`initials ${INIT_CLASSES[i % INIT_CLASSES.length]}`}>{initialsOf(c.name)}</span>
                       <div>
                         <div style={{ fontWeight: 600 }}>{c.name}</div>
                         <div style={{ fontSize: 12, color: 'var(--muted)' }}>Créée le {formatDate(c.createdAt)}</div>
@@ -156,11 +156,9 @@ export default function ListeCantines() {
                     <td style={{ fontWeight: 500 }}>{c.owner || '—'}</td>
                     <td>
                       {c.isActive ? (
-                        <span className="badge-green"><span className="status-dot dot-green" style={{ marginRight: 4 }} />Actif</span>
+                        <span className="badge-green">Actif</span>
                       ) : (
-                        <span style={{ background: '#FEF2F2', color: '#B91C1C', fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20 }}>
-                          <span className="status-dot" style={{ background: '#EF4444', marginRight: 4 }} />Suspendu
-                        </span>
+                        <span className="badge-red">Suspendu</span>
                       )}
                     </td>
                     <td><span className={c.isOpen ? 'badge-green' : 'badge-gray'}>{c.isOpen ? 'Ouverte' : 'Fermée'}</span></td>

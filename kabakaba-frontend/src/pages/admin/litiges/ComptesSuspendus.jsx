@@ -124,7 +124,7 @@ export default function ComptesSuspendus() {
                         </div>
                       </td>
                       <td>{student?.campus?.name ? <span className="badge-blue">{student.campus.name}</span> : <span style={{ color: 'var(--muted)' }}>—</span>}</td>
-                      <td style={{ fontSize: 13, color: '#475569' }}>{r.reason}</td>
+                      <td style={{ maxWidth: 220, minWidth: 160, whiteSpace: 'normal', wordBreak: 'break-word', fontSize: 13, color: '#475569', lineHeight: 1.4 }}>{r.reason}</td>
                       <td style={{ fontSize: 13, color: 'var(--muted)' }}>{formatDateTime(r.suspendedAt)}</td>
                       <td style={{ fontSize: 13 }}>
                         <span style={{ fontWeight: 600, color: 'var(--indigo)' }}>{r.suspendedUntil ? formatDateTime(r.suspendedUntil) : 'Indéterminée'}</span>

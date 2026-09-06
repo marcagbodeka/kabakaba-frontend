@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { LayoutDashboard, TrendingUp, TrendingDown, Trophy, AlertTriangle, Search } from 'lucide-react';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
+import DateRangePicker from '../../../components/DateRangePicker';
+import LineChart from '../../../components/LineChart';
+import { chartPeriodTitle, formatChartDate } from '../../../utils/chartLabels';
 import { getCampusComparison, getTopCanteens, getVendorPerformance, getVendorFinancials } from '../../../services/domain/analyticsService';
 import { getVendors } from '../../../services/domain/vendorsService';
 import { getPendingAmbassadors, getNewPartnerApplications } from '../../../services/domain/applicationsService';
@@ -10,12 +13,14 @@ import { countOrdersByStatus } from '../../../services/domain/ordersService';
 const ACCEPTANCE_ALERT_THRESHOLD = 70;
 
 // Regroupement des statuts bruts de commande en 4 catégories affichées.
+// Compteurs cumulés (l'API ne filtre pas encore ces totaux par date).
 const STATUS_GROUPS = {
   'Complétées': ['RECEIVED', 'AUTO_RECEIVED'],
   'En cours': ['PENDING', 'ACCEPTED', 'IN_PREPARATION', 'READY'],
   'Annulées': ['CANCELLED_VENDOR', 'REFUNDED'],
   'Refusées': ['REFUSED'],
 };
+const STATUS_COLOR = { 'Complétées': '#22C55E', 'En cours': '#F07840', 'Annulées': '#F59E0B', 'Refusées': '#EF4444' };
 
 function initialsOf(name) {
   return (name || '?')
@@ -41,11 +46,44 @@ function timeAgo(dateStr) {
   return `Il y a ${days}j`;
 }
 
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
+
+function TrendBadge({ value }) {
+  if (value == null) return null;
+  const up = value >= 0;
+  const Icon = up ? TrendingUp : TrendingDown;
+  return (
+    <span className={up ? 'badge-green' : 'badge-orange'}>
+      <Icon size={13} /> {Math.abs(value)}%
+    </span>
+  );
+}
+
 export default function VueVendeurs() {
   const [search, setSearch] = useState('');
+
+  // Bloc temps réel : cantines, alertes, notifications — indépendant de la
+  // plage de dates choisie ci-dessous, toujours "maintenant".
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [data, setData] = useState(null);
+  const [live, setLive] = useState(null);
+
+  // Bloc analyse : classement, graphe, acceptation par campus — piloté par
+  // la plage de dates, même logique que /supervision.
+  const [range, setRange] = useState({ from: daysAgo(6), to: startOfDay(new Date()) });
+  const [rangeLoading, setRangeLoading] = useState(true);
+  const [rangeError, setRangeError] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -55,11 +93,9 @@ export default function VueVendeurs() {
         const [
           vendorsRes,
           todayCanteens,
-          weekCanteens,
           todayPerf,
           weekPerf,
           financials,
-          campusComparison7d,
           campusComparison1d,
           pendingAmbassadors,
           newPartners,
@@ -67,11 +103,9 @@ export default function VueVendeurs() {
         ] = await Promise.all([
           getVendors(1, 100),
           getTopCanteens(1, 5),
-          getTopCanteens(7, 50),
           getVendorPerformance(1),
           getVendorPerformance(7),
           getVendorFinancials(),
-          getCampusComparison(7),
           getCampusComparison(1),
           getPendingAmbassadors(),
           getNewPartnerApplications(),
@@ -82,14 +116,12 @@ export default function VueVendeurs() {
             }),
           ).then(Object.fromEntries),
         ]);
-        setData({
+        setLive({
           vendors: vendorsRes.data || [],
           todayCanteens,
-          weekCanteens,
           todayPerf,
           weekPerf,
           financials,
-          campusComparison7d,
           campusComparison1d,
           pendingAmbassadors: pendingAmbassadors.data || [],
           newPartners: newPartners.data || [],
@@ -103,11 +135,34 @@ export default function VueVendeurs() {
     })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      setRangeLoading(true);
+      setRangeError(null);
+      try {
+        const [campusComparisonRange, topCanteensRange] = await Promise.all([
+          getCampusComparison(undefined, range),
+          getTopCanteens(undefined, 50, range),
+        ]);
+        setAnalysis({ campusComparisonRange, topCanteensRange });
+      } catch (err) {
+        setRangeError(err.message || "Impossible de charger l'analyse sur cette période.");
+      } finally {
+        setRangeLoading(false);
+      }
+    })();
+  }, [range]);
+
   if (loading) {
     return (
       <>
-        <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Tableau de bord' }]} badge={{ text: "Aujourd'hui" }} hidePeriodSelect />
-        <PageContent><p>Chargement…</p></PageContent>
+        <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Tableau de bord' }]} badge={{ text: "Aujourd'hui" }} hidePeriodSelect>
+          <div className="global-search-wrap">
+            <input className="global-search-input" placeholder="Rechercher une cantine..." disabled />
+            <Search size={14} className="global-search-icon" />
+          </div>
+        </Topbar>
+        <PageContent><p style={{ color: 'var(--muted)' }}>Chargement…</p></PageContent>
       </>
     );
   }
@@ -116,7 +171,7 @@ export default function VueVendeurs() {
     return (
       <>
         <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Tableau de bord' }]} badge={{ text: "Aujourd'hui" }} hidePeriodSelect />
-        <PageContent><p style={{ color: '#DC2626' }}>{error}</p></PageContent>
+        <PageContent><div className="notice-banner notice-error">{error}</div></PageContent>
       </>
     );
   }
@@ -124,16 +179,14 @@ export default function VueVendeurs() {
   const {
     vendors,
     todayCanteens,
-    weekCanteens,
     todayPerf,
     weekPerf,
     financials,
-    campusComparison7d,
     campusComparison1d,
     pendingAmbassadors,
     newPartners,
     statusCounts,
-  } = data;
+  } = live;
 
   const vendorById = new Map(vendors.map((v) => [v.id, v]));
   const openCount = vendors.filter((v) => v.isOpen).length;
@@ -141,20 +194,6 @@ export default function VueVendeurs() {
   const ordersToday = campusComparison1d.summary.totalOrders;
   const ordersYesterday = campusComparison1d.summary.totalOrdersPrevPeriod;
   const ordersDeltaPct = ordersYesterday > 0 ? Math.round(((ordersToday - ordersYesterday) / ordersYesterday) * 100) : null;
-
-  const classement = todayCanteens.map((c, i) => {
-    const vendor = vendorById.get(c.id);
-    return {
-      rank: i + 1,
-      name: c.name,
-      initials: initialsOf(c.name),
-      campus: c.campusName,
-      orders: c.orders,
-      acceptance: `${c.acceptanceRate}%`,
-      status: c.acceptanceRate >= ACCEPTANCE_ALERT_THRESHOLD ? 'green' : 'orange',
-      isOpen: vendor?.isOpen ?? null,
-    };
-  });
 
   const statutTempsReel = vendors
     .slice()
@@ -183,14 +222,6 @@ export default function VueVendeurs() {
       ? [{ level: 'amber', title: `${pendingAmbassadors.length} demande(s) ambassadeur en attente`, text: 'En attente de décision' }]
       : []),
   ];
-
-  const dailyLabels = campusComparison7d.dailyVolume.labels;
-  const dailySeries = campusComparison7d.dailyVolume.series['Tous les campus'];
-  const maxDaily = Math.max(1, ...dailySeries);
-  const dayNames = dailyLabels.map((iso) => {
-    const d = new Date(iso);
-    return ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'][d.getDay()];
-  });
 
   const notifications = [
     ...pendingAmbassadors.map((a) => {
@@ -222,13 +253,38 @@ export default function VueVendeurs() {
     })),
   ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+  // --- Bloc analyse (dépend de `range`) ---
+  const campusRange = analysis?.campusComparisonRange;
+  const topCanteensRange = analysis?.topCanteensRange ?? [];
+
+  const dayLabels = campusRange?.dailyVolume?.labels ?? [];
+  const dailySeries = campusRange?.dailyVolume?.series?.['Tous les campus'] ?? [];
+
+  const classement = topCanteensRange
+    .filter((c) => c.name.toLowerCase().includes(search.trim().toLowerCase()))
+    .map((c, i) => {
+      const vendor = vendorById.get(c.id);
+      return {
+        rank: i + 1,
+        name: c.name,
+        initials: initialsOf(c.name),
+        campus: c.campusName,
+        orders: c.orders,
+        acceptance: `${c.acceptanceRate}%`,
+        status: c.acceptanceRate >= ACCEPTANCE_ALERT_THRESHOLD ? 'green' : 'orange',
+        isOpen: vendor?.isOpen ?? null,
+      };
+    });
+
+  const totalStatusCount = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+
   return (
     <>
       <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Tableau de bord' }]} badge={{ text: "Aujourd'hui" }} hidePeriodSelect>
         <div className="global-search-wrap">
           <input
             className="global-search-input"
-            placeholder="Rechercher cantine, vendeur..."
+            placeholder="Rechercher une cantine..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -250,13 +306,8 @@ export default function VueVendeurs() {
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Commandes (24h)</div>
-            <div className="kpi-value">
-              {ordersToday}
-              {ordersDeltaPct !== null && (
-                <span className={ordersDeltaPct >= 0 ? 'badge-green' : 'badge-orange'}>
-                  {ordersDeltaPct >= 0 ? <TrendingUp size={13} /> : <TrendingDown size={13} />} {Math.abs(ordersDeltaPct)}%
-                </span>
-              )}
+            <div className="kpi-value kpi-value-sm">
+              {ordersToday} {ordersDeltaPct !== null && <TrendBadge value={ordersDeltaPct} />}
             </div>
             <div className="kpi-sub">vs 24h précédentes : {ordersYesterday}</div>
           </div>
@@ -275,23 +326,32 @@ export default function VueVendeurs() {
         </div>
 
         <div className="two-col">
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, padding: '20px 22px 0' }}>
               <div>
                 <div className="card-title" style={{ marginBottom: 0 }}>Classement vendeurs</div>
-                <div className="card-sub" style={{ marginBottom: 0 }}>Volume de commandes — 24 dernières heures</div>
+                <div className="card-sub" style={{ marginBottom: 0 }}>{chartPeriodTitle('Volume de commandes', dayLabels.length)}</div>
               </div>
+              <DateRangePicker value={range} onChange={setRange} />
             </div>
-            <div className="table-scroll">
+
+            {rangeError && (
+              <div className="notice-banner notice-error" style={{ margin: '14px 22px 0' }}>{rangeError}</div>
+            )}
+
+            <div className="table-scroll" style={{ marginTop: 16 }}>
               <table>
                 <thead>
                   <tr><th>Rang</th><th>Cantine</th><th>Campus</th><th>Commandes</th><th>Acceptation</th><th>Statut</th></tr>
                 </thead>
                 <tbody>
-                  {classement.length === 0 && (
-                    <tr><td colSpan={6} style={{ color: 'var(--muted)' }}>Aucune commande sur cette période.</td></tr>
+                  {rangeLoading && (
+                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>
                   )}
-                  {classement.map((v) => (
+                  {!rangeLoading && classement.length === 0 && (
+                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Aucune commande sur cette période.</td></tr>
+                  )}
+                  {!rangeLoading && classement.map((v) => (
                     <tr key={v.rank} className={v.rank === 1 ? 'rank1' : ''}>
                       <td>
                         {v.rank === 1 ? (
@@ -319,6 +379,7 @@ export default function VueVendeurs() {
                 </tbody>
               </table>
             </div>
+            <div style={{ height: 20 }} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -373,41 +434,30 @@ export default function VueVendeurs() {
 
         <div className="two-col">
           <div className="card">
-            <div className="card-title">Commandes par jour — 7 jours</div>
-            <div className="chart-wrap">
-              <div className="chart-bars" style={{ marginTop: 12 }}>
-                {dailySeries.map((v, i) => (
-                  <div
-                    key={i}
-                    className="bar"
-                    style={{
-                      height: `${Math.max(4, Math.round((v / maxDaily) * 100))}%`,
-                      background: i === dailySeries.length - 1 ? '#F07840' : '#1B2A6B',
-                      opacity: i === dailySeries.length - 1 ? 1 : 0.5 + (v / maxDaily) * 0.3,
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="bar-labels">
-              {dayNames.map((d, i) => (
-                <div key={i} className={`bar-label${i === dayNames.length - 1 ? ' active' : ''}`}>{d}</div>
-              ))}
-            </div>
+            <div className="card-title">{chartPeriodTitle('Commandes / jour', dayLabels.length)}</div>
+            {rangeLoading ? (
+              <p style={{ color: 'var(--muted)', fontSize: 13 }}>Chargement…</p>
+            ) : (
+              <LineChart
+                labels={dayLabels}
+                values={dailySeries}
+                color="#1B2A6B"
+                formatLabel={formatChartDate}
+                formatValue={(v) => `${v}`}
+              />
+            )}
           </div>
 
           <div className="card">
             <div className="card-title">Répartition des statuts commandes</div>
-            <div className="card-sub">7 derniers jours — tous vendeurs</div>
+            <div className="card-sub">Depuis le lancement — tous vendeurs confondus</div>
             <div className="h-bars" style={{ marginTop: 14 }}>
               {Object.entries(statusCounts).map(([label, count]) => {
-                const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
-                const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                const color = { 'Complétées': '#22C55E', 'En cours': '#F07840', 'Annulées': '#F59E0B', 'Refusées': '#EF4444' }[label];
+                const pct = totalStatusCount > 0 ? Math.round((count / totalStatusCount) * 100) : 0;
                 return (
                   <div className="h-bar-row" key={label}>
                     <div className="h-bar-label" style={{ width: 80 }}>{label}</div>
-                    <div className="h-bar-wrap"><div className="h-bar-fill" style={{ width: `${pct}%`, background: color }} /></div>
+                    <div className="h-bar-wrap"><div className="h-bar-fill" style={{ width: `${pct}%`, background: STATUS_COLOR[label] }} /></div>
                     <div className="h-bar-val">{count} <span style={{ color: '#94A3B8' }}>({pct}%)</span></div>
                   </div>
                 );
@@ -416,16 +466,20 @@ export default function VueVendeurs() {
 
             <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid var(--border)' }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '.04em' }}>
-                Acceptation par campus
+                Acceptation par campus — {dayLabels.length} jour{dayLabels.length > 1 ? 's' : ''}
               </div>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                {campusComparison7d.campuses.map((c) => (
-                  <div key={c.id} style={{ flex: '1 1 100px', background: '#F8FAFC', border: '1px solid var(--border)', borderRadius: 12, padding: 14, textAlign: 'center' }}>
-                    <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 6 }}>{c.name}</div>
-                    <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--indigo)' }}>{c.acceptanceRate}%</div>
-                  </div>
-                ))}
-              </div>
+              {rangeLoading ? (
+                <p style={{ color: 'var(--muted)', fontSize: 13 }}>Chargement…</p>
+              ) : (
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  {campusRange.campuses.map((c) => (
+                    <div key={c.id} style={{ flex: '1 1 100px', background: '#F8FAFC', border: '1px solid var(--border)', borderRadius: 12, padding: 14, textAlign: 'center' }}>
+                      <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 6 }}>{c.name}</div>
+                      <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--indigo)' }}>{c.acceptanceRate}%</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
