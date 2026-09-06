@@ -21,3 +21,11 @@ export function getWithdrawals(page = 1, limit = 10, status, range) {
 export function getWithdrawalsStats() {
   return apiFetch('/withdrawals/stats');
 }
+
+// POST /withdrawals/:id/sync — synchronisation ponctuelle avec le payout fournisseur.
+// Intentionnellement non exposé dans l'interface : réservé aux workflows internes
+// ou à une future action opérateur explicitement autorisée.
+export function syncWithdrawal(id) {
+  if (!id || typeof id !== 'string') throw new TypeError('Identifiant de retrait invalide');
+  return apiFetch(`/withdrawals/${encodeURIComponent(id)}/sync`, { method: 'POST' });
+}

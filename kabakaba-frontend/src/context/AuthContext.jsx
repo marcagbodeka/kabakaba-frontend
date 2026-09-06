@@ -1,25 +1,34 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { getStoredToken, setStoredToken, AUTH_EXPIRED_EVENT } from '../services/httpClient';
+import { clearLegacyToken, AUTH_EXPIRED_EVENT } from '../services/httpClient';
 import * as webAuth from '../services/webAuthService';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => getStoredToken());
   const [user, setUser] = useState(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
-  const isAuthenticated = Boolean(token);
+  const isAuthenticated = Boolean(user);
 
-  const applySession = useCallback((sessionToken, sessionUser) => {
-    setStoredToken(sessionToken);
-    setToken(sessionToken);
+  const applySession = useCallback((_sessionToken, sessionUser) => {
+    // Le JWT de session est HttpOnly et n'est volontairement jamais exposé
+    // ni stocké côté JavaScript. Le premier argument est conservé pour la
+    // compatibilité avec les écrans existants.
+    clearLegacyToken();
     if (sessionUser) setUser(sessionUser);
   }, []);
 
-  const logout = useCallback(() => {
-    setStoredToken(null);
-    setToken(null);
-    setUser(null);
+  const logout = useCallback(async () => {
+    try {
+      await webAuth.logout();
+    } catch {
+      // Même si le serveur est indisponible, on purge l'état local et le
+      // navigateur supprimera le cookie lors du prochain appel réussi.
+    } finally {
+      clearLegacyToken();
+      setUser(null);
+      setSessionChecked(true);
+    }
   }, []);
 
   const refreshMe = useCallback(async () => {
@@ -29,29 +38,33 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (!token || user) return;
-    refreshMe().catch(() => {
-      setStoredToken(null);
-      setToken(null);
-    });
-  }, [token, user, refreshMe]);
+    let active = true;
+    clearLegacyToken();
+    refreshMe()
+      .catch(() => { if (active) setUser(null); })
+      .finally(() => { if (active) setSessionChecked(true); });
+    return () => { active = false; };
+  }, [refreshMe]);
 
-  // Écoute le signal global émis par httpClient dès qu'une requête reçoit
-  // un 401 (token expiré, invalidé côté serveur, etc.) — peu importe
-  // quelle page ou quel appel API l'a déclenché. Faire passer token à
-  // null bascule isAuthenticated à false, et App.jsx redirige alors
-  // automatiquement vers /supervision/login au lieu de laisser la page
-  // afficher une erreur "non autorisé".
   useEffect(() => {
     const handleAuthExpired = () => {
-      setToken(null);
+      clearLegacyToken();
       setUser(null);
+      setSessionChecked(true);
     };
     window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
     return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
   }, []);
 
-  const value = { token, user, isAuthenticated, applySession, logout, refreshMe };
+  const value = {
+    token: null,
+    user,
+    isAuthenticated,
+    sessionChecked,
+    applySession,
+    logout,
+    refreshMe,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

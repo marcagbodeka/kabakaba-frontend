@@ -46,6 +46,10 @@ export function getMe() {
   return apiFetch('/web-auth/me');
 }
 
+export function logout() {
+  return apiFetch('/web-auth/logout', { method: 'POST' });
+}
+
 // ─── Réinitialisation de mot de passe (TOTP ou clé de secours) ──────
 // Facteur unique volontaire : voir web-auth.service.ts côté backend pour
 // le détail du compromis de sécurité (pas de canal externe email/SMS).

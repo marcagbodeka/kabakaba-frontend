@@ -179,7 +179,7 @@ export default function Login({ onSuccess, onFirstLogin, onForgotPassword, expec
       // mauvais espace ne reçoit jamais de challengeToken et n'atteint donc
       // jamais cette étape. Rien à revérifier ici, et surtout rien à
       // afficher qui mentionnerait le rôle réel du compte.
-      applySession(result.accessToken, result.webUser);
+      applySession(null, result.webUser);
       setStep(3);
     } catch (err) {
       setError(err.message || 'Code invalide ou expiré.');

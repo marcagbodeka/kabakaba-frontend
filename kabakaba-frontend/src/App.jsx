@@ -56,13 +56,19 @@ export default function App() {
   // isAuthenticated ET user.role, pas seulement isAuthenticated, pour
   // qu'un compte Supervision ne puisse jamais atterrir sur le dashboard
   // Admin (et inversement) même en connaissant l'URL.
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, sessionChecked } = useAuth();
 
-  const isSupervision = isAuthenticated && user?.role === 'SUPERVISION';
-  const isAdmin = isAuthenticated && user?.role === 'ADMIN';
+  const isSupervision = sessionChecked && isAuthenticated && user?.role === 'SUPERVISION';
+  const isAdmin = sessionChecked && isAuthenticated && user?.role === 'ADMIN';
 
   return (
     <BrowserRouter>
+      {!sessionChecked ? (
+        <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }} aria-busy="true">
+          Chargement…
+        </div>
+      ) : null}
+      <div style={{ display: sessionChecked ? 'contents' : 'none' }}>
       <Routes>
         {/* Site vitrine — page publique */}
         <Route path="/" element={<Suspense fallback={null}><Home /></Suspense>} />
@@ -173,6 +179,7 @@ export default function App() {
         {/* URL inconnue → site public */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </div>
     </BrowserRouter>
   );
 }

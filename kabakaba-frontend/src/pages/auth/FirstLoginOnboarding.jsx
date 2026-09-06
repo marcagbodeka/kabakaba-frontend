@@ -482,7 +482,7 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone,
               // mot de passe temporaire (firstLogin) — voir Login.jsx pour
               // le raisonnement complet. Rien à revérifier ni à afficher
               // ici qui mentionnerait le rôle réel du compte.
-              applySession(result.accessToken, result.webUser);
+              applySession(null, result.webUser);
               setBackupCodes(result.backupCodes || []);
               setInternalStep(5);
             } catch (err) {

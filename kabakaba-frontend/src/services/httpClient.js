@@ -1,20 +1,29 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://kabakaba-backend.vercel.app/api/v1';
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 
-const TOKEN_KEY = 'kbb_web_session_token';
-
-// Nom de l'événement global émis quand une requête échoue en 401 (token
-// expiré ou invalide). AuthContext l'écoute pour nettoyer la session et
-// déclencher la redirection vers le login — évite à chaque page du
-// dashboard de devoir gérer elle-même ce cas.
-export const AUTH_EXPIRED_EVENT = 'kbb:auth-expired';
-
-export function getStoredToken() {
-  return sessionStorage.getItem(TOKEN_KEY);
+if (import.meta.env.PROD && !configuredApiBaseUrl) {
+  throw new Error('VITE_API_BASE_URL est obligatoire en production.');
 }
 
-export function setStoredToken(token) {
-  if (token) sessionStorage.setItem(TOKEN_KEY, token);
-  else sessionStorage.removeItem(TOKEN_KEY);
+const API_BASE_URL = configuredApiBaseUrl || 'http://localhost:3000/api/v1';
+const LEGACY_TOKEN_KEY = 'kbb_web_session_token';
+const CSRF_COOKIE_NAME = 'kabakaba_web_csrf';
+
+export const AUTH_EXPIRED_EVENT = 'kbb:auth-expired';
+
+// Le JWT de session Web est désormais HttpOnly : le frontend ne peut ni le
+// lire ni le stocker. On supprime aussi toute ancienne copie sessionStorage.
+export function clearLegacyToken() {
+  try { sessionStorage.removeItem(LEGACY_TOKEN_KEY); } catch {}
+}
+
+function getCookie(name) {
+  const prefix = `${name}=`;
+  const entry = document.cookie.split('; ').find((part) => part.startsWith(prefix));
+  return entry ? decodeURIComponent(entry.slice(prefix.length)) : null;
+}
+
+export function getCsrfToken() {
+  return getCookie(CSRF_COOKIE_NAME);
 }
 
 export class ApiError extends Error {
@@ -26,36 +35,35 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch(path, { method = 'GET', body, auth = true, headers = {} } = {}) {
-  const finalHeaders = { 'Content-Type': 'application/json', ...headers };
+  clearLegacyToken();
+  const normalizedMethod = method.toUpperCase();
+  const finalHeaders = { ...headers };
 
-  if (auth) {
-    const token = getStoredToken();
-    if (token) finalHeaders.Authorization = `Bearer ${token}`;
+  if (body !== undefined) finalHeaders['Content-Type'] = 'application/json';
+
+  // Les routes de session Web utilisent le cookie HttpOnly. Le cookie CSRF
+  // est volontairement lisible par JS et doit être renvoyé pour les mutations.
+  if (auth && !['GET', 'HEAD', 'OPTIONS'].includes(normalizedMethod)) {
+    const csrf = getCsrfToken();
+    if (csrf) finalHeaders['X-CSRF-Token'] = csrf;
   }
 
   const res = await fetch(`${API_BASE_URL}${path}`, {
-    method,
+    method: normalizedMethod,
     headers: finalHeaders,
-    body: body ? JSON.stringify(body) : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+    credentials: 'include',
   });
 
   let data = null;
   const text = await res.text();
   if (text) {
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = text;
-    }
+    try { data = JSON.parse(text); } catch { data = text; }
   }
 
   if (!res.ok) {
-    // 401 = session expirée ou invalide. On ne laisse pas chaque page
-    // décider quoi en faire : on nettoie tout de suite et on prévient
-    // globalement, pour une redirection immédiate vers le login plutôt
-    // qu'un message d'erreur affiché dans le tableau de bord.
     if (res.status === 401 && auth) {
-      setStoredToken(null);
+      clearLegacyToken();
       window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT));
     }
 
