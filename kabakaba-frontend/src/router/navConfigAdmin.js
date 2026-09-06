@@ -5,6 +5,7 @@ import {
   Trophy,
   UserPlus,
   Monitor,
+  Banknote,
   Settings,
 } from 'lucide-react';
 
@@ -53,7 +54,10 @@ export const navSections = [
   },
   {
     label: 'Monitoring',
-    items: [{ label: 'Transactions', path: '/admin/transactions', icon: Monitor }],
+    items: [
+      { label: 'Transactions', path: '/admin/transactions', icon: Monitor },
+      { label: 'Retraits', path: '/admin/retraits', icon: Banknote },
+    ],
   },
   {
     label: 'Compte',
