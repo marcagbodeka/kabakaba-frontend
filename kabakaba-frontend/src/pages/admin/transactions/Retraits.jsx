@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Banknote } from 'lucide-react';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
+import DateRangePicker from '../../../components/DateRangePicker';
 import { getWithdrawals, getWithdrawalsStats } from '../../../services/domain/withdrawalsService';
 
 const PAGE_SIZE = 10;
@@ -26,9 +27,20 @@ function formatDateTime(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
+function startOfDay(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+function daysAgo(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return startOfDay(d);
+}
 
 export default function Retraits() {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,20 +53,22 @@ export default function Retraits() {
     getWithdrawalsStats().then(setStats).catch((err) => setStatsError(err.message));
   }, []);
 
-  useEffect(() => { setPage(1); }, [statusFilter]);
+  useEffect(() => { setPage(1); }, [statusFilter, range]);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    getWithdrawals(page, PAGE_SIZE, statusFilter)
+    getWithdrawals(page, PAGE_SIZE, statusFilter, range)
       .then((res) => { setWithdrawals(res.data); setMeta(res.meta); })
       .catch((err) => setError(err.message || 'Impossible de charger les retraits.'))
       .finally(() => setLoading(false));
-  }, [page, statusFilter]);
+  }, [page, statusFilter, range]);
 
   return (
     <>
-      <Topbar icon={Banknote} breadcrumb={[{ label: 'Retraits' }]} />
+      <Topbar icon={Banknote} breadcrumb={[{ label: 'Retraits' }]} hidePeriodSelect>
+        <DateRangePicker value={range} onChange={setRange} />
+      </Topbar>
       <PageContent>
         <div className="page-header">
           <div className="eyebrow">Admin web · Monitoring</div>
