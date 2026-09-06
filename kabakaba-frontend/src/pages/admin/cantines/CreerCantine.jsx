@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Utensils } from 'lucide-react';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
+import Toast from '../../../components/Toast';
 import { createVendor } from '../../../services/domain/vendorsService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
 
@@ -20,15 +21,17 @@ export default function CreerCantine() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null); // { type: 'error'|'success', message }
 
   useEffect(() => {
-    findAllCampuses().then((list) => {
-      setCampuses(list);
-      // Pré-coche le premier campus pour retrouver le comportement de la
-      // maquette (un campus coché par défaut), sans en présumer le nom.
-      if (list[0]) setCampusChecked({ [list[0].id]: true });
-    });
+    findAllCampuses()
+      .then((list) => {
+        setCampuses(list);
+        // Pré-coche le premier campus pour retrouver le comportement de la
+        // maquette (un campus coché par défaut), sans en présumer le nom.
+        if (list[0]) setCampusChecked({ [list[0].id]: true });
+      })
+      .catch((err) => setToast({ type: 'error', message: err.message || 'Impossible de charger la liste des campus.' }));
   }, []);
 
   const generatePassword = () => {
@@ -55,15 +58,15 @@ export default function CreerCantine() {
   async function handleSubmit() {
     if (!canSubmit) return;
     setSubmitting(true);
-    setError(null);
+    setToast(null);
     try {
       await createVendor(
-        { firstName, lastName, phone, email, temporaryPassword: tempPassword },
-        { canteenName, campusIds: selectedCampusIds },
+        { firstName, lastName, phone: phone.trim(), email: email.trim(), temporaryPassword: tempPassword },
+        { canteenName: canteenName.trim(), campusIds: selectedCampusIds },
       );
       navigate('/admin/cantines');
     } catch (err) {
-      setError(err.message || 'Échec de la création.');
+      setToast({ type: 'error', message: err.message || 'Échec de la création de la cantine.' });
     } finally {
       setSubmitting(false);
     }
@@ -71,6 +74,7 @@ export default function CreerCantine() {
 
   return (
     <>
+      <Toast toast={toast} onClose={() => setToast(null)} />
       <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Créer une cantine' }]}>
         <button className="btn-secondary-sm" disabled={submitting} onClick={() => navigate('/admin/cantines')}>Annuler</button>
         <button className="btn-primary-sm" disabled={!canSubmit || submitting} onClick={handleSubmit}>
@@ -83,8 +87,6 @@ export default function CreerCantine() {
           <h1>Créer une cantine</h1>
           <p>Renseignez les informations du vendeur et configurez son accès à l&apos;application mobile.</p>
         </div>
-
-        {error && <p style={{ color: '#DC2626', fontSize: 14, marginBottom: 16 }}>{error}</p>}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 800 }}>
           <div className="card">
