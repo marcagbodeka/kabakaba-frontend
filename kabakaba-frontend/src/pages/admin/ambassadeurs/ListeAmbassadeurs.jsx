@@ -196,7 +196,7 @@ export default function ListeAmbassadeurs() {
               </thead>
               <tbody>
                 {pageRows.length === 0 && (
-                  <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Aucun ambassadeur ne correspond à ces filtres.</td></tr>
+                  <tr><td colSpan={8} style={{ color: 'var(--muted)', padding: '24px 0' }}>Aucun ambassadeur ne correspond à ces filtres.</td></tr>
                 )}
                 {pageRows.map((a) => {
                   const isActive = a.status === 'ACTIVE';

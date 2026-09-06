@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Banknote } from 'lucide-react';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
-import { getWithdrawals } from '../../../services/domain/withdrawalsService';
+import { getWithdrawals, getWithdrawalsStats } from '../../../services/domain/withdrawalsService';
 
 const PAGE_SIZE = 10;
 
@@ -34,6 +34,12 @@ export default function Retraits() {
   const [error, setError] = useState(null);
   const [withdrawals, setWithdrawals] = useState([]);
   const [meta, setMeta] = useState({ total: 0, totalPages: 1 });
+  const [stats, setStats] = useState(null);
+  const [statsError, setStatsError] = useState(null);
+
+  useEffect(() => {
+    getWithdrawalsStats().then(setStats).catch((err) => setStatsError(err.message));
+  }, []);
 
   useEffect(() => { setPage(1); }, [statusFilter]);
 
@@ -57,6 +63,30 @@ export default function Retraits() {
         </div>
 
         {error && <div className="notice-banner notice-error">{error}</div>}
+        {statsError && <div className="notice-banner notice-error">{statsError}</div>}
+
+        <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+          <div className="kpi-card">
+            <div className="kpi-label">En attente</div>
+            <div className="kpi-value" style={{ color: 'var(--amber)' }}>{stats ? formatFcfa(stats.pending.total) : '…'}</div>
+            <div className="kpi-sub">{stats ? `${stats.pending.count} retrait${stats.pending.count === 1 ? '' : 's'}` : '—'}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">En cours</div>
+            <div className="kpi-value" style={{ color: 'var(--indigo)' }}>{stats ? formatFcfa(stats.processing.total) : '…'}</div>
+            <div className="kpi-sub">{stats ? `${stats.processing.count} retrait${stats.processing.count === 1 ? '' : 's'}` : '—'}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Versés</div>
+            <div className="kpi-value" style={{ color: '#22C55E' }}>{stats ? formatFcfa(stats.completed.total) : '…'}</div>
+            <div className="kpi-sub">{stats ? `${stats.completed.count} retrait${stats.completed.count === 1 ? '' : 's'}` : '—'}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Échoués</div>
+            <div className="kpi-value" style={{ color: '#DC2626' }}>{stats ? formatFcfa(stats.failed.total) : '…'}</div>
+            <div className="kpi-sub">{stats ? `${stats.failed.count} retrait${stats.failed.count === 1 ? '' : 's'}` : '—'}</div>
+          </div>
+        </div>
 
         <div className="filter-bar">
           <div className="filter-group">
@@ -87,10 +117,10 @@ export default function Retraits() {
               </thead>
               <tbody>
                 {loading && (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>
+                  <tr><td colSpan={7} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>
                 )}
                 {!loading && withdrawals.length === 0 && (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Aucun retrait ne correspond à ce filtre.</td></tr>
+                  <tr><td colSpan={7} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun retrait ne correspond à ce filtre.</td></tr>
                 )}
                 {!loading && withdrawals.map((w) => (
                   <tr key={w.id}>

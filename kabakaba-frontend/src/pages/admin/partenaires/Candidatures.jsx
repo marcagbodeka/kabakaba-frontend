@@ -287,7 +287,7 @@ export default function Candidatures() {
               </thead>
               <tbody>
                 {otherRows.length === 0 && (
-                  <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Aucune candidature ne correspond à ces filtres.</td></tr>
+                  <tr><td colSpan={5} style={{ color: 'var(--muted)', padding: '24px 0' }}>Aucune candidature ne correspond à ces filtres.</td></tr>
                 )}
                 {otherRows.map((c) => (
                   <tr key={c.id}>

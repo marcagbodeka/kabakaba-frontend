@@ -204,7 +204,7 @@ export default function AmbassadeurFiche() {
                 </thead>
                 <tbody>
                   {affiliatesPageRows.length === 0 && (
-                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Aucun affilié pour le moment.</td></tr>
+                    <tr><td colSpan={6} style={{ color: 'var(--muted)', padding: '24px 0' }}>Aucun affilié pour le moment.</td></tr>
                   )}
                   {affiliatesPageRows.map((a) => (
                     <tr key={a.id}>
@@ -251,7 +251,7 @@ export default function AmbassadeurFiche() {
                 </thead>
                 <tbody>
                   {commissions.length === 0 && (
-                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Aucune commission pour le moment.</td></tr>
+                    <tr><td colSpan={6} style={{ color: 'var(--muted)', padding: '24px 0' }}>Aucune commission pour le moment.</td></tr>
                   )}
                   {commissions.map((c) => (
                     <tr key={c.id}>
@@ -278,7 +278,7 @@ export default function AmbassadeurFiche() {
             {appeals.length === 0 ? (
               <>
                 <div className="card-sub">Aucun appel en cours pour cet ambassadeur.</div>
-                <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--muted)' }}>
+                <div style={{ padding: '32px 0', color: 'var(--muted)' }}>
                   <ShieldCheck size={44} color="#CBD5E1" style={{ margin: '0 auto 12px' }} />
                   <div style={{ fontSize: 15, fontWeight: 500 }}>Aucun appel soumis</div>
                   <div style={{ fontSize: 13, marginTop: 4 }}>Les appels suite à une suspension apparaissent ici.</div>

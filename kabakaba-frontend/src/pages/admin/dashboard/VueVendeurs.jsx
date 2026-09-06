@@ -346,10 +346,10 @@ export default function VueVendeurs() {
                 </thead>
                 <tbody>
                   {rangeLoading && (
-                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>
+                    <tr><td colSpan={6} style={{ color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>
                   )}
                   {!rangeLoading && classement.length === 0 && (
-                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Aucune commande sur cette période.</td></tr>
+                    <tr><td colSpan={6} style={{ color: 'var(--muted)', padding: '24px 0' }}>Aucune commande sur cette période.</td></tr>
                   )}
                   {!rangeLoading && classement.map((v) => (
                     <tr key={v.rank} className={v.rank === 1 ? 'rank1' : ''}>

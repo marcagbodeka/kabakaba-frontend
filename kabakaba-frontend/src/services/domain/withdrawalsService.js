@@ -9,3 +9,9 @@ export function getWithdrawals(page = 1, limit = 10, status) {
   if (status && status !== 'all') qs.set('status', status);
   return apiFetch(`/withdrawals?${qs.toString()}`);
 }
+
+// GET /withdrawals/stats — agrégat par statut (count + total débité), pour
+// les KPI cards de la page Retraits.
+export function getWithdrawalsStats() {
+  return apiFetch('/withdrawals/stats');
+}

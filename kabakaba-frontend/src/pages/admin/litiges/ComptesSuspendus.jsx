@@ -105,9 +105,9 @@ export default function ComptesSuspendus() {
                 </tr>
               </thead>
               <tbody>
-                {loading && <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>}
+                {loading && <tr><td colSpan={6} style={{ color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>}
                 {!loading && rows.length === 0 && (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Aucune suspension active.</td></tr>
+                  <tr><td colSpan={6} style={{ color: 'var(--muted)', padding: '24px 0' }}>Aucune suspension active.</td></tr>
                 )}
                 {!loading && rows.map((r) => {
                   const student = r.student;

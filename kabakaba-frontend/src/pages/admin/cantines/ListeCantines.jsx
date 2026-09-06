@@ -135,13 +135,13 @@ export default function ListeCantines() {
               </thead>
               <tbody>
                 {!loading && !error && vendors.length === 0 && (
-                  <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Aucune cantine ne correspond à ces filtres.</td></tr>
+                  <tr><td colSpan={8} style={{ color: 'var(--muted)', padding: '24px 0' }}>Aucune cantine ne correspond à ces filtres.</td></tr>
                 )}
                 {loading && (
-                  <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>
+                  <tr><td colSpan={8} style={{ color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>
                 )}
                 {error && (
-                  <tr><td colSpan={8} style={{ textAlign: 'center', color: '#DC2626', padding: '24px 0' }}>{error}</td></tr>
+                  <tr><td colSpan={8} style={{ color: '#DC2626', padding: '24px 0' }}>{error}</td></tr>
                 )}
                 {!loading && !error && vendors.map((c, i) => (
                   <tr key={c.id} onClick={() => navigate(`/admin/cantines/${c.id}`)} style={{ cursor: 'pointer' }}>

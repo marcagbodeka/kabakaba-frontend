@@ -246,10 +246,10 @@ export default function Transactions() {
                     <tr><th>Réf.</th><th>Type</th><th>Étudiant / Vendeur</th><th>Cantine</th><th>Montant</th><th>Opérateur</th><th>Statut</th><th>Horodatage</th><th></th></tr>
                   </thead>
                   <tbody>
-                    {txLoading && <tr><td colSpan={9} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
-                    {txError && <tr><td colSpan={9} style={{ textAlign: 'center', padding: '24px 0', color: '#DC2626' }}>{txError}</td></tr>}
+                    {txLoading && <tr><td colSpan={9} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
+                    {txError && <tr><td colSpan={9} style={{ padding: '24px 0', color: '#DC2626' }}>{txError}</td></tr>}
                     {!txLoading && !txError && transactions.length === 0 && (
-                      <tr><td colSpan={9} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Aucune transaction ne correspond à ces filtres.</td></tr>
+                      <tr><td colSpan={9} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucune transaction ne correspond à ces filtres.</td></tr>
                     )}
                     {!txLoading && !txError && transactions.map((t) => {
                       const personName = `${t.user?.firstName ?? ''} ${t.user?.lastName ?? ''}`.trim() || '—';
@@ -333,8 +333,8 @@ export default function Transactions() {
               <table>
                 <thead><tr><th>Réf.</th><th>Étudiant</th><th>Vendeur</th><th>Montant</th><th>Date</th><th>Motif</th></tr></thead>
                 <tbody>
-                  {refundLoading && <tr><td colSpan={6} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
-                  {!refundLoading && !refundError && refundOrders.length === 0 && <tr><td colSpan={6} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Aucun remboursement sur cette période.</td></tr>}
+                  {refundLoading && <tr><td colSpan={6} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
+                  {!refundLoading && !refundError && refundOrders.length === 0 && <tr><td colSpan={6} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun remboursement sur cette période.</td></tr>}
                   {refundOrders.map((o) => {
                     const studentName = `${o.student?.firstName ?? ''} ${o.student?.lastName ?? ''}`.trim() || '—';
                     return (

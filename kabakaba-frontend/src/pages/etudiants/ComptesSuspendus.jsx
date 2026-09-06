@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
-import { findUsers, updateUser, extractList } from '../../services/domain/usersService';
+import { findUsers, extractList } from '../../services/domain/usersService';
 import { findAllCampuses } from '../../services/domain/campusesService';
 import { getSupervisionStats } from '../../services/domain/adminStatsService';
 
@@ -25,7 +25,6 @@ export default function ComptesSuspendus() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [liftingId, setLiftingId] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -51,20 +50,9 @@ export default function ComptesSuspendus() {
     load();
   }, []);
 
-  const handleLift = async (id) => {
-    setLiftingId(id);
-    try {
-      await updateUser(id, { isSuspended: false });
-      setStudents((prev) => prev.filter((s) => s.id !== id));
-      setStats((prev) => (prev ? { ...prev, activeSuspensions: Math.max(0, prev.activeSuspensions - 1) } : prev));
-    } catch (err) {
-      setError(err.message || 'Impossible de lever cette suspension.');
-    } finally {
-      setLiftingId(null);
-    }
-  };
-
-  const blockedFunds = students.reduce((sum, s) => sum + (s.walletBalance || 0) + (s.escrowBalance || 0), 0);
+  // walletBalance uniquement : escrowBalance n'existe plus côté backend
+  // (champ mort supprimé — il valait toujours 0, jamais maintenu).
+  const blockedFunds = students.reduce((sum, s) => sum + (s.walletBalance || 0), 0);
 
   return (
     <>
@@ -107,18 +95,24 @@ export default function ComptesSuspendus() {
 
         <div className="card">
           <div className="card-title">Étudiants suspendus</div>
-          <div className="card-sub">Possibilité de lever une suspension manuellement</div>
+          {/* Lecture seule : la levée de suspension est une action de
+              modération réservée à l'Admin web (voir CDC 9.2 — Supervision
+              n'a pas ce droit ; le backend le refuse explicitement,
+              403 "La supervision est en lecture seule sur les comptes
+              utilisateurs"). Traiter une suspension se fait depuis
+              l'espace Admin. */}
+          <div className="card-sub">Consultation uniquement — la levée de suspension se fait depuis l&apos;espace Admin</div>
           <div className="table-scroll">
             <table>
               <thead>
-                <tr><th>Étudiant</th><th>Campus</th><th>Motif</th><th>Date</th><th>Fin de suspension</th><th>Statut</th><th></th></tr>
+                <tr><th>Étudiant</th><th>Campus</th><th>Motif</th><th>Date</th><th>Fin de suspension</th><th>Statut</th></tr>
               </thead>
               <tbody>
                 {loading && (
-                  <tr><td colSpan={7}>Chargement...</td></tr>
+                  <tr><td colSpan={6}>Chargement...</td></tr>
                 )}
                 {!loading && students.length === 0 && (
-                  <tr><td colSpan={7}>Aucun compte suspendu actuellement.</td></tr>
+                  <tr><td colSpan={6}>Aucun compte suspendu actuellement.</td></tr>
                 )}
                 {!loading && students.map((s) => (
                   <tr key={s.id}>
@@ -135,13 +129,6 @@ export default function ComptesSuspendus() {
                         <span className="badge-black">Banni définitivement</span>
                       ) : (
                         <span className="badge-red">Suspendu</span>
-                      )}
-                    </td>
-                    <td>
-                      {!s.isBanned && (
-                        <button className="action-btn" disabled={liftingId === s.id} onClick={() => handleLift(s.id)}>
-                          {liftingId === s.id ? 'Levée...' : 'Lever la suspension'}
-                        </button>
                       )}
                     </td>
                   </tr>

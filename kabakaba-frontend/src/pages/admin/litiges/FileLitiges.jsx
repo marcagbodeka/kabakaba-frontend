@@ -165,10 +165,10 @@ export default function FileLitiges() {
                 </tr>
               </thead>
               <tbody>
-                {loading && <tr><td colSpan={9} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
-                {error && <tr><td colSpan={9} style={{ textAlign: 'center', padding: '24px 0', color: '#DC2626' }}>{error}</td></tr>}
+                {loading && <tr><td colSpan={9} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
+                {error && <tr><td colSpan={9} style={{ padding: '24px 0', color: '#DC2626' }}>{error}</td></tr>}
                 {!loading && !error && litiges.length === 0 && (
-                  <tr><td colSpan={9} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)' }}>Aucun litige ne correspond à ces filtres.</td></tr>
+                  <tr><td colSpan={9} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun litige ne correspond à ces filtres.</td></tr>
                 )}
                 {!loading && !error && litiges.map((l) => {
                   const studentName = `${l.student?.firstName ?? ''} ${l.student?.lastName ?? ''}`.trim() || '—';
