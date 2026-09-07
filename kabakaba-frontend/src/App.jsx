@@ -46,6 +46,7 @@ import Candidatures from './pages/admin/partenaires/Candidatures';
 import Transactions from './pages/admin/transactions/Transactions';
 import TransactionDetail from './pages/admin/transactions/TransactionDetail';
 import Retraits from './pages/admin/transactions/Retraits';
+import RetraitDetail from './pages/admin/transactions/RetraitDetail';
 import ParametresAdmin from './pages/admin/parametres/ParametresAdmin';
 
 export default function App() {
@@ -173,6 +174,7 @@ export default function App() {
           <Route path="/admin/transactions" element={<Transactions />} />
           <Route path="/admin/transactions/:ref" element={<TransactionDetail />} />
           <Route path="/admin/retraits" element={<Retraits />} />
+          <Route path="/admin/retraits/:id" element={<RetraitDetail />} />
           <Route path="/admin/parametres" element={<ParametresAdmin />} />
         </Route>
 

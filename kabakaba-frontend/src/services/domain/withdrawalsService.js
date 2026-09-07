@@ -1,30 +1,72 @@
-import { apiFetch } from '../httpClient';
+import { apiFetch, apiFetchBlob } from '../httpClient';
 
-// Même convention que analyticsService : { from: Date, to: Date } -> query params ISO.
 function rangeParams(range) {
   if (!range?.from || !range?.to) return {};
   return { from: range.from.toISOString(), to: range.to.toISOString() };
 }
 
-// GET /withdrawals — liste des retraits vendeur (Admin/Supervision), filtrable
-// par statut et par plage de dates. Le retrait est automatique côté plateforme
-// (payout FedaPay) : cette page est un récapitulatif en lecture seule, pas un
-// outil de traitement manuel — pas de PATCH exposé ici volontairement.
 export function getWithdrawals(page = 1, limit = 10, status, range) {
   const qs = new URLSearchParams({ page: String(page), limit: String(limit), ...rangeParams(range) });
   if (status && status !== 'all') qs.set('status', status);
   return apiFetch(`/withdrawals?${qs.toString()}`);
 }
 
-// GET /withdrawals/stats — agrégat par statut (count + total débité), pour
-// les KPI cards de la page Retraits.
 export function getWithdrawalsStats() {
   return apiFetch('/withdrawals/stats');
 }
 
-// POST /withdrawals/:id/sync — synchronisation ponctuelle avec le payout fournisseur.
-// Intentionnellement non exposé dans l'interface : réservé aux workflows internes
-// ou à une future action opérateur explicitement autorisée.
+export function getWithdrawal(id) {
+  if (!id || typeof id !== 'string') throw new TypeError('Identifiant de retrait invalide');
+  return apiFetch(`/withdrawals/${encodeURIComponent(id)}`);
+}
+
+export function acceptWithdrawal(id) {
+  return apiFetch(`/withdrawals/${encodeURIComponent(id)}/accept`, { method: 'PATCH' });
+}
+
+export function uploadWithdrawalProof(id, file) {
+  if (!id || typeof id !== 'string') throw new TypeError('Identifiant de retrait invalide');
+  if (!(file instanceof File)) throw new TypeError('Fichier de preuve invalide');
+  const form = new FormData();
+  form.append('file', file);
+  return apiFetch(`/withdrawals/${encodeURIComponent(id)}/proof`, {
+    method: 'POST',
+    body: form,
+  });
+}
+
+export function getWithdrawalProof(id) {
+  if (!id || typeof id !== 'string') throw new TypeError('Identifiant de retrait invalide');
+  return apiFetchBlob(`/withdrawals/${encodeURIComponent(id)}/proof`);
+}
+
+export function confirmWithdrawal(id) {
+  return apiFetch(`/withdrawals/${encodeURIComponent(id)}/confirm`, { method: 'POST' });
+}
+
+export function failWithdrawal(id, reason) {
+  return apiFetch(`/withdrawals/${encodeURIComponent(id)}/fail`, {
+    method: 'POST',
+    body: { reason },
+  });
+}
+
+export function cancelWithdrawal(id, reason) {
+  return apiFetch(`/withdrawals/${encodeURIComponent(id)}/cancel`, {
+    method: 'POST',
+    body: { reason },
+  });
+}
+
+export function resolveWithdrawalAppeal(appealId, resolutionNote, approved) {
+  const qs = new URLSearchParams({ approved: String(Boolean(approved)) });
+  return apiFetch(`/withdrawals/appeals/${encodeURIComponent(appealId)}/resolve?${qs.toString()}`, {
+    method: 'PATCH',
+    body: { resolutionNote },
+  });
+}
+
+// Réservé aux workflows internes : aucune action Sync fournisseur n'est exposée.
 export function syncWithdrawal(id) {
   if (!id || typeof id !== 'string') throw new TypeError('Identifiant de retrait invalide');
   return apiFetch(`/withdrawals/${encodeURIComponent(id)}/sync`, { method: 'POST' });

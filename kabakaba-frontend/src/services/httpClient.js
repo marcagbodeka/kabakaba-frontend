@@ -36,12 +36,35 @@ export class ApiError extends Error {
   }
 }
 
+
+export async function apiFetchBlob(path) {
+  clearLegacyToken();
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    let data = null;
+    try {
+      const text = await res.text();
+      data = text ? JSON.parse(text) : null;
+    } catch {}
+    if (res.status === 401) {
+      window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT));
+    }
+    const rawMessage = (data && (data.message || data.error)) || `Erreur ${res.status}`;
+    throw new ApiError(res.status, Array.isArray(rawMessage) ? rawMessage.join(', ') : rawMessage, data);
+  }
+  return res.blob();
+}
+
 export async function apiFetch(path, { method = 'GET', body, auth = true, headers = {} } = {}) {
   clearLegacyToken();
   const normalizedMethod = method.toUpperCase();
   const finalHeaders = { ...headers };
 
-  if (body !== undefined) finalHeaders['Content-Type'] = 'application/json';
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+  if (body !== undefined && !isFormData) finalHeaders['Content-Type'] = 'application/json';
 
   // Les routes de session Web utilisent le cookie HttpOnly. Le cookie CSRF
   // est volontairement lisible par JS et doit être renvoyé pour les mutations.
@@ -53,7 +76,9 @@ export async function apiFetch(path, { method = 'GET', body, auth = true, header
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method: normalizedMethod,
     headers: finalHeaders,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: body !== undefined
+      ? (isFormData ? body : JSON.stringify(body))
+      : undefined,
     credentials: 'include',
   });
 

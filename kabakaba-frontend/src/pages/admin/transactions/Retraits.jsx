@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Banknote } from 'lucide-react';
+import { Banknote, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import DateRangePicker from '../../../components/DateRangePicker';
@@ -11,13 +12,15 @@ const STATUS_LABEL = {
   PENDING: 'En attente',
   PROCESSING: 'En cours',
   COMPLETED: 'Versé',
-  FAILED: 'Échoué',
+  FAILED: 'Non abouti',
+  CANCELLED: 'Annulé',
 };
 const STATUS_TONE = {
   PENDING: 'badge-amber',
   PROCESSING: 'badge-blue',
   COMPLETED: 'badge-green',
   FAILED: 'badge-gray',
+  CANCELLED: 'badge-red',
 };
 
 function formatFcfa(n) {
@@ -39,6 +42,7 @@ function daysAgo(n) {
 }
 
 export default function Retraits() {
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState('all');
   const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [page, setPage] = useState(1);
@@ -59,7 +63,7 @@ export default function Retraits() {
     setLoading(true);
     setError(null);
     getWithdrawals(page, PAGE_SIZE, statusFilter, range)
-      .then((res) => { setWithdrawals(res.data); setMeta(res.meta); })
+      .then((res) => { setWithdrawals(res.data || []); setMeta(res.meta || { total: 0, totalPages: 1 }); })
       .catch((err) => setError(err.message || 'Impossible de charger les retraits.'))
       .finally(() => setLoading(false));
   }, [page, statusFilter, range]);
@@ -73,44 +77,40 @@ export default function Retraits() {
         <div className="page-header">
           <div className="eyebrow">Admin web · Monitoring</div>
           <h1>Retraits</h1>
-          <p>Récapitulatif des retraits vendeur — le versement (payout) est automatique, ceci n&apos;est pas un outil de traitement manuel.</p>
+          <p>Traitement manuel des demandes de retrait vendeur. L&apos;administrateur effectue le transfert USSD et dépose la preuve.</p>
         </div>
 
         {error && <div className="notice-banner notice-error">{error}</div>}
         {statsError && <div className="notice-banner notice-error">{statsError}</div>}
 
-        <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-          <div className="kpi-card">
-            <div className="kpi-label">En attente</div>
-            <div className="kpi-value" style={{ color: 'var(--amber)' }}>{stats ? formatFcfa(stats.pending.total) : '…'}</div>
-            <div className="kpi-sub">{stats ? `${stats.pending.count} retrait${stats.pending.count === 1 ? '' : 's'}` : '—'}</div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-label">En cours</div>
-            <div className="kpi-value" style={{ color: 'var(--indigo)' }}>{stats ? formatFcfa(stats.processing.total) : '…'}</div>
-            <div className="kpi-sub">{stats ? `${stats.processing.count} retrait${stats.processing.count === 1 ? '' : 's'}` : '—'}</div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Versés</div>
-            <div className="kpi-value" style={{ color: '#22C55E' }}>{stats ? formatFcfa(stats.completed.total) : '…'}</div>
-            <div className="kpi-sub">{stats ? `${stats.completed.count} retrait${stats.completed.count === 1 ? '' : 's'}` : '—'}</div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Échoués</div>
-            <div className="kpi-value" style={{ color: '#DC2626' }}>{stats ? formatFcfa(stats.failed.total) : '…'}</div>
-            <div className="kpi-sub">{stats ? `${stats.failed.count} retrait${stats.failed.count === 1 ? '' : 's'}` : '—'}</div>
-          </div>
+        <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+          {[
+            ['En attente', 'pending', 'var(--amber)'],
+            ['En cours', 'processing', 'var(--indigo)'],
+            ['Versés', 'completed', '#22C55E'],
+            ['Non aboutis', 'failed', '#DC2626'],
+            ['Annulés', 'cancelled', '#64748B'],
+          ].map(([label, key, color]) => (
+            <div className="kpi-card" key={key}>
+              <div className="kpi-label">{label}</div>
+              <div className="kpi-value" style={{ color }}>{stats ? formatFcfa(stats[key]?.total) : '…'}</div>
+              <div className="kpi-sub">{stats ? `${stats[key]?.count || 0} retrait${stats[key]?.count === 1 ? '' : 's'}` : '—'}</div>
+            </div>
+          ))}
         </div>
 
         <div className="filter-bar">
           <div className="filter-group">
             <label className="filter-label">Statut</label>
-            <div className="tab-pills">
-              <button className={`pill${statusFilter === 'all' ? ' active' : ''}`} onClick={() => setStatusFilter('all')}>Tous</button>
-              <button className={`pill${statusFilter === 'PENDING' ? ' active' : ''}`} onClick={() => setStatusFilter('PENDING')}>En attente</button>
-              <button className={`pill${statusFilter === 'PROCESSING' ? ' active' : ''}`} onClick={() => setStatusFilter('PROCESSING')}>En cours</button>
-              <button className={`pill${statusFilter === 'COMPLETED' ? ' active' : ''}`} onClick={() => setStatusFilter('COMPLETED')}>Versés</button>
-              <button className={`pill${statusFilter === 'FAILED' ? ' active' : ''}`} onClick={() => setStatusFilter('FAILED')}>Échoués</button>
+            <div className="tab-pills" style={{ flexWrap: 'wrap' }}>
+              {[
+                ['all', 'Tous'], ['PENDING', 'En attente'], ['PROCESSING', 'En cours'],
+                ['COMPLETED', 'Versés'], ['FAILED', 'Non aboutis'], ['CANCELLED', 'Annulés'],
+              ].map(([value, label]) => (
+                <button key={value} className={`pill${statusFilter === value ? ' active' : ''}`} onClick={() => setStatusFilter(value)}>
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -120,31 +120,34 @@ export default function Retraits() {
             <table>
               <thead>
                 <tr>
-                  <th>Cantine</th>
-                  <th>Montant demandé</th>
-                  <th>Frais FedaPay</th>
-                  <th>Frais cash</th>
-                  <th>Débité du solde</th>
+                  <th>Vendeur / Cantine</th>
+                  <th>Téléphone</th>
+                  <th>Brut demandé</th>
+                  <th>Frais retenus</th>
+                  <th>Net à envoyer</th>
                   <th>Statut</th>
                   <th>Date</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
-                {loading && (
-                  <tr><td colSpan={7} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>
-                )}
-                {!loading && withdrawals.length === 0 && (
-                  <tr><td colSpan={7} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun retrait ne correspond à ce filtre.</td></tr>
-                )}
+                {loading && <tr><td colSpan={8} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
+                {!loading && withdrawals.length === 0 && <tr><td colSpan={8} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun retrait ne correspond à ce filtre.</td></tr>}
                 {!loading && withdrawals.map((w) => (
-                  <tr key={w.id}>
-                    <td style={{ fontWeight: 600 }}>{w.vendor?.canteenName || '—'}</td>
+                  <tr key={w.id} onClick={() => navigate(`/admin/retraits/${encodeURIComponent(w.id)}`)} style={{ cursor: 'pointer' }}>
+                    <td style={{ fontWeight: 600 }}>
+                      {w.vendor?.canteenName || '—'}
+                      <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 400 }}>
+                        {`${w.vendor?.user?.firstName || ''} ${w.vendor?.user?.lastName || ''}`.trim() || '—'}
+                      </div>
+                    </td>
+                    <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{w.vendor?.user?.phone || '—'}</td>
                     <td>{formatFcfa(w.amount)}</td>
-                    <td style={{ color: 'var(--muted)' }}>{formatFcfa(w.operatorFee)}</td>
-                    <td style={{ color: 'var(--muted)' }}>{formatFcfa(w.platformFee)}</td>
-                    <td style={{ fontWeight: 700, color: 'var(--indigo)' }}>{formatFcfa(w.debitedAmount)}</td>
+                    <td style={{ color: 'var(--muted)' }}>{formatFcfa(w.feeRetained)}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--indigo)' }}>{formatFcfa(w.payoutAmount ?? w.amount)}</td>
                     <td><span className={STATUS_TONE[w.status] || 'badge-gray'}>{STATUS_LABEL[w.status] || w.status}</span></td>
                     <td style={{ fontSize: 12, color: 'var(--muted)' }}>{formatDateTime(w.createdAt)}</td>
+                    <td><button className="icon-btn" title="Voir le détail" aria-label="Voir le détail" onClick={(e) => { e.stopPropagation(); navigate(`/admin/retraits/${encodeURIComponent(w.id)}`); }}><Eye size={15} /></button></td>
                   </tr>
                 ))}
               </tbody>
@@ -154,10 +157,10 @@ export default function Retraits() {
             <span>Affichage {meta.total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, meta.total)} sur {meta.total} retrait{meta.total === 1 ? '' : 's'}</span>
             <div style={{ display: 'flex', gap: 6 }}>
               <button className="icon-btn" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>←</button>
-              {Array.from({ length: Math.min(meta.totalPages, 7) }, (_, i) => i + 1).map((n) => (
+              {Array.from({ length: Math.min(meta.totalPages || 1, 7) }, (_, i) => i + 1).map((n) => (
                 <button key={n} className="icon-btn" style={n === page ? { background: 'var(--indigo)', color: '#fff', borderColor: 'var(--indigo)' } : undefined} onClick={() => setPage(n)}>{n}</button>
               ))}
-              <button className="icon-btn" disabled={page >= meta.totalPages} onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}>→</button>
+              <button className="icon-btn" disabled={page >= (meta.totalPages || 1)} onClick={() => setPage((p) => Math.min(meta.totalPages || 1, p + 1))}>→</button>
             </div>
           </div>
         </div>
