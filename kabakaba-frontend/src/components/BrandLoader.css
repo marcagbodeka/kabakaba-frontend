@@ -1,0 +1,128 @@
+.brand-loader {
+  min-height: 100vh;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #fff;
+  isolation: isolate;
+}
+
+.brand-loader__scene {
+  position: relative;
+  width: 210px;
+  height: 210px;
+  display: grid;
+  place-items: center;
+}
+
+.brand-loader__logo {
+  position: relative;
+  z-index: 4;
+  width: 104px;
+  height: 104px;
+  object-fit: contain;
+  animation: brand-loader-logo 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 10px 24px rgba(18, 42, 105, 0.12));
+  transform-origin: center;
+}
+
+.brand-loader__ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: scale(0.86);
+  opacity: 0;
+}
+
+.brand-loader__ring--outer {
+  width: 184px;
+  height: 184px;
+  border: 1px solid rgba(245, 151, 28, 0.28);
+  box-shadow: 0 0 0 14px rgba(245, 151, 28, 0.035), inset 0 0 32px rgba(245, 151, 28, 0.06);
+  animation: brand-loader-ring 2.4s ease-out infinite;
+}
+
+.brand-loader__ring--inner {
+  width: 142px;
+  height: 142px;
+  border: 1px solid rgba(18, 42, 105, 0.11);
+  box-shadow: 0 0 34px rgba(245, 151, 28, 0.08);
+  animation: brand-loader-ring 2.4s ease-out 0.35s infinite;
+}
+
+.brand-loader__dot {
+  position: absolute;
+  z-index: 3;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f59b1c;
+  box-shadow: 0 0 12px rgba(245, 155, 28, 0.35);
+  animation: brand-loader-orbit 2.8s linear infinite;
+  transform-origin: 105px 105px;
+}
+
+.brand-loader__dot--one {
+  animation-delay: -0.9s;
+}
+
+.brand-loader__dot--two {
+  width: 6px;
+  height: 6px;
+  animation-delay: -1.85s;
+  animation-duration: 3.5s;
+  background: #ffb62d;
+}
+
+.brand-loader__dot--three {
+  width: 5px;
+  height: 5px;
+  animation-delay: -2.35s;
+  animation-duration: 3.1s;
+  background: #ff7b16;
+}
+
+@keyframes brand-loader-logo {
+  0%, 100% {
+    transform: scale(0.88);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes brand-loader-ring {
+  0% {
+    transform: scale(0.78);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.95;
+  }
+  75% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+}
+
+@keyframes brand-loader-orbit {
+  0% {
+    transform: rotate(0deg) translateX(92px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(92px) rotate(-360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-loader__logo,
+  .brand-loader__ring,
+  .brand-loader__dot {
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+  }
+}

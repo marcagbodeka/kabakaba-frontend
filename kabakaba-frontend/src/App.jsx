@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './layouts/DashboardLayout';
+import BrandLoader from './components/BrandLoader';
 import LoginPage from './pages/auth/LoginPage';
 import { useAuth } from './context/AuthContext';
 
@@ -65,12 +66,10 @@ export default function App() {
   return (
     <BrowserRouter>
       {!sessionChecked ? (
-        <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }} aria-busy="true">
-          Chargement…
-        </div>
+        <BrandLoader />
       ) : null}
       <div style={{ display: sessionChecked ? 'contents' : 'none' }}>
-      <Suspense fallback={<div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }} aria-busy="true">Chargement…</div>}>
+      <Suspense fallback={<BrandLoader />}>
       <Routes>
         {/* Site vitrine — page publique */}
         <Route path="/" element={<Suspense fallback={null}><Home /></Suspense>} />
