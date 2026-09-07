@@ -13,41 +13,41 @@ import { navSections as supervisionNav } from './router/navConfigSupervision';
 import { navSections as adminNav } from './router/navConfigAdmin';
 
 // Supervision
-import VueGenerale from './pages/dashboard/VueGenerale';
-import ComparaisonCampus from './pages/campus/ComparaisonCampus';
-import VolumeRevenus from './pages/campus/VolumeRevenus';
-import PerformanceVendeurs from './pages/cantines/PerformanceVendeurs';
-import SoldeCreances from './pages/cantines/SoldeCreances';
-import ComportementEtudiants from './pages/etudiants/ComportementEtudiants';
-import ComptesSuspendus from './pages/etudiants/ComptesSuspendus';
-import HistoriqueSuspensions from './pages/etudiants/HistoriqueSuspensions';
-import NotesAlertes from './pages/qualite/NotesAlertes';
-import Commentaires from './pages/qualite/Commentaires';
-import SupervisionAmbassadeurs from './pages/ambassadeurs/SupervisionAmbassadeurs';
-import DetailAmbassadeur from './pages/ambassadeurs/DetailAmbassadeur';
-import ParametresSupervision from './pages/parametres/Parametres';
-import ComptesSupervision from './pages/comptes/ComptesSupervision';
-import ComptesAdmin from './pages/comptes/ComptesAdmin';
+const VueGenerale = lazy(() => import('./pages/dashboard/VueGenerale'));
+const ComparaisonCampus = lazy(() => import('./pages/campus/ComparaisonCampus'));
+const VolumeRevenus = lazy(() => import('./pages/campus/VolumeRevenus'));
+const PerformanceVendeurs = lazy(() => import('./pages/cantines/PerformanceVendeurs'));
+const SoldeCreances = lazy(() => import('./pages/cantines/SoldeCreances'));
+const ComportementEtudiants = lazy(() => import('./pages/etudiants/ComportementEtudiants'));
+const ComptesSuspendus = lazy(() => import('./pages/etudiants/ComptesSuspendus'));
+const HistoriqueSuspensions = lazy(() => import('./pages/etudiants/HistoriqueSuspensions'));
+const NotesAlertes = lazy(() => import('./pages/qualite/NotesAlertes'));
+const Commentaires = lazy(() => import('./pages/qualite/Commentaires'));
+const SupervisionAmbassadeurs = lazy(() => import('./pages/ambassadeurs/SupervisionAmbassadeurs'));
+const DetailAmbassadeur = lazy(() => import('./pages/ambassadeurs/DetailAmbassadeur'));
+const ParametresSupervision = lazy(() => import('./pages/parametres/Parametres'));
+const ComptesSupervision = lazy(() => import('./pages/comptes/ComptesSupervision'));
+const ComptesAdmin = lazy(() => import('./pages/comptes/ComptesAdmin'));
 
 // Admin web
-import VueVendeurs from './pages/admin/dashboard/VueVendeurs';
-import ListeCantines from './pages/admin/cantines/ListeCantines';
-import CantineFiche from './pages/admin/cantines/CantineFiche';
-import CreerCantine from './pages/admin/cantines/CreerCantine';
-import CampusFacultes from './pages/admin/cantines/CampusFacultes';
-import ArticleConfig from './pages/admin/cantines/ArticleConfig';
-import FileLitiges from './pages/admin/litiges/FileLitiges';
-import LitigeDetail from './pages/admin/litiges/LitigeDetail';
-import ComptesSuspendusAdmin from './pages/admin/litiges/ComptesSuspendus';
-import ListeAmbassadeurs from './pages/admin/ambassadeurs/ListeAmbassadeurs';
-import AmbassadeurFiche from './pages/admin/ambassadeurs/AmbassadeurFiche';
-import DemandesAmbassadeur from './pages/admin/ambassadeurs/DemandesAmbassadeur';
-import Candidatures from './pages/admin/partenaires/Candidatures';
-import Transactions from './pages/admin/transactions/Transactions';
-import TransactionDetail from './pages/admin/transactions/TransactionDetail';
-import Retraits from './pages/admin/transactions/Retraits';
-import RetraitDetail from './pages/admin/transactions/RetraitDetail';
-import ParametresAdmin from './pages/admin/parametres/ParametresAdmin';
+const VueVendeurs = lazy(() => import('./pages/admin/dashboard/VueVendeurs'));
+const ListeCantines = lazy(() => import('./pages/admin/cantines/ListeCantines'));
+const CantineFiche = lazy(() => import('./pages/admin/cantines/CantineFiche'));
+const CreerCantine = lazy(() => import('./pages/admin/cantines/CreerCantine'));
+const CampusFacultes = lazy(() => import('./pages/admin/cantines/CampusFacultes'));
+const ArticleConfig = lazy(() => import('./pages/admin/cantines/ArticleConfig'));
+const FileLitiges = lazy(() => import('./pages/admin/litiges/FileLitiges'));
+const LitigeDetail = lazy(() => import('./pages/admin/litiges/LitigeDetail'));
+const ComptesSuspendusAdmin = lazy(() => import('./pages/admin/litiges/ComptesSuspendus'));
+const ListeAmbassadeurs = lazy(() => import('./pages/admin/ambassadeurs/ListeAmbassadeurs'));
+const AmbassadeurFiche = lazy(() => import('./pages/admin/ambassadeurs/AmbassadeurFiche'));
+const DemandesAmbassadeur = lazy(() => import('./pages/admin/ambassadeurs/DemandesAmbassadeur'));
+const Candidatures = lazy(() => import('./pages/admin/partenaires/Candidatures'));
+const Transactions = lazy(() => import('./pages/admin/transactions/Transactions'));
+const TransactionDetail = lazy(() => import('./pages/admin/transactions/TransactionDetail'));
+const Retraits = lazy(() => import('./pages/admin/transactions/Retraits'));
+const RetraitDetail = lazy(() => import('./pages/admin/transactions/RetraitDetail'));
+const ParametresAdmin = lazy(() => import('./pages/admin/parametres/ParametresAdmin'));
 
 export default function App() {
   // Une seule source de vérité pour la session, partagée entre les deux
@@ -70,6 +70,7 @@ export default function App() {
         </div>
       ) : null}
       <div style={{ display: sessionChecked ? 'contents' : 'none' }}>
+      <Suspense fallback={<div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }} aria-busy="true">Chargement…</div>}>
       <Routes>
         {/* Site vitrine — page publique */}
         <Route path="/" element={<Suspense fallback={null}><Home /></Suspense>} />
@@ -181,6 +182,7 @@ export default function App() {
         {/* URL inconnue → site public */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
       </div>
     </BrowserRouter>
   );

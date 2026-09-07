@@ -12,6 +12,24 @@ const CSRF_COOKIE_NAME = 'kabakaba_web_csrf';
 
 export const AUTH_EXPIRED_EVENT = 'kbb:auth-expired';
 
+const GET_CACHE_TTL_MS = 5000;
+const getCache = new Map();
+
+function getCachedGet(path) {
+  const hit = getCache.get(path);
+  if (!hit) return null;
+  if (hit.expiresAt <= Date.now()) { getCache.delete(path); return null; }
+  return hit.value;
+}
+
+function setCachedGet(path, value) {
+  getCache.set(path, { value, expiresAt: Date.now() + GET_CACHE_TTL_MS });
+}
+
+export function clearApiCache() {
+  getCache.clear();
+}
+
 // Le JWT de session Web est désormais HttpOnly : le frontend ne peut ni le
 // lire ni le stocker. On supprime aussi toute ancienne copie sessionStorage.
 export function clearLegacyToken() {
@@ -63,6 +81,14 @@ export async function apiFetch(path, { method = 'GET', body, auth = true, header
   const normalizedMethod = method.toUpperCase();
   const finalHeaders = { ...headers };
 
+  // Petit cache mémoire uniquement pour GET : évite les appels identiques
+  // déclenchés par plusieurs widgets/pages pendant quelques secondes.
+  // Rien n'est persisté et toute mutation invalide le cache.
+  if (normalizedMethod === 'GET' && auth) {
+    const cached = getCachedGet(path);
+    if (cached !== null) return cached;
+  }
+
   const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
   if (body !== undefined && !isFormData) finalHeaders['Content-Type'] = 'application/json';
 
@@ -98,5 +124,7 @@ export async function apiFetch(path, { method = 'GET', body, auth = true, header
     throw new ApiError(res.status, Array.isArray(rawMessage) ? rawMessage.join(', ') : rawMessage, data);
   }
 
+  if (normalizedMethod === 'GET' && auth) setCachedGet(path, data);
+  if (normalizedMethod !== 'GET' && normalizedMethod !== 'HEAD' && normalizedMethod !== 'OPTIONS') clearApiCache();
   return data;
 }
