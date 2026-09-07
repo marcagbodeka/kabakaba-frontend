@@ -46,17 +46,28 @@ export default function CreerCantine() {
   const [firstName, ...lastNameParts] = vendorName.trim().split(/\s+/);
   const lastName = lastNameParts.join(' ');
 
-  const canSubmit =
-    canteenName.trim() &&
-    firstName && lastName &&
-    phone.trim() &&
-    email.trim() &&
-    tempPassword.length >= 8 &&
-    tempPassword === confirmPassword &&
-    selectedCampusIds.length > 0;
+  // Le bouton "Créer la cantine" reste toujours cliquable : on ne bloque
+  // jamais silencieusement (bouton grisé sans explication). Chaque règle
+  // manquante devient un message de popup explicite au clic.
+  function getValidationError() {
+    if (!canteenName.trim()) return 'Le nom de la cantine est requis.';
+    if (!vendorName.trim() || !firstName || !lastName) {
+      return 'Merci de renseigner le prénom ET le nom du vendeur (ex : "Akosua Mensah").';
+    }
+    if (!phone.trim()) return 'Le téléphone de contact est requis.';
+    if (!email.trim()) return "L'email de connexion est requis.";
+    if (tempPassword.length < 8) return 'Le mot de passe temporaire doit contenir au moins 8 caractères.';
+    if (tempPassword !== confirmPassword) return 'Les mots de passe ne correspondent pas.';
+    if (selectedCampusIds.length === 0) return 'Sélectionnez au moins un campus affilié.';
+    return null;
+  }
 
   async function handleSubmit() {
-    if (!canSubmit) return;
+    const validationError = getValidationError();
+    if (validationError) {
+      setToast({ type: 'error', message: validationError });
+      return;
+    }
     setSubmitting(true);
     setToast(null);
     try {
@@ -77,7 +88,7 @@ export default function CreerCantine() {
       <Toast toast={toast} onClose={() => setToast(null)} />
       <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Créer une cantine' }]}>
         <button className="btn-secondary-sm" disabled={submitting} onClick={() => navigate('/admin/cantines')}>Annuler</button>
-        <button className="btn-primary-sm" disabled={!canSubmit || submitting} onClick={handleSubmit}>
+        <button className="btn-primary-sm" disabled={submitting} onClick={handleSubmit}>
           {submitting ? 'Création…' : 'Créer la cantine'}
         </button>
       </Topbar>

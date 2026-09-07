@@ -1,10 +1,12 @@
+// En production, les appels passent par le rewrite Vercel défini dans
+// vercel.json (/api/v1/:path* -> backend) : ils restent donc sur la même
+// origine que le frontend (ka-bakaba.vercel.app), ce qui rend le cookie de
+// session réellement de premier parti (same-site) plutôt que cross-site —
+// voir le commentaire de sameSite() côté backend pour le contexte complet.
+// VITE_API_BASE_URL reste disponible pour un override explicite (staging
+// pointant vers un autre backend, environnement sans le rewrite, etc.).
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
-
-if (import.meta.env.PROD && !configuredApiBaseUrl) {
-  throw new Error('VITE_API_BASE_URL est obligatoire en production.');
-}
-
-const API_BASE_URL = configuredApiBaseUrl || 'http://localhost:3000/api/v1';
+const API_BASE_URL = configuredApiBaseUrl || (import.meta.env.PROD ? '/api/v1' : 'http://localhost:3000/api/v1');
 const LEGACY_TOKEN_KEY = 'kbb_web_session_token';
 const CSRF_COOKIE_NAME = 'kabakaba_web_csrf';
 
