@@ -281,6 +281,7 @@ export default function VueVendeurs() {
   return (
     <>
       <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Tableau de bord' }]} badge={{ text: "Aujourd'hui" }} hidePeriodSelect>
+        <DateRangePicker value={range} onChange={setRange} />
         <div className="global-search-wrap">
           <input
             className="global-search-input"
@@ -327,12 +328,9 @@ export default function VueVendeurs() {
 
         <div className="two-col">
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, padding: '20px 22px 0' }}>
-              <div>
-                <div className="card-title" style={{ marginBottom: 0 }}>Classement vendeurs</div>
-                <div className="card-sub" style={{ marginBottom: 0 }}>{chartPeriodTitle('Volume de commandes', dayLabels.length)}</div>
-              </div>
-              <DateRangePicker value={range} onChange={setRange} />
+            <div style={{ padding: '20px 22px 0' }}>
+              <div className="card-title" style={{ marginBottom: 0 }}>Classement vendeurs</div>
+              <div className="card-sub" style={{ marginBottom: 0 }}>{chartPeriodTitle('Volume de commandes', dayLabels.length)}</div>
             </div>
 
             {rangeError && (
