@@ -108,7 +108,7 @@ export default function CampusFacultes() {
   if (loading) {
     return (
       <>
-        <Topbar icon={Building2} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Campus & facultés' }]} />
+        <Topbar icon={Building2} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Campus & facultés' }]} hidePeriodSelect />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -116,7 +116,7 @@ export default function CampusFacultes() {
 
   return (
     <>
-      <Topbar icon={Building2} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Campus & facultés' }]}>
+      <Topbar icon={Building2} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Campus & facultés' }]} hidePeriodSelect>
         <button className="btn-primary-sm" onClick={openNewCampus}><Plus size={14} /> Ajouter un campus</button>
       </Topbar>
       <PageContent>

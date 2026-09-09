@@ -5,7 +5,7 @@ import PageContent from '../../../components/PageContent';
 export default function Parametres() {
   return (
     <>
-      <Topbar icon={Settings} breadcrumb={[{ label: 'Paramètres' }]} />
+      <Topbar icon={Settings} breadcrumb={[{ label: 'Paramètres' }]} hidePeriodSelect />
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Admin web · Paramètres</div>

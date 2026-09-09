@@ -100,7 +100,7 @@ export default function ListeAmbassadeurs() {
   if (loading) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]} />
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]} hidePeriodSelect />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -109,7 +109,7 @@ export default function ListeAmbassadeurs() {
   if (error) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]} />
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]} hidePeriodSelect />
         <PageContent><p style={{ color: '#DC2626' }}>{error}</p></PageContent>
       </>
     );

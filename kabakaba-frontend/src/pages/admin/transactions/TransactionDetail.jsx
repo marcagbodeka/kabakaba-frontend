@@ -53,7 +53,7 @@ export default function TransactionDetail() {
   if (loading) {
     return (
       <>
-        <Topbar icon={Monitor} breadcrumb={[{ label: 'Transactions', path: '/admin/transactions' }]} />
+        <Topbar icon={Monitor} breadcrumb={[{ label: 'Transactions', path: '/admin/transactions' }]} hidePeriodSelect />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -62,7 +62,7 @@ export default function TransactionDetail() {
   if (error || !t) {
     return (
       <>
-        <Topbar icon={Monitor} breadcrumb={[{ label: 'Transactions', path: '/admin/transactions' }]} />
+        <Topbar icon={Monitor} breadcrumb={[{ label: 'Transactions', path: '/admin/transactions' }]} hidePeriodSelect />
         <PageContent><p style={{ color: '#DC2626' }}>{error || 'Transaction introuvable.'}</p></PageContent>
       </>
     );

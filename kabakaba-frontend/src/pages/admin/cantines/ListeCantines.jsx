@@ -74,7 +74,7 @@ export default function ListeCantines() {
 
   return (
     <>
-      <Topbar icon={Utensils} breadcrumb={[{ label: 'Gestion' }, { label: 'Cantines' }]}>
+      <Topbar icon={Utensils} breadcrumb={[{ label: 'Gestion' }, { label: 'Cantines' }]} hidePeriodSelect>
         <button className="btn-primary-sm" onClick={() => navigate('/admin/cantines/creer')}>
           <Plus size={16} /> Créer une cantine
         </button>

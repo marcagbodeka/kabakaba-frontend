@@ -89,7 +89,7 @@ export default function LitigeDetail() {
   if (loading) {
     return (
       <>
-        <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }]} />
+        <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }]} hidePeriodSelect />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -98,7 +98,7 @@ export default function LitigeDetail() {
   if (error || !ctx) {
     return (
       <>
-        <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }]} />
+        <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }]} hidePeriodSelect />
         <PageContent><p style={{ color: '#DC2626' }}>{error || 'Litige introuvable.'}</p></PageContent>
       </>
     );
@@ -122,6 +122,7 @@ export default function LitigeDetail() {
         icon={AlertTriangle}
         breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }, { label: `#${shortRef}` }]}
         badge={{ text: STATUS_LABEL[dispute.status], tone: dispute.status === 'OPEN' ? 'red' : 'default' }}
+        hidePeriodSelect
       >
         <button className="btn-secondary-sm" onClick={() => navigate('/admin/litiges')}>← Retour</button>
       </Topbar>

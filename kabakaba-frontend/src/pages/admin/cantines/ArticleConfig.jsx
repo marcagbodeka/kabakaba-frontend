@@ -196,7 +196,7 @@ export default function ArticleConfig() {
   if (loading) {
     return (
       <>
-        <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }]} />
+        <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }]} hidePeriodSelect />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -205,7 +205,7 @@ export default function ArticleConfig() {
   if (loadError) {
     return (
       <>
-        <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }]} />
+        <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }]} hidePeriodSelect />
         <PageContent><p style={{ color: '#DC2626' }}>{loadError}</p></PageContent>
       </>
     );
@@ -219,7 +219,7 @@ export default function ArticleConfig() {
           { label: 'Cantines', path: '/admin/cantines' },
           { label: canteenBreadcrumb, path: `/admin/cantines/${id}` },
           { label: isEdit ? 'Modifier un article' : 'Configurer un article' },
-        ]}
+        ] } hidePeriodSelect
       >
         <button className="btn-secondary-sm" disabled={saving} onClick={() => navigate(`/admin/cantines/${id}`)}>Annuler</button>
         <button className="btn-primary-sm" disabled={!canSave || saving} onClick={handleSave}>

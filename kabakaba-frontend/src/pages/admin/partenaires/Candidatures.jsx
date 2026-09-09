@@ -130,7 +130,7 @@ export default function Candidatures() {
   if (loading) {
     return (
       <>
-        <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} />
+        <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} hidePeriodSelect />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -139,7 +139,7 @@ export default function Candidatures() {
   if (error) {
     return (
       <>
-        <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} />
+        <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} hidePeriodSelect />
         <PageContent><p style={{ color: '#DC2626' }}>{error}</p></PageContent>
       </>
     );
@@ -147,7 +147,7 @@ export default function Candidatures() {
 
   return (
     <>
-      <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} badge={{ text: `${byStatus.NEW.length} nouvelle${byStatus.NEW.length === 1 ? '' : 's'}`, tone: byStatus.NEW.length > 0 ? 'red' : 'default' }} />
+      <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} badge={{ text: `${byStatus.NEW.length} nouvelle${byStatus.NEW.length === 1 ? '' : 's'}`, tone: byStatus.NEW.length > 0 ? 'red' : 'default' }} hidePeriodSelect />
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Admin web · Partenaires</div>
@@ -282,6 +282,13 @@ export default function Candidatures() {
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div className="table-scroll">
             <table>
+              <colgroup>
+                <col style={{ width: '30%' }} />
+                <col style={{ width: '22%' }} />
+                <col style={{ width: '16%' }} />
+                <col style={{ width: '16%' }} />
+                <col style={{ width: '16%' }} />
+              </colgroup>
               <thead>
                 <tr><th>Structure</th><th>Contact</th><th>Campus</th><th>Reçu le</th><th>Statut</th></tr>
               </thead>
@@ -291,8 +298,8 @@ export default function Candidatures() {
                 )}
                 {otherRows.map((c) => (
                   <tr key={c.id}>
-                    <td className="name-cell"><span className="initials init-gray" style={{ width: 28, height: 28, fontSize: 11 }}>{initialsOf(c.structureName)}</span><strong>{c.structureName}</strong></td>
-                    <td>{c.contactName}</td>
+                    <td className="name-cell"><span className="initials init-gray">{initialsOf(c.structureName)}</span><strong>{c.structureName}</strong></td>
+                    <td style={{ color: '#475569' }}>{c.contactName}</td>
                     <td><span className="badge-blue">{c.targetCampus}</span></td>
                     <td style={{ fontSize: 13, color: 'var(--muted)' }}>{formatDate(c.createdAt)}</td>
                     <td>

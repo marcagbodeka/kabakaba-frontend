@@ -86,7 +86,7 @@ export default function CreerCantine() {
   return (
     <>
       <Toast toast={toast} onClose={() => setToast(null)} />
-      <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Créer une cantine' }]}>
+      <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Créer une cantine' }]} hidePeriodSelect>
         <button className="btn-secondary-sm" disabled={submitting} onClick={() => navigate('/admin/cantines')}>Annuler</button>
         <button className="btn-primary-sm" disabled={submitting} onClick={handleSubmit}>
           {submitting ? 'Création…' : 'Créer la cantine'}

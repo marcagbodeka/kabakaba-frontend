@@ -218,7 +218,7 @@ export default function CantineFiche() {
   if (loading) {
     return (
       <>
-        <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }]} />
+        <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }]} hidePeriodSelect />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -227,7 +227,7 @@ export default function CantineFiche() {
   if (error || !vendor) {
     return (
       <>
-        <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }]} />
+        <Topbar icon={Utensils} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }]} hidePeriodSelect />
         <PageContent><p style={{ color: '#DC2626' }}>{error || 'Cantine introuvable.'}</p></PageContent>
       </>
     );
@@ -242,6 +242,7 @@ export default function CantineFiche() {
         icon={Utensils}
         breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: vendor.canteenName }]}
         badge={{ text: `${vendor.isActive ? 'Actif' : 'Suspendu'} · ${vendor.isOpen ? 'Ouverte' : 'Fermée'}`, tone: vendor.isActive ? 'default' : 'red' }}
+        hidePeriodSelect
       >
         <button className="btn-secondary-sm" onClick={() => navigate('/admin/cantines')}>← Retour à la liste</button>
       </Topbar>
