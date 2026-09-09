@@ -4,7 +4,7 @@ import { Utensils, Plus, Pencil, X, Clock, Building2, Trash2 } from 'lucide-reac
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import { getVendorForAdmin, updateVendor, getVendorSchedules, createVendorSchedule, deleteVendorSchedule } from '../../../services/domain/vendorsService';
-import { getMenuItemsByVendor } from '../../../services/domain/catalogService';
+import { getMenuItemsByVendor, getMenuComponents } from '../../../services/domain/catalogService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
 
 const DAY_LABEL = { MONDAY: 'Lun', TUESDAY: 'Mar', WEDNESDAY: 'Mer', THURSDAY: 'Jeu', FRIDAY: 'Ven', SATURDAY: 'Sam', SUNDAY: 'Dim' };
@@ -58,6 +58,7 @@ export default function CantineFiche() {
   const [campusToAdd, setCampusToAdd] = useState('');
   const [campusBusy, setCampusBusy] = useState(false);
   const [campusError, setCampusError] = useState(null);
+  const [minPriceByItemId, setMinPriceByItemId] = useState({});
 
   function loadVendor() {
     return getVendorForAdmin(id).then((v) => {
@@ -81,6 +82,30 @@ export default function CantineFiche() {
   }, [id]);
 
   const menuTypeCount = useMemo(() => new Set(menuItems.map((m) => m.type)).size, [menuItems]);
+
+  // Pour un article "Personnalisable", le prix stocké sur l'article lui-même
+  // (souvent 0) ne reflète pas ce que l'étudiant paiera au minimum : c'est
+  // la somme de sa base + de ses composants obligatoires (minQty > 0,
+  // chacun compté minQty × son prix unitaire) qui donne le vrai plancher
+  // "dès X tickets" annoncé. On la calcule une fois les articles chargés.
+  useEffect(() => {
+    const customizable = menuItems.filter((m) => m.type === 'CUSTOMIZABLE');
+    if (customizable.length === 0) return;
+    let cancelled = false;
+    Promise.all(
+      customizable.map((item) =>
+        getMenuComponents(item.id).then((res) => {
+          const mandatoryTotal = res.data
+            .filter((c) => c.minQty > 0)
+            .reduce((sum, c) => sum + c.minQty * c.unitPriceTickets, 0);
+          return [item.id, item.priceTickets + mandatoryTotal];
+        }),
+      ),
+    ).then((pairs) => {
+      if (!cancelled) setMinPriceByItemId(Object.fromEntries(pairs));
+    });
+    return () => { cancelled = true; };
+  }, [menuItems]);
   const availableCampusesToAdd = useMemo(() => {
     const affiliatedIds = new Set((vendor?.campuses ?? []).map((c) => c.id));
     return allCampuses.filter((c) => !affiliatedIds.has(c.id));
@@ -375,7 +400,11 @@ export default function CantineFiche() {
                     </div>
                   </div>
                   <div className="article-right">
-                    <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--indigo)' }}>{a.type === 'CUSTOMIZABLE' ? 'dès ' : ''}{a.priceTickets} tickets</span>
+                    <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--indigo)' }}>
+                      {a.type === 'CUSTOMIZABLE'
+                        ? `dès ${minPriceByItemId[a.id] ?? '…'} tickets`
+                        : `${a.priceTickets} tickets`}
+                    </span>
                     <span className={a.isAvailable ? 'badge-green' : 'badge-gray'}>{a.isAvailable ? 'Disponible' : 'Indisponible'}</span>
                     <button className="icon-btn" title="Modifier" onClick={() => navigate(`/admin/cantines/${id}/articles/${a.id}`)}><Pencil size={15} /></button>
                   </div>
