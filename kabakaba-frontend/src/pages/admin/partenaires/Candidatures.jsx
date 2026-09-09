@@ -282,13 +282,6 @@ export default function Candidatures() {
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div className="table-scroll">
             <table>
-              <colgroup>
-                <col style={{ width: '30%' }} />
-                <col style={{ width: '22%' }} />
-                <col style={{ width: '16%' }} />
-                <col style={{ width: '16%' }} />
-                <col style={{ width: '16%' }} />
-              </colgroup>
               <thead>
                 <tr><th>Structure</th><th>Contact</th><th>Campus</th><th>Reçu le</th><th>Statut</th></tr>
               </thead>
