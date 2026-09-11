@@ -29,12 +29,8 @@ export default function Home() {
         <div className="hero-text">
           <div className="pill">Restauration campus · 100% digital</div>
           <h1>
-            Ton ex fait la queue.
-            <span className="accent">Toi tu manges déjà.</span>
+            Avec <span className="accent-inline">kabakaba</span>, c&apos;est plus simple, plus pratique, sans perdre de temps.
           </h1>
-          <p className="hero-kicker">
-            Ce n&apos;est pas le karma.&nbsp;C&apos;est&nbsp;<b>kabakaba</b>.
-          </p>
           <p className="hero-sub">
             Commande, paye et suis ta commande en temps réel dans les cantines de ton campus.
           </p>

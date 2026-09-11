@@ -277,6 +277,10 @@
   display: block;
 }
 
+.hero h1 .accent-inline {
+  color: var(--orange);
+}
+
 .hero-kicker {
   font-size: 15px;
   font-weight: 600;

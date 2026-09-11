@@ -9,7 +9,7 @@ export default function BrandLoader() {
         <span className="brand-loader__dot brand-loader__dot--one" />
         <span className="brand-loader__dot brand-loader__dot--two" />
         <span className="brand-loader__dot brand-loader__dot--three" />
-        <img className="brand-loader__logo" src="/site/kabakaba-loader-logo-v2.png" alt="" width="128" height="128" />
+        <img className="brand-loader__logo" src="/site/logo-128.webp" alt="" width="128" height="128" />
       </div>
     </div>
   );
