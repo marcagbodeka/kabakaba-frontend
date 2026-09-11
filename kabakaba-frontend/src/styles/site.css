@@ -784,7 +784,7 @@
   .feat-card { flex: 1 1 calc(50% - 10px); }
   .partner-block { flex-direction: column; }
   .partner-text { text-align: left; }
-  .partner-form-card { flex: 1 1 auto; width: 100%; }
+  .partner-form-card { flex: 1 1 auto; width: 100%; min-width: 0; }
   .partner-form-row { flex-direction: column; gap: 0; }
   .partner-form-row > .field { flex: none; }
 }
