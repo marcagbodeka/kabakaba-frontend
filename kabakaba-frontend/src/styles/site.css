@@ -782,9 +782,9 @@
   .hero-phones { width: 100%; }
   .why-card { text-align: center; }
   .feat-card { flex: 1 1 calc(50% - 10px); }
-  .partner-block { flex-direction: column; }
+  .partner-block { flex-direction: column; padding: 24px; gap: 32px; }
   .partner-text { text-align: left; }
-  .partner-form-card { flex: 1 1 auto; width: 100%; min-width: 0; }
+  .partner-form-card { flex: 1 1 auto; width: 100%; min-width: 0; padding: 20px; }
   .partner-form-row { flex-direction: column; gap: 0; }
   .partner-form-row > .field { flex: none; }
 }

@@ -35,7 +35,6 @@ export default function Home() {
             Commande, paye et suis ta commande en temps réel dans les cantines de ton campus.
           </p>
           <StoreBadges />
-          <div className="micro-note">Gratuit · Paiement sécurisé par séquestre</div>
         </div>
 
         <div className="hero-phones">
