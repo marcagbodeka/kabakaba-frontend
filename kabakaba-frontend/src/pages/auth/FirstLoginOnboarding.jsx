@@ -265,8 +265,14 @@ export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone,
             setFormError(null);
             setLoading(true);
             try {
-              await webAuth.setOnboardingPassword(onboardingToken, newPw);
-              const setupResult = await webAuth.setupTwoFactor(onboardingToken);
+              // Chaque étape de l'onboarding consomme son jeton (usage
+              // unique) et en émet un nouveau pour l'étape suivante — le
+              // backend refuse tout jeton déjà consommé ou du mauvais
+              // "step". Il faut donc capturer et réutiliser le jeton
+              // retourné à chaque appel, jamais l'ancien.
+              const passwordResult = await webAuth.setOnboardingPassword(onboardingToken, newPw);
+              const setupResult = await webAuth.setupTwoFactor(passwordResult.onboardingToken);
+              setOnboardingToken(setupResult.onboardingToken);
               setQrCodeDataUrl(setupResult.qrCodeDataUrl);
               setManualKey(setupResult.manualKey);
               setInternalStep(3);
