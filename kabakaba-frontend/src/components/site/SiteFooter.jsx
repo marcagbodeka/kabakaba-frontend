@@ -35,7 +35,7 @@ export default function SiteFooter() {
 
           <div className="footer-col">
             <h5>Nous contacter</h5>
-            <div className="footer-contact-row"><Mail size={14} /><span>contact@kabakaba.app</span></div>
+            <div className="footer-contact-row"><Mail size={14} /><span>contactkabakaba@gmail.com</span></div>
             <div className="footer-contact-row"><Phone size={14} /><span>+228 71 54 39 09</span></div>
             <div className="footer-contact-row"><MapPin size={14} /><span>Lomé, Togo</span></div>
           </div>
