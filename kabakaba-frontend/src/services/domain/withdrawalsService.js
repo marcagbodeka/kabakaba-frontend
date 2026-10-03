@@ -65,9 +65,3 @@ export function resolveWithdrawalAppeal(appealId, resolutionNote, approved) {
     body: { resolutionNote },
   });
 }
-
-// Réservé aux workflows internes : aucune action Sync fournisseur n'est exposée.
-export function syncWithdrawal(id) {
-  if (!id || typeof id !== 'string') throw new TypeError('Identifiant de retrait invalide');
-  return apiFetch(`/withdrawals/${encodeURIComponent(id)}/sync`, { method: 'POST' });
-}

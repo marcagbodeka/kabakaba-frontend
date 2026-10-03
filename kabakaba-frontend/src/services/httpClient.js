@@ -26,7 +26,7 @@ function setCachedGet(path, value) {
   getCache.set(path, { value, expiresAt: Date.now() + GET_CACHE_TTL_MS });
 }
 
-export function clearApiCache() {
+function clearApiCache() {
   getCache.clear();
 }
 
@@ -42,7 +42,7 @@ function getCookie(name) {
   return entry ? decodeURIComponent(entry.slice(prefix.length)) : null;
 }
 
-export function getCsrfToken() {
+function getCsrfToken() {
   return getCookie(CSRF_COOKIE_NAME);
 }
 

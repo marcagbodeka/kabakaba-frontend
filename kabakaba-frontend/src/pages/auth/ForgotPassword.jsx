@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Mail, Lock, ShieldCheck, Eye, EyeOff, Moon, Sun, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import styles from './Login.module.css';
 import * as webAuth from '../../services/webAuthService';
-import { ApiError } from '../../services/httpClient';
 import useAuthTheme from './useAuthTheme';
 
 const OTP_LENGTH = 6;

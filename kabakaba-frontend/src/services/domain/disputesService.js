@@ -27,11 +27,6 @@ export function getDisputeContext(id) {
   return apiFetch(`/disputes/${id}/context`);
 }
 
-// GET /disputes/:id
-export function getDispute(id) {
-  return apiFetch(`/disputes/${id}`);
-}
-
 // PATCH /disputes/:id — { status, decision, decisionNote }
 export function updateDispute(id, patch) {
   return apiFetch(`/disputes/${id}`, { method: 'PATCH', body: patch });
