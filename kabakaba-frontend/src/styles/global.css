@@ -45,7 +45,6 @@ a {
 
 /* Alignement propre des chiffres dans les KPI et tableaux */
 .kpi-value,
-.revenue-cell-value,
 .chart-stacked-val {
   font-variant-numeric: tabular-nums;
 }

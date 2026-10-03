@@ -85,7 +85,6 @@ export default function VueGenerale() {
     completedOrders += Math.round((c.orders * c.completionRate) / 100);
   }
   const totalOrders = summary?.totalOrders ?? 0;
-  const otherOrders = Math.max(0, totalOrders - completedOrders);
   const completedPct = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
   const otherPct = totalOrders > 0 ? 100 - completedPct : 0;
 

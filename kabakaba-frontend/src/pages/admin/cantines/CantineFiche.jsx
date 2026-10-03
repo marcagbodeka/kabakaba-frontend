@@ -187,7 +187,7 @@ export default function CantineFiche() {
     setCampusError(null);
     try {
       const nextIds = [...(vendor.campuses ?? []).map((c) => c.id), campusToAdd];
-      const updated = await updateVendor(id, { campusIds: nextIds });
+      await updateVendor(id, { campusIds: nextIds });
       await loadVendor();
       setCampusToAdd('');
     } catch (err) {

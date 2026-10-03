@@ -274,10 +274,6 @@
   color: var(--auth-text);
 }
 
-.stepSub {
-  display: none;
-}
-
 .stepLine {
   width: 26px;
   height: 2px;
@@ -728,14 +724,6 @@
 .wrap[data-theme='dark'] .successRing {
   background: rgba(240, 120, 64, 0.16);
   color: var(--orange);
-}
-
-.backupKey {
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  letter-spacing: 0.08em;
-  color: var(--auth-text);
-  margin-top: 2px;
 }
 
 .progressTrack {

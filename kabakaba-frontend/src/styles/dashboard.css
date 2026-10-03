@@ -39,40 +39,6 @@
 }
 
 /* ── Sections numérotées (grandes pages à plusieurs étapes) ── */
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 30px 0 14px;
-}
-
-.section-title .section-num {
-  font-size: 11px;
-  font-weight: 800;
-  color: #fff;
-  background: var(--indigo);
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.section-title h2 {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--indigo-dark);
-  margin: 0;
-  white-space: nowrap;
-}
-
-.section-title .section-line {
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
 
 /* ── KPI ─────────────────────────────────────────────── */
 .kpi-grid {
@@ -238,8 +204,6 @@
   gap: 10px;
   margin-bottom: 16px;
 }
-
-.notice-success { background: var(--green-soft); color: #0B7A4C; }
 .notice-error { background: var(--red-soft); color: #B32C2C; }
 
 .two-col {
@@ -250,86 +214,14 @@
 }
 
 /* ── Décomposition revenus ─────────────────────────── */
-.revenue-breakdown {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  margin-top: 4px;
-}
-
-.revenue-cell {
-  padding: 18px 22px;
-  border-right: 1px solid var(--border);
-}
-
-.revenue-cell:last-child {
-  border-right: none;
-}
-
-.revenue-cell.highlight {
-  background: #f8fafc;
-}
-
-.revenue-cell-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 8px;
-}
-
-.revenue-cell-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0d1438;
-}
-
-.revenue-cell-value.orange {
-  color: var(--orange);
-}
-
-.revenue-cell-value.indigo {
-  color: var(--indigo);
-}
-
-.revenue-cell-sub {
-  font-size: 13px;
-  color: #64748b;
-  margin-top: 4px;
-}
 
 /* ── Charts ────────────────────────────────────────── */
-.chart-wrap {
-  width: 100%;
-  margin-top: 16px;
-}
-
-.chart-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: clamp(6px, 1.2vw, 12px);
-  height: clamp(160px, 22vh, 240px);
-  width: 100%;
-  min-height: 160px;
-  padding-top: 8px;
-}
 
 .bar {
   border-radius: 6px 6px 0 0;
   flex: 1;
   min-width: 0;
   transition: opacity 0.2s;
-}
-
-.bar-labels {
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
-  margin-top: 10px;
 }
 
 .bar-label {
@@ -444,19 +336,9 @@
     font-size: 16px;
   }
 
-  .chart-bars,
   .chart-stacked {
     min-height: 140px;
     height: clamp(130px, 28vh, 180px);
-  }
-
-  .revenue-cell {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .revenue-cell:last-child {
-    border-bottom: none;
   }
 }
 
@@ -634,8 +516,7 @@ table tr.rank1 td {
 
 /* ── Boutons pleins (vraies actions principales) ──────── */
 .btn-primary,
-.btn-accent,
-.btn-danger-outline {
+.btn-accent {
   font-family: var(--font);
   font-size: 13.5px;
   font-weight: 700;
@@ -650,8 +531,7 @@ table tr.rank1 td {
 }
 
 .btn-primary:active,
-.btn-accent:active,
-.btn-danger-outline:active {
+.btn-accent:active {
   transform: scale(0.97);
 }
 
@@ -678,19 +558,8 @@ table tr.rank1 td {
   box-shadow: 0 6px 16px -4px rgba(240, 120, 64, 0.5);
 }
 
-.btn-danger-outline {
-  background: #fff;
-  color: var(--red);
-  border-color: #F3C9C9;
-}
-
-.btn-danger-outline:hover {
-  background: var(--red-soft);
-}
-
 .btn-primary:disabled,
-.btn-accent:disabled,
-.btn-danger-outline:disabled {
+.btn-accent:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
@@ -981,14 +850,6 @@ table tr.rank1 td {
   border-bottom-color: var(--indigo);
 }
 
-.tab-panel {
-  display: none;
-}
-
-.tab-panel.active {
-  display: block;
-}
-
 /* ── Formulaires ──────────────────────────────────────── */
 .form-grid {
   display: grid;
@@ -1100,21 +961,6 @@ textarea.fg-input {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   flex-wrap: wrap;
-}
-
-.horaire-jours {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.jour-check {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12.5px;
-  color: var(--muted);
-  cursor: pointer;
 }
 
 .horaire-times {
@@ -1424,13 +1270,6 @@ textarea.fg-input {
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(13,20,56,.5);
   display: flex; align-items: center; justify-content: center; z-index: 100;
-}
-.modal-content {
-  background: #fff; border-radius: 12px; padding: 24px; width: 420px; max-width: 90vw;
-}
-.action-btn-danger {
-  display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;
-  color: #EF4444; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px; padding: 4px 8px; cursor: pointer;
 }
 .btn-primary-sm, .btn-secondary-sm {
   display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;

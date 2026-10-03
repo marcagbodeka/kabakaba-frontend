@@ -2,8 +2,6 @@
 /* Toutes les couleurs/rayons/ombres réutilisent les tokens globaux
    (tokens.css, déjà chargés pour toute l'app) : pas de duplication. */
 
-.wrap-1160 { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
-
 /* Compense le header sticky : les ancres internes (#pourquoi, #campus…)
    ne doivent pas passer sous la barre de navigation au scroll. */
 #pourquoi, #partenaire, #technologies, #ambassadeur, #campus { scroll-margin-top: 84px; }
@@ -281,30 +279,12 @@
   color: var(--orange);
 }
 
-.hero-kicker {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--indigo);
-  font-style: italic;
-  margin: 0 0 10px;
-}
-
-.hero-kicker b {
-  font-style: normal;
-  color: var(--orange-dark, #d9612c);
-}
-
 .hero-sub {
   font-size: 15px;
   color: var(--muted);
   line-height: 1.55;
   max-width: 420px;
   margin: 0 0 20px;
-}
-
-.micro-note {
-  font-size: 12px;
-  color: var(--muted-light);
 }
 
 .hero-phones {
@@ -577,7 +557,6 @@
 
 .fi-peach { background: var(--peach); color: var(--orange-dark, #d9612c); }
 .fi-indigo { background: var(--indigo-soft, #eef0fa); color: var(--indigo); }
-.fi-green { background: var(--green-soft, #e4f7ee); color: var(--green, #0f9d63); }
 
 .feat-card h4 { font-size: 15px; font-weight: 800; color: var(--indigo-dark); margin: 0 0 7px; }
 .feat-card p { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0; }

@@ -121,7 +121,7 @@ export default function ForgotPassword({ onBackToLogin }) {
       setResetSessionToken(result.resetSessionToken);
       if (result.warning) setWarning(result.warning);
       setStep('password');
-    } catch (err) {
+    } catch {
       // Message volontairement générique — le backend ne distingue pas
       // "compte inexistant" de "code invalide" (anti-énumération), le
       // frontend ne doit pas réintroduire cette distinction non plus.

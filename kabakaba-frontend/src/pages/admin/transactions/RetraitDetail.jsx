@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, CheckCircle2, XCircle, Ban, Upload, FileImage, Clock, AlertTriangle } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Topbar from '../../../components/Topbar';
@@ -91,12 +91,8 @@ export default function RetraitDetail() {
 
   const manual = withdrawal?.manualTransfer;
   const hasProof = Boolean(withdrawal?.proof);
-  const pendingAppeals = useMemo(
-    () => (withdrawal?.appeals || []).filter((a) => a.status === 'PENDING'),
-    [withdrawal],
-  );
 
-  const doAction = async (action, successMessage) => {
+  const doAction = async (action) => {
     setBusy(true);
     setActionError(null);
     try {
@@ -113,7 +109,7 @@ export default function RetraitDetail() {
 
   const handleUpload = async () => {
     if (!file) return;
-    await doAction(() => uploadWithdrawalProof(withdrawalId, file), 'Preuve ajoutée');
+    await doAction(() => uploadWithdrawalProof(withdrawalId, file));
     setFile(null);
     const input = document.getElementById('withdrawal-proof-input');
     if (input) input.value = '';
