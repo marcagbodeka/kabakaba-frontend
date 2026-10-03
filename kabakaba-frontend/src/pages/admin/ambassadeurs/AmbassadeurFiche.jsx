@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Trophy, X, ShieldCheck } from 'lucide-react';
+import { Trophy, X } from 'lucide-react';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import { getAmbassadorDetail } from '../../../services/domain/analyticsService';
@@ -9,7 +9,6 @@ import { suspendAmbassador } from '../../../services/domain/applicationsService'
 const PAGE_SIZE = 10;
 const LEVEL_LABEL = { GOLD: 'Or', SILVER: 'Argent', BRONZE: 'Bronze' };
 const LEVEL_KEY = { GOLD: 'or', SILVER: 'argent', BRONZE: 'bronze' };
-const APPEAL_STATUS_LABEL = { PENDING: 'En attente', ACCEPTED: 'Acceptée', REJECTED: 'Rejetée' };
 
 function initialsOf(first, last) {
   return `${(first || '?')[0]}${(last || '?')[0]}`.toUpperCase();
@@ -103,7 +102,7 @@ export default function AmbassadeurFiche() {
     );
   }
 
-  const { identity, stats, affiliates, commissions, appeals } = detail;
+  const { identity, stats, affiliates, commissions } = detail;
   const fullName = `${identity.firstName ?? ''} ${identity.lastName ?? ''}`.trim() || '—';
   const isActive = identity.status === 'ACTIVE';
   const progressPct = stats.levelThreshold ? Math.min(100, (stats.volume30d / stats.levelThreshold) * 100) : 100;
@@ -144,7 +143,6 @@ export default function AmbassadeurFiche() {
           <button className={`tab-btn ${tab === 'stats' ? 'active' : ''}`} onClick={() => setTab('stats')}>Vue générale</button>
           <button className={`tab-btn ${tab === 'affilies' ? 'active' : ''}`} onClick={() => setTab('affilies')}>Affiliés ({stats.totalAffiliates})</button>
           <button className={`tab-btn ${tab === 'commissions' ? 'active' : ''}`} onClick={() => setTab('commissions')}>Historique commissions</button>
-          <button className={`tab-btn ${tab === 'appels' ? 'active' : ''}`} onClick={() => setTab('appels')}>Appels{appeals.length ? ` (${appeals.length})` : ''}</button>
         </div>
 
         {tab === 'stats' && (
@@ -269,36 +267,6 @@ export default function AmbassadeurFiche() {
             <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', fontSize: 13, color: 'var(--muted)' }}>
               Total versé ce mois : <strong style={{ color: 'var(--indigo)' }}>{formatFcfa(stats.commissionThisMonth)}</strong>
             </div>
-          </div>
-        )}
-
-        {tab === 'appels' && (
-          <div className="card">
-            <div className="card-title">Appels soumis</div>
-            {appeals.length === 0 ? (
-              <>
-                <div className="card-sub">Aucun appel en cours pour cet ambassadeur.</div>
-                <div style={{ padding: '32px 0', color: 'var(--muted)' }}>
-                  <ShieldCheck size={44} color="#CBD5E1" style={{ margin: '0 auto 12px' }} />
-                  <div style={{ fontSize: 15, fontWeight: 500 }}>Aucun appel soumis</div>
-                  <div style={{ fontSize: 13, marginTop: 4 }}>Les appels suite à une suspension apparaissent ici.</div>
-                </div>
-              </>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {appeals.map((ap) => (
-                  <div key={ap.id} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span className={ap.status === 'ACCEPTED' ? 'badge-green' : ap.status === 'REJECTED' ? 'badge-gray' : 'badge-blue'}>
-                        {APPEAL_STATUS_LABEL[ap.status] || ap.status}
-                      </span>
-                      <span style={{ fontSize: 12, color: 'var(--muted)' }}>{formatDate(ap.createdAt)}</span>
-                    </div>
-                    <p style={{ fontSize: 14, color: '#475569', margin: 0 }}>{ap.reason}</p>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )}
       </PageContent>
