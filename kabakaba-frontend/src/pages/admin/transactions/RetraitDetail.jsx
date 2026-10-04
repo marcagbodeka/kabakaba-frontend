@@ -179,7 +179,7 @@ export default function RetraitDetail() {
 
   return (
     <>
-      <Topbar icon={FileImage} breadcrumb={[{ label: 'Retraits', path: '/admin/retraits' }, { label: `#${withdrawal.id.slice(0, 8)}` }]} hidePeriodSelect>
+      <Topbar icon={FileImage} breadcrumb={[{ label: 'Retraits', path: '/admin/retraits' }, { label: `#${withdrawal.id.slice(0, 8)}` }]}>
         <button className="btn-secondary-sm" onClick={() => navigate('/admin/retraits')}><ArrowLeft size={15} /> Retour</button>
       </Topbar>
       <PageContent>

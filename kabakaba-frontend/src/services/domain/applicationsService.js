@@ -14,10 +14,11 @@ export function getNewPartnerApplications(limit = 20) {
 }
 
 // PATCH /ambassadors/:id — suspendre un ambassadeur avec motif obligatoire.
+// Le backend horodate lui-même la suspension.
 export function suspendAmbassador(id, decisionReason) {
   return apiFetch(`/ambassadors/${id}`, {
     method: 'PATCH',
-    body: { status: 'SUSPENDED', decisionReason, suspendedAt: new Date().toISOString() },
+    body: { status: 'SUSPENDED', decisionReason },
   });
 }
 

@@ -384,6 +384,15 @@
   margin: 8px 0;
 }
 
+.fieldHint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--auth-muted-light);
+  margin-top: 6px;
+}
+
 /* ── OTP ─────────────────────────────────────── */
 .otpRow {
   display: flex;

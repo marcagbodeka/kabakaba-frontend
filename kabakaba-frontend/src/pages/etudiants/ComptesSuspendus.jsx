@@ -5,10 +5,7 @@ import PageContent from '../../components/PageContent';
 import { findUsers, extractList } from '../../services/domain/usersService';
 import { findAllCampuses } from '../../services/domain/campusesService';
 import { getSupervisionStats } from '../../services/domain/adminStatsService';
-
-function initials(firstName, lastName) {
-  return `${(firstName || '?')[0]}${(lastName || '?')[0]}`.toUpperCase();
-}
+import { initials } from '../../utils/strings';
 
 function formatDate(iso) {
   if (!iso) return '—';

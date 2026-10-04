@@ -1,13 +1,5 @@
 import { apiFetch } from '../httpClient';
-
-function buildQuery(params = {}) {
-  const usp = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') usp.set(key, value);
-  });
-  const qs = usp.toString();
-  return qs ? `?${qs}` : '';
-}
+import { buildQuery } from '../buildQuery';
 
 // Forme confirmée par le backend : { data: [...], meta: { page, limit, total, totalPages } }
 export function extractList(response) {

@@ -91,7 +91,7 @@ function checkPasswordStrength(pw) {
   return { reqs, score, label };
 }
 
-export default function FirstLoginOnboarding({ userName = 'Kofi Mensah', onDone, expectedRole }) {
+export default function FirstLoginOnboarding({ userName, onDone, expectedRole }) {
   const { applySession } = useAuth();
   const [theme, toggleTheme] = useAuthTheme();
   const [internalStep, setInternalStep] = useState(1);

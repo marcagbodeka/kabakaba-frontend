@@ -6,21 +6,10 @@ import DateRangePicker from '../../components/DateRangePicker';
 import { getRevenueBreakdown } from '../../services/domain/analyticsService';
 import LineChart from '../../components/LineChart';
 import { chartPeriodTitle, formatChartDate } from '../../utils/chartLabels';
+import { startOfDay, daysAgo } from '../../utils/dates';
 
 function formatFcfa(n) {
   return `${Math.round(Number(n)).toLocaleString('fr-FR')} FCFA`;
-}
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
 }
 
 export default function VolumeRevenus() {
@@ -52,7 +41,6 @@ export default function VolumeRevenus() {
       <Topbar
         icon={BarChart3}
         breadcrumb={[{ label: 'Par campus', path: '/supervision/campus' }, { label: 'Volume & revenus' }]}
-        hidePeriodSelect
       >
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>

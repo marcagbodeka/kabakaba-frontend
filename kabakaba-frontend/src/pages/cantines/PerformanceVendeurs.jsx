@@ -4,24 +4,13 @@ import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import { getVendorPerformance } from '../../services/domain/analyticsService';
+import { startOfDay, daysAgo } from '../../utils/dates';
 
 function formatDuration(seconds) {
   if (seconds === null || seconds === undefined) return '—';
   const m = Math.floor(seconds / 60);
   const s = Math.round(seconds % 60);
   return m > 0 ? `${m}min ${s}s` : `${s}s`;
-}
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
 }
 
 export default function PerformanceVendeurs() {
@@ -52,7 +41,6 @@ export default function PerformanceVendeurs() {
       <Topbar
         icon={Utensils}
         breadcrumb={[{ label: 'Par cantine', path: '/supervision/cantines/performance' }, { label: 'Performance vendeurs' }]}
-        hidePeriodSelect
       >
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>

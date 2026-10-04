@@ -765,8 +765,6 @@ table tr.rank1 td {
 }
 
 .btn-primary-sm {
-  background: var(--indigo);
-  color: #fff;
   border: none;
 }
 
@@ -775,8 +773,6 @@ table tr.rank1 td {
 }
 
 .btn-secondary-sm {
-  background: var(--surface);
-  color: var(--text);
   border: 1px solid var(--border);
 }
 
@@ -931,17 +927,6 @@ textarea.fg-input {
 }
 
 /* ── Modale ───────────────────────────────────────────── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(13, 20, 56, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
-  padding: 20px;
-}
-
 .modal-box {
   background: var(--surface);
   border-radius: var(--radius);
@@ -1270,6 +1255,7 @@ textarea.fg-input {
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(13,20,56,.5);
   display: flex; align-items: center; justify-content: center; z-index: 100;
+  padding: 20px;
 }
 .btn-primary-sm, .btn-secondary-sm {
   display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;

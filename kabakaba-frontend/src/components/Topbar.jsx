@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   Bell,
-  Settings,
   UserPlus,
   Utensils,
   Star,
@@ -14,8 +13,6 @@ import { Link } from 'react-router-dom';
 import { getTodayEvents } from '../services/domain/adminStatsService';
 import { TOGGLE_MOBILE_NAV_EVENT } from './Sidebar';
 import styles from './Topbar.module.css';
-
-const PERIOD_OPTIONS = ['Aujourd\'hui', '7 jours', '30 jours'];
 
 const EVENT_ICON_BY_TYPE = {
   NEW_STUDENT: UserPlus,
@@ -117,16 +114,12 @@ function NotificationsBell() {
  * - icon: composant icône lucide-react affiché à gauche
  * - breadcrumb: [{ label, path? }] — le dernier élément est toujours en gras, non-cliquable
  * - badge: { text, tone: 'default' | 'red' } — pastille d'info (ex: "Aujourd'hui", "3 suspensions actives")
- * - periodOptions: liste des options du sélecteur de période (défaut: Aujourd'hui / 7 jours / 30 jours)
- * - hidePeriodSelect: masque le sélecteur de période par défaut (ex: page qui fournit son propre contrôle via children)
  * - children: contrôles à droite (select campus, sélecteur de plage personnalisé...) insérés avant les icônes fixes
  */
 export default function Topbar({
   icon: Icon,
   breadcrumb = [],
   badge,
-  periodOptions = PERIOD_OPTIONS,
-  hidePeriodSelect = false,
   children,
 }) {
   return (
@@ -175,19 +168,7 @@ export default function Topbar({
 
       <div className={styles.right}>
         {children}
-        {!hidePeriodSelect && (
-          <select className={styles.topbarSelect} defaultValue={periodOptions[0]} aria-label="Période">
-            {periodOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        )}
         <NotificationsBell />
-        <button type="button" className={styles.iconBtn} title="Paramètres">
-          <Settings size={18} />
-        </button>
       </div>
     </div>
   );

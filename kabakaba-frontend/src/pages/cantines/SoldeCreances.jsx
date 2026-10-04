@@ -4,21 +4,10 @@ import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import { getVendorFinancials } from '../../services/domain/analyticsService';
+import { startOfDay, daysAgo } from '../../utils/dates';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
-}
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
 }
 
 export default function SoldeCreances() {
@@ -49,7 +38,6 @@ export default function SoldeCreances() {
       <Topbar
         icon={Wallet}
         breadcrumb={[{ label: 'Par cantine', path: '/supervision/cantines/performance' }, { label: 'Solde & créances' }]}
-        hidePeriodSelect
       >
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>

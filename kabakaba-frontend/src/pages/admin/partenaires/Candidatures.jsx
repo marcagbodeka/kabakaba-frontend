@@ -130,7 +130,7 @@ export default function Candidatures() {
   if (loading) {
     return (
       <>
-        <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} hidePeriodSelect />
+        <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -139,7 +139,7 @@ export default function Candidatures() {
   if (error) {
     return (
       <>
-        <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} hidePeriodSelect />
+        <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} />
         <PageContent><p style={{ color: '#DC2626' }}>{error}</p></PageContent>
       </>
     );
@@ -147,7 +147,7 @@ export default function Candidatures() {
 
   return (
     <>
-      <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} badge={{ text: `${byStatus.NEW.length} nouvelle${byStatus.NEW.length === 1 ? '' : 's'}`, tone: byStatus.NEW.length > 0 ? 'red' : 'default' }} hidePeriodSelect />
+      <Topbar icon={UserPlus} breadcrumb={[{ label: 'Partenaires' }]} badge={{ text: `${byStatus.NEW.length} nouvelle${byStatus.NEW.length === 1 ? '' : 's'}`, tone: byStatus.NEW.length > 0 ? 'red' : 'default' }} />
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Admin web · Partenaires</div>

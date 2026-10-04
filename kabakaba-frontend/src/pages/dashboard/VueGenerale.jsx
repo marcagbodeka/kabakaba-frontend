@@ -7,18 +7,7 @@ import LineChart from '../../components/LineChart';
 import { chartPeriodTitle, formatChartDate } from '../../utils/chartLabels';
 import { getCampusComparison, getRevenueBreakdown, getVendorPerformance } from '../../services/domain/analyticsService';
 import { getSupervisionStats } from '../../services/domain/adminStatsService';
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
-}
+import { startOfDay, daysAgo } from '../../utils/dates';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
@@ -104,7 +93,7 @@ export default function VueGenerale() {
 
   return (
     <>
-      <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Vue générale' }]} hidePeriodSelect>
+      <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Vue générale' }]}>
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>
       <PageContent>

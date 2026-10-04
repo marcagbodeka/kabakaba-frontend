@@ -5,6 +5,8 @@ import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import { getAmbassadorDetail } from '../../services/domain/analyticsService';
+import { startOfDay, daysAgo } from '../../utils/dates';
+import { initials } from '../../utils/strings';
 
 function formatFcfa(n) {
   return `${Number(n ?? 0).toLocaleString('fr-FR')} FCFA`;
@@ -18,22 +20,6 @@ function formatDate(iso) {
 function formatDateTime(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-}
-
-function initials(firstName, lastName) {
-  return `${(firstName || '?')[0]}${(lastName || '?')[0]}`.toUpperCase();
-}
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
 }
 
 const levelLabel = { GOLD: 'Or', SILVER: 'Argent', BRONZE: 'Bronze' };
@@ -66,7 +52,7 @@ export default function DetailAmbassadeur() {
   if (loading) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/supervision/ambassadeurs' }, { label: '...' }]} hidePeriodSelect />
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/supervision/ambassadeurs' }, { label: '...' }]} />
         <PageContent><div className="card">Chargement...</div></PageContent>
       </>
     );
@@ -75,7 +61,7 @@ export default function DetailAmbassadeur() {
   if (error || !data) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/supervision/ambassadeurs' }, { label: 'Introuvable' }]} hidePeriodSelect>
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/supervision/ambassadeurs' }, { label: 'Introuvable' }]}>
           <button className="btn-secondary-sm" onClick={() => navigate('/supervision/ambassadeurs')}>← Retour</button>
         </Topbar>
         <PageContent>
@@ -95,7 +81,6 @@ export default function DetailAmbassadeur() {
         icon={Trophy}
         breadcrumb={[{ label: 'Ambassadeurs', path: '/supervision/ambassadeurs' }, { label: fullName }]}
         badge={{ text: levelLabel[identity.level] }}
-        hidePeriodSelect
       >
         <DateRangePicker value={range} onChange={setRange} />
         <button className="btn-secondary-sm" onClick={() => navigate('/supervision/ambassadeurs')}>← Retour</button>

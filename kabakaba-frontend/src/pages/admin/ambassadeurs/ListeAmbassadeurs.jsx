@@ -7,6 +7,7 @@ import DateRangePicker from '../../../components/DateRangePicker';
 import { chartPeriodTitle } from '../../../utils/chartLabels';
 import { getAmbassadorRanking } from '../../../services/domain/analyticsService';
 import { getPendingAmbassadors } from '../../../services/domain/applicationsService';
+import { startOfDay, daysAgo } from '../../../utils/dates';
 
 const PAGE_SIZE = 10;
 
@@ -24,18 +25,6 @@ function initialsOf(name) {
 
 function formatFcfa(n) {
   return `${Number(n || 0).toLocaleString('fr-FR')} FCFA`;
-}
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
 }
 
 export default function ListeAmbassadeurs() {
@@ -100,7 +89,7 @@ export default function ListeAmbassadeurs() {
   if (loading) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]} hidePeriodSelect />
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]} />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -109,7 +98,7 @@ export default function ListeAmbassadeurs() {
   if (error) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]} hidePeriodSelect />
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]} />
         <PageContent><p style={{ color: '#DC2626' }}>{error}</p></PageContent>
       </>
     );
@@ -117,7 +106,7 @@ export default function ListeAmbassadeurs() {
 
   return (
     <>
-      <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]} hidePeriodSelect>
+      <Topbar icon={Trophy} breadcrumb={[{ label: 'Gestion' }, { label: 'Ambassadeurs' }]}>
         <DateRangePicker value={range} onChange={(r) => { setRange(r); setPage(1); }} />
         <button className="btn-primary-sm" onClick={() => navigate('/admin/ambassadeurs/demandes')}>
           {pendingCount} demande{pendingCount === 1 ? '' : 's'} en attente

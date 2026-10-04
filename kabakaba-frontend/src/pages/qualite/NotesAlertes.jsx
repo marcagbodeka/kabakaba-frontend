@@ -6,18 +6,7 @@ import DateRangePicker from '../../components/DateRangePicker';
 import LineChart from '../../components/LineChart';
 import { getReviewsQuality } from '../../services/domain/analyticsService';
 import { chartPeriodTitle, formatChartDate } from '../../utils/chartLabels';
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
-}
+import { startOfDay, daysAgo } from '../../utils/dates';
 
 export default function NotesAlertes() {
   const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
@@ -59,7 +48,6 @@ export default function NotesAlertes() {
       <Topbar
         icon={Star}
         breadcrumb={[{ label: 'Avis & qualité', path: '/supervision/qualite/notes' }, { label: 'Notes & alertes' }]}
-        hidePeriodSelect
       >
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>

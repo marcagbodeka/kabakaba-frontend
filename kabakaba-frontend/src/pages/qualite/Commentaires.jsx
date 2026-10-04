@@ -5,6 +5,8 @@ import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import { findReviews } from '../../services/domain/reviewsService';
 import { getReviewsQuality } from '../../services/domain/analyticsService';
+import { startOfDay, daysAgo } from '../../utils/dates';
+import { initials } from '../../utils/strings';
 
 const RATING_LABELS = {
   1: 'Pas du tout satisfait',
@@ -16,22 +18,6 @@ const RATING_LABELS = {
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function initials(firstName, lastName) {
-  return `${(firstName || '?')[0]}${(lastName || '?')[0]}`.toUpperCase();
-}
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
 }
 
 const filters = ['Toutes', '5', '4', '3', '2', '1'];
@@ -87,7 +73,6 @@ export default function Commentaires() {
       <Topbar
         icon={MessageSquare}
         breadcrumb={[{ label: 'Avis & qualité', path: '/supervision/qualite/notes' }, { label: 'Commentaires' }]}
-        hidePeriodSelect
       >
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>

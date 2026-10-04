@@ -6,21 +6,10 @@ import DateRangePicker from '../../components/DateRangePicker';
 import LineChart from '../../components/LineChart';
 import { getStudentBehavior } from '../../services/domain/analyticsService';
 import { chartPeriodTitle, formatChartDate } from '../../utils/chartLabels';
+import { startOfDay, daysAgo } from '../../utils/dates';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
-}
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
 }
 
 export default function ComportementEtudiants() {
@@ -56,7 +45,6 @@ export default function ComportementEtudiants() {
       <Topbar
         icon={Users}
         breadcrumb={[{ label: 'Étudiants', path: '/supervision/etudiants' }, { label: 'Comportement étudiants' }]}
-        hidePeriodSelect
       >
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>

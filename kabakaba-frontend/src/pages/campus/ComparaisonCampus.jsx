@@ -6,6 +6,7 @@ import DateRangePicker from '../../components/DateRangePicker';
 import { getCampusComparison, getTopCanteens } from '../../services/domain/analyticsService';
 import LineChart from '../../components/LineChart';
 import { chartPeriodTitle, formatChartDate } from '../../utils/chartLabels';
+import { startOfDay, daysAgo } from '../../utils/dates';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
@@ -14,18 +15,6 @@ function formatFcfa(n) {
 function pctChange(current, previous) {
   if (!previous) return null;
   return Math.round(((current - previous) / previous) * 100);
-}
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
 }
 
 export default function ComparaisonCampus() {
@@ -64,7 +53,6 @@ export default function ComparaisonCampus() {
       <Topbar
         icon={Building2}
         breadcrumb={[{ label: 'Par campus', path: '/supervision/campus' }, { label: 'Comparaison campus' }]}
-        hidePeriodSelect
       >
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>

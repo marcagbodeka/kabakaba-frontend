@@ -84,7 +84,7 @@ export default function ComptesSuspendus() {
 
   return (
     <>
-      <Topbar icon={ShieldAlert} breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }, { label: 'Comptes suspendus' }]} hidePeriodSelect />
+      <Topbar icon={ShieldAlert} breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }, { label: 'Comptes suspendus' }]} />
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Admin web · Litiges</div>

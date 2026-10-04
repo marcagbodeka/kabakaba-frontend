@@ -8,6 +8,7 @@ import { getTransactionsStats, getActiveDebts, getTransactions } from '../../../
 import { getOrders } from '../../../services/domain/ordersService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
 import { getVendors } from '../../../services/domain/vendorsService';
+import { startOfDay, daysAgo } from '../../../utils/dates';
 
 const PAGE_SIZE = 10;
 // La libération d'escrow (crédit du vendeur) se produit dès READY, pas à
@@ -59,17 +60,6 @@ function formatDateTime(iso) {
 function minutesAgo(iso) {
   return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
 }
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
-}
-
 function typeBadge(type) {
   return <span className={TYPE_BADGE_CLASS[type] || 'badge-gray'}>{TYPE_LABEL[type] || type}</span>;
 }
@@ -163,7 +153,7 @@ export default function Transactions() {
 
   return (
     <>
-      <Topbar icon={Monitor} breadcrumb={[{ label: 'Transactions' }]} hidePeriodSelect>
+      <Topbar icon={Monitor} breadcrumb={[{ label: 'Transactions' }]}>
         {showDateFilter && <DateRangePicker value={range} onChange={setRange} />}
       </Topbar>
       <PageContent>

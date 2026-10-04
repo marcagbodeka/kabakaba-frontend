@@ -87,7 +87,7 @@ export default function AmbassadeurFiche() {
   if (loading) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/admin/ambassadeurs' }]} hidePeriodSelect />
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/admin/ambassadeurs' }]} />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -96,7 +96,7 @@ export default function AmbassadeurFiche() {
   if (error || !detail) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/admin/ambassadeurs' }]} hidePeriodSelect />
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/admin/ambassadeurs' }]} />
         <PageContent><p style={{ color: '#DC2626' }}>{error || 'Ambassadeur introuvable.'}</p></PageContent>
       </>
     );
@@ -109,7 +109,7 @@ export default function AmbassadeurFiche() {
 
   return (
     <>
-      <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/admin/ambassadeurs' }, { label: fullName }]} badge={{ text: LEVEL_LABEL[identity.level] }} hidePeriodSelect>
+      <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/admin/ambassadeurs' }, { label: fullName }]} badge={{ text: LEVEL_LABEL[identity.level] }}>
         <button className="btn-secondary-sm" onClick={() => navigate('/admin/ambassadeurs')}>← Retour</button>
       </Topbar>
       <PageContent>

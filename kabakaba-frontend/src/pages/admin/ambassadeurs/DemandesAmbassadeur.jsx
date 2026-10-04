@@ -94,7 +94,7 @@ export default function DemandesAmbassadeur() {
   if (loading) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/admin/ambassadeurs' }, { label: 'Demandes en attente' }]} hidePeriodSelect />
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/admin/ambassadeurs' }, { label: 'Demandes en attente' }]} />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -103,7 +103,7 @@ export default function DemandesAmbassadeur() {
   if (error) {
     return (
       <>
-        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/admin/ambassadeurs' }, { label: 'Demandes en attente' }]} hidePeriodSelect />
+        <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs', path: '/admin/ambassadeurs' }, { label: 'Demandes en attente' }]} />
         <PageContent><p style={{ color: '#DC2626' }}>{error}</p></PageContent>
       </>
     );
@@ -115,7 +115,6 @@ export default function DemandesAmbassadeur() {
         icon={Trophy}
         breadcrumb={[{ label: 'Ambassadeurs', path: '/admin/ambassadeurs' }, { label: 'Demandes en attente' }]}
         badge={{ text: `${pendingCount} en attente`, tone: pendingCount > 0 ? 'red' : 'default' }}
-        hidePeriodSelect
       />
       <PageContent>
         <div className="page-header">

@@ -1,27 +1,44 @@
-# React + Vite
+# Kabakaba — Dashboard web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Application React (Vite) d'administration et de supervision de Kabakaba. Elle consomme l'API du
+dépôt `kabakaba-backend` (préfixe `/api/v1`).
 
-Currently, two official plugins are available:
+## Démarrage local
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev        # http://localhost:5173
+```
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-
+| Commande | Rôle |
+|---|---|
+| `npm run dev` | Serveur de développement Vite |
+| `npm run build` | Build de production dans `dist/` |
+| `npm run preview` | Prévisualise le build |
 
 ## Configuration de l'API
 
-Le build de production exige `VITE_API_BASE_URL`. Copiez `.env.example` vers un fichier d'environnement adapté à votre déploiement et renseignez l'URL HTTPS du backend.
+L'URL de l'API est résolue dans `src/services/httpClient.js` :
 
-Le service `syncWithdrawal()` existe pour permettre une future synchronisation opérateur d'un retrait avec le fournisseur de payout. Cette action n'est volontairement pas exposée dans l'interface actuelle.
+1. `VITE_API_BASE_URL` si elle est définie (par exemple pour un environnement de staging) ;
+2. sinon `/api/v1` en production (redirigé vers le backend par `vercel.json`) ;
+3. sinon `http://localhost:3000/api/v1` en développement.
 
-## Sécurité de session Web
+## Structure de `src/`
 
-Le JWT de session Web n'est pas accessible au JavaScript : il est porté par un cookie `HttpOnly` émis par le backend. Les requêtes mutantes authentifiées utilisent le cookie CSRF `kabakaba_web_csrf` via l'en-tête `X-CSRF-Token`. Les tokens Bearer d'onboarding/réinitialisation restent des tokens de flux courts et ne sont pas stockés dans `sessionStorage`.
+| Dossier | Contenu |
+|---|---|
+| `pages/` | Écrans (admin, supervision, authentification, site vitrine) |
+| `components/` | Composants partagés (`Topbar`, sélecteur de dates, modales de compte…) |
+| `layouts/` | Mise en page du dashboard |
+| `router/` | Entrées de navigation (`navConfigAdmin.js`, `navConfigSupervision.js`) ; les routes sont déclarées dans `App.jsx` |
+| `services/` | Client HTTP (`httpClient.js`) et appels par domaine (`services/domain/`) |
+| `context/` | Contexte d'authentification |
+| `utils/` | Fonctions utilitaires partagées (dates, chaînes…) |
+| `styles/` | Styles globaux et tokens |
+
+## Déploiement (Vercel)
+
+`vercel.json` redirige `/api/v1/*` vers le backend déployé, renvoie `index.html` pour les autres
+chemins (application monopage) et définit les en-têtes de sécurité, dont la Content-Security-Policy.
+Si l'URL du backend change, mettre à jour à la fois la redirection et la directive `connect-src`.

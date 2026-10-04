@@ -9,6 +9,7 @@ import { getCampusComparison, getTopCanteens, getVendorPerformance, getVendorFin
 import { getVendors } from '../../../services/domain/vendorsService';
 import { getPendingAmbassadors, getNewPartnerApplications } from '../../../services/domain/applicationsService';
 import { countOrdersByStatus } from '../../../services/domain/ordersService';
+import { startOfDay, daysAgo } from '../../../utils/dates';
 
 const ACCEPTANCE_ALERT_THRESHOLD = 70;
 
@@ -44,18 +45,6 @@ function timeAgo(dateStr) {
   if (days === 1) return 'Hier';
   if (days === 2) return 'Avant-hier';
   return `Il y a ${days}j`;
-}
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
 }
 
 function TrendBadge({ value }) {
@@ -156,7 +145,7 @@ export default function VueVendeurs() {
   if (loading) {
     return (
       <>
-        <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Tableau de bord' }]} badge={{ text: "Aujourd'hui" }} hidePeriodSelect>
+        <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Tableau de bord' }]} badge={{ text: "Aujourd'hui" }}>
           <div className="global-search-wrap">
             <input className="global-search-input" placeholder="Rechercher une cantine..." disabled />
             <Search size={14} className="global-search-icon" />
@@ -170,7 +159,7 @@ export default function VueVendeurs() {
   if (error) {
     return (
       <>
-        <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Tableau de bord' }]} badge={{ text: "Aujourd'hui" }} hidePeriodSelect />
+        <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Tableau de bord' }]} badge={{ text: "Aujourd'hui" }} />
         <PageContent><div className="notice-banner notice-error">{error}</div></PageContent>
       </>
     );
@@ -280,7 +269,7 @@ export default function VueVendeurs() {
 
   return (
     <>
-      <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Tableau de bord' }]} badge={{ text: "Aujourd'hui" }} hidePeriodSelect>
+      <Topbar icon={LayoutDashboard} breadcrumb={[{ label: 'Tableau de bord' }]} badge={{ text: "Aujourd'hui" }}>
         <DateRangePicker value={range} onChange={setRange} />
         <div className="global-search-wrap">
           <input
@@ -493,11 +482,11 @@ export default function VueVendeurs() {
           <div className="table-scroll">
             <table>
               <thead>
-                <tr><th>Type</th><th>Nom</th><th>Campus</th><th>Reçu le</th><th>Statut</th><th></th></tr>
+                <tr><th>Type</th><th>Nom</th><th>Campus</th><th>Reçu le</th><th>Statut</th></tr>
               </thead>
               <tbody>
                 {notifications.length === 0 && (
-                  <tr><td colSpan={6} style={{ color: 'var(--muted)' }}>Aucune notification en attente.</td></tr>
+                  <tr><td colSpan={5} style={{ color: 'var(--muted)' }}>Aucune notification en attente.</td></tr>
                 )}
                 {notifications.map((n, i) => (
                   <tr key={i}>
@@ -509,7 +498,6 @@ export default function VueVendeurs() {
                     <td>{n.campus}</td>
                     <td style={{ color: 'var(--muted)', fontSize: 13 }}>{n.time}</td>
                     <td><span className={n.statusTone}>{n.status}</span></td>
-                    <td><button className="action-btn">Traiter →</button></td>
                   </tr>
                 ))}
               </tbody>

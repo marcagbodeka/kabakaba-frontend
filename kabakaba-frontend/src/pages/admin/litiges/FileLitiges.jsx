@@ -6,6 +6,7 @@ import PageContent from '../../../components/PageContent';
 import DateRangePicker from '../../../components/DateRangePicker';
 import { getDisputesStats, getDisputes } from '../../../services/domain/disputesService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
+import { startOfDay, daysAgo } from '../../../utils/dates';
 
 const PAGE_SIZE = 10;
 
@@ -42,17 +43,6 @@ function formatDelay(minutes) {
   const m = minutes % 60;
   return h > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${m} min`;
 }
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
-}
-
 export default function FileLitiges() {
   const navigate = useNavigate();
 
@@ -91,7 +81,7 @@ export default function FileLitiges() {
 
   return (
     <>
-      <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Gestion' }, { label: 'Litiges' }]} hidePeriodSelect>
+      <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Gestion' }, { label: 'Litiges' }]}>
         <DateRangePicker
           value={range ?? { from: daysAgo(29), to: startOfDay(new Date()) }}
           onChange={setRange}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './DateRangePicker.module.css';
+import { startOfDay, daysAgo } from '../utils/dates';
 
 const MONTH_LABELS_FR = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -8,20 +9,8 @@ const MONTH_LABELS_FR = [
 ];
 const WEEKDAY_LABELS_FR = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
 function sameDay(a, b) {
   return a && b && a.toDateString() === b.toDateString();
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
 }
 
 function formatShort(d) {

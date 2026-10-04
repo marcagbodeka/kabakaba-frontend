@@ -1,14 +1,6 @@
 import { apiFetch } from '../httpClient';
 import { extractList } from './usersService';
-
-function buildQuery(params = {}) {
-  const usp = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') usp.set(key, value);
-  });
-  const qs = usp.toString();
-  return qs ? `?${qs}` : '';
-}
+import { buildQuery } from '../buildQuery';
 
 export async function findReviews({ page = 1, limit = 20, vendorId, rating, search, sortBy = 'recent' } = {}) {
   // CDC 4.6/9.7 : les avis sont internes, réservés au rôle Supervision — le

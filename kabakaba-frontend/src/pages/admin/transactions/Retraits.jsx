@@ -5,6 +5,7 @@ import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import DateRangePicker from '../../../components/DateRangePicker';
 import { getWithdrawals, getWithdrawalsStats } from '../../../services/domain/withdrawalsService';
+import { startOfDay, daysAgo } from '../../../utils/dates';
 
 const PAGE_SIZE = 10;
 
@@ -30,17 +31,6 @@ function formatDateTime(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
-}
-
 export default function Retraits() {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState('all');
@@ -70,7 +60,7 @@ export default function Retraits() {
 
   return (
     <>
-      <Topbar icon={Banknote} breadcrumb={[{ label: 'Retraits' }]} hidePeriodSelect>
+      <Topbar icon={Banknote} breadcrumb={[{ label: 'Retraits' }]}>
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>
       <PageContent>

@@ -6,7 +6,7 @@ import AccountsManager from '../../components/AccountsManager';
 export default function ComptesSupervision() {
   return (
     <>
-      <Topbar icon={ShieldCheck} breadcrumb={[{ label: 'Gestion des comptes', path: '/supervision/comptes' }, { label: 'Comptes Supervision' }]} />
+      <Topbar icon={ShieldCheck} breadcrumb={[{ label: 'Gestion des comptes' }, { label: 'Comptes Supervision' }]} />
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Supervision · Comptes</div>

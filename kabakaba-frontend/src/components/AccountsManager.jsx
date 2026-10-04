@@ -11,10 +11,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import AccountFormModal from './AccountFormModal';
 import DeleteAccountModal from './DeleteAccountModal';
-
-function initials(firstName, lastName) {
-  return `${(firstName || '?')[0]}${(lastName || '?')[0]}`.toUpperCase();
-}
+import { initials } from '../utils/strings';
 
 function formatDateTime(iso) {
   if (!iso) return '—';

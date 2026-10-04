@@ -5,21 +5,10 @@ import Topbar from '../../components/Topbar';
 import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import { getAmbassadorRanking } from '../../services/domain/analyticsService';
+import { startOfDay, daysAgo } from '../../utils/dates';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
-}
-
-function startOfDay(d) {
-  const copy = new Date(d);
-  copy.setHours(0, 0, 0, 0);
-  return copy;
-}
-
-function daysAgo(n) {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  return startOfDay(d);
 }
 
 const levelLabel = { GOLD: 'Or', SILVER: 'Argent', BRONZE: 'Bronze' };
@@ -58,7 +47,7 @@ export default function SupervisionAmbassadeurs() {
 
   return (
     <>
-      <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs' }]} hidePeriodSelect>
+      <Topbar icon={Trophy} breadcrumb={[{ label: 'Ambassadeurs' }]}>
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>
       <PageContent>
