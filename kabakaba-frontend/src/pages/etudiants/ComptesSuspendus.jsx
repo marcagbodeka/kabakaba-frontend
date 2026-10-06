@@ -78,10 +78,6 @@ export default function ComptesSuspendus() {
             <div className="kpi-label">Fonds bloqués</div>
             <div className="kpi-value">{loading ? '—' : formatTickets(blockedFunds)}</div>
           </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Bannissements définitifs</div>
-            <div className="kpi-value">{loading ? '—' : stats?.totalBanned ?? '—'}</div>
-          </div>
         </div>
 
         {error && (
@@ -122,11 +118,7 @@ export default function ComptesSuspendus() {
                     <td>{formatDate(s.suspendedAt)}</td>
                     <td>{s.suspensionUntil ? formatDate(s.suspensionUntil) : 'Indéterminée'}</td>
                     <td>
-                      {s.isBanned ? (
-                        <span className="badge-black">Banni définitivement</span>
-                      ) : (
-                        <span className="badge-red">Suspendu</span>
-                      )}
+                      <span className="badge-red">Suspendu</span>
                     </td>
                   </tr>
                 ))}

@@ -51,7 +51,7 @@ export default function HistoriqueSuspensions() {
         <div className="page-header">
       <div className="eyebrow">Supervision · Étudiants</div>
           <h1>Historique des suspensions</h1>
-          <p>Toutes les suspensions (actives, levées) et bannissements définitifs, avec motif</p>
+          <p>Toutes les suspensions (actives, levées), avec motif</p>
         </div>
 
         <div className="filters-row" style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
@@ -86,7 +86,6 @@ export default function HistoriqueSuspensions() {
                   <tr key={e.id}>
                     <td className="name-cell">
                       <strong>{e.student?.firstName} {e.student?.lastName}</strong>
-                      {e.student?.isBanned && <span className="badge-black" style={{ marginLeft: 8 }}>Banni</span>}
                     </td>
                     <td>{e.reason}</td>
                     <td>{formatDateTime(e.suspendedAt)}</td>
