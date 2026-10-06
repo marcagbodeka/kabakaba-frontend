@@ -172,7 +172,7 @@ export default function LitigeDetail() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div className="card">
                 <div className="card-title">Timeline de la commande #{order.id.slice(0, 8).toUpperCase()}</div>
-                <div className="card-sub">{formatTickets(order.totalTickets)}{order.packagingOptionName ? ` · ${order.packagingOptionName}` : ''}</div>
+                <div className="card-sub">{formatTickets(order.totalTickets)} · {order.consumptionMode === 'TAKEAWAY' ? `À emporter${order.takeawayOptionName ? ` (${order.takeawayOptionName})` : ''}` : 'Sur place'}</div>
                 <div className="timeline">
                   {timelineSteps.map((t, i) => (
                     <div className="tl-item" key={i}>

@@ -5,25 +5,13 @@ import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import { getVendorForAdmin } from '../../../services/domain/vendorsService';
 import {
-  getMenuItem, getMenuComponents, getPackagingOptions,
+  getMenuItem, getMenuComponents,
   createMenuItem, updateMenuItem,
   createMenuComponent, updateMenuComponent, deleteMenuComponent,
-  createPackagingOption, updatePackagingOption, deletePackagingOption,
 } from '../../../services/domain/catalogService';
 
 let tempId = 0;
 const newTempId = () => `new-${tempId++}`;
-
-// Conditionnements courants proposés par défaut à la création. En édition,
-// les PackagingOption réelles de l'article sont chargées et rapprochées de
-// ces 3 noms ; toute option existante au nom différent est affichée en plus,
-// avec un bouton Retirer explicite plutôt qu'une case à décocher, pour ne
-// jamais supprimer une donnée réelle par accident.
-const PRESET_PACKAGING = [
-  { name: 'Sur place', desc: "L'étudiant mange sur place" },
-  { name: 'À emporter — Sachet', desc: 'Emballage sachet simple' },
-  { name: 'À emporter — Take away', desc: 'Boîte ou contenant hermétique' },
-];
 
 export default function ArticleConfig() {
   const navigate = useNavigate();
@@ -42,12 +30,6 @@ export default function ArticleConfig() {
 
   const [composants, setComposants] = useState([]);
   const [removedComposantIds, setRemovedComposantIds] = useState([]);
-
-  const [presetState, setPresetState] = useState(
-    PRESET_PACKAGING.map((p) => ({ ...p, id: null, checked: false, surcout: 0 })),
-  );
-  const [extraPackaging, setExtraPackaging] = useState([]); // options existantes hors presets
-  const [removedPackagingIds, setRemovedPackagingIds] = useState([]);
 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
@@ -71,19 +53,8 @@ export default function ArticleConfig() {
             id: c.id, name: c.name, price: c.unitPriceTickets, min: c.minQty, max: c.maxQty, required: c.minQty >= 1,
           })));
         }),
-        getPackagingOptions(articleId).then((res) => {
-          const rows = res.data;
-          setPresetState(PRESET_PACKAGING.map((p) => {
-            const match = rows.find((r) => r.name === p.name);
-            return match ? { ...p, id: match.id, checked: true, surcout: match.extraCost } : { ...p, id: null, checked: false, surcout: 0 };
-          }));
-          setExtraPackaging(rows.filter((r) => !PRESET_PACKAGING.some((p) => p.name === r.name)));
-        }),
       );
     } else {
-      // Nouvel article : les 3 conditionnements usuels cochés par défaut,
-      // comme dans la maquette.
-      setPresetState(PRESET_PACKAGING.map((p, i) => ({ ...p, id: null, checked: true, surcout: i === 2 ? 100 : 0 })));
       setComposants([
         { id: newTempId(), name: '', price: 0, min: 1, max: 1, required: true },
       ]);
@@ -106,20 +77,6 @@ export default function ArticleConfig() {
   const removeComposant = (cid) => {
     setComposants((prev) => prev.filter((c) => c.id !== cid));
     if (!String(cid).startsWith('new-')) setRemovedComposantIds((prev) => [...prev, cid]);
-  };
-
-  const togglePreset = (name) => {
-    setPresetState((prev) => prev.map((p) => (p.name === name ? { ...p, checked: !p.checked } : p)));
-  };
-  const updatePresetSurcout = (name, value) => {
-    setPresetState((prev) => prev.map((p) => (p.name === name ? { ...p, surcout: value } : p)));
-  };
-  const updateExtraPackaging = (pid, field, value) => {
-    setExtraPackaging((prev) => prev.map((p) => (p.id === pid ? { ...p, [field]: value } : p)));
-  };
-  const removeExtraPackaging = (pid) => {
-    setExtraPackaging((prev) => prev.filter((p) => p.id !== pid));
-    setRemovedPackagingIds((prev) => [...prev, pid]);
   };
 
   const previewPrice = type === 'FIXED' ? `${prixFixe} tickets` : `dès ${prixMinPerso} tickets`;
@@ -165,22 +122,6 @@ export default function ArticleConfig() {
             await updateMenuComponent(c.id, payload);
           }
         }
-      }
-
-      for (const pid of removedPackagingIds) {
-        await deletePackagingOption(pid);
-      }
-      for (const p of presetState) {
-        if (p.checked && !p.id) {
-          await createPackagingOption({ itemId, name: p.name, extraCost: p.surcout, required: false });
-        } else if (p.checked && p.id) {
-          await updatePackagingOption(p.id, { extraCost: p.surcout });
-        } else if (!p.checked && p.id) {
-          await deletePackagingOption(p.id);
-        }
-      }
-      for (const p of extraPackaging) {
-        await updatePackagingOption(p.id, { extraCost: p.extraCost });
       }
 
       navigate(`/admin/cantines/${id}`);
@@ -364,55 +305,6 @@ export default function ArticleConfig() {
               </div>
             </div>
           )}
-
-          <div className="card">
-            <div className="card-title">Options de conditionnement</div>
-            <div className="card-sub">Sélectionnez les modes de retrait disponibles pour cet article et leur surcoût éventuel.</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {presetState.map((c) => (
-                <label key={c.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: '#F8FAFC', borderRadius: 10, border: '1.5px solid var(--border)', cursor: 'pointer', flexWrap: 'wrap', gap: 10 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <input type="checkbox" checked={c.checked} onChange={() => togglePreset(c.name)} style={{ width: 16, height: 16, accentColor: 'var(--indigo)' }} />
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: 14 }}>{c.name}</div>
-                      <div style={{ fontSize: 13, color: 'var(--muted)' }}>{c.desc}</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 13, color: 'var(--muted)' }}>Surcoût :</span>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        className="fg-input"
-                        type="number" min={0} step={50}
-                        style={{ width: 90, textAlign: 'center', height: 36, paddingRight: 28, fontSize: 13 }}
-                        value={c.surcout}
-                        onChange={(e) => updatePresetSurcout(c.name, Number(e.target.value) || 0)}
-                      />
-                      <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: 'var(--indigo)', fontWeight: 600 }}>t.</span>
-                    </div>
-                  </div>
-                </label>
-              ))}
-              {extraPackaging.map((p) => (
-                <div key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: '#F8FAFC', borderRadius: 10, border: '1.5px solid var(--border)', flexWrap: 'wrap', gap: 10 }}>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>{p.name} <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--muted)' }}>(existant)</span></div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 13, color: 'var(--muted)' }}>Surcoût :</span>
-                    <input
-                      className="fg-input"
-                      type="number" min={0} step={50}
-                      style={{ width: 90, textAlign: 'center', height: 36, fontSize: 13 }}
-                      value={p.extraCost}
-                      onChange={(e) => updateExtraPackaging(p.id, 'extraCost', Number(e.target.value) || 0)}
-                    />
-                    <button className="icon-btn" style={{ color: '#EF4444', borderColor: '#FEE2E2' }} title="Retirer" onClick={() => removeExtraPackaging(p.id)}>
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           <div className="card" style={{ background: 'var(--indigo-dark)', borderColor: 'transparent' }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 14 }}>
