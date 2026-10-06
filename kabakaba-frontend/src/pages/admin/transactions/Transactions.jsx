@@ -20,7 +20,7 @@ const TYPE_LABEL = {
   DEPOSIT: 'Recharge', ESCROW_LOCK: 'Séquestre', ESCROW_RELEASE: 'Libération séquestre',
   PAYMENT: 'Commande', REFUND: 'Remboursement', WITHDRAWAL: 'Retrait',
   COMMISSION: 'Commission', AMBASSADOR_COMMISSION: 'Commission ambassadeur',
-  DEBT_RECOVERY: 'Recouvrement créance', TRANSFER: 'Transfert',
+  DEBT_RECOVERY: 'Recouvrement créance',
 };
 // Classe de badge par type — cohérent avec les badges utilisés partout
 // ailleurs dans le dashboard (styles/dashboard.css), plus de styles inline
@@ -36,11 +36,11 @@ const TYPE_BADGE_CLASS = {
 // Unité d'affichage par type : les mouvements d'argent (recharge, retrait,
 // commissions) sont en FCFA ; les mouvements liés aux commandes (séquestre,
 // débit, remboursement) sont en tickets, l'unité interne de l'app.
-const TICKET_TYPES = new Set(['ESCROW_LOCK', 'ESCROW_RELEASE', 'PAYMENT', 'REFUND', 'TRANSFER']);
+const TICKET_TYPES = new Set(['ESCROW_LOCK', 'ESCROW_RELEASE', 'PAYMENT', 'REFUND']);
 const COMPLETED_LABEL = {
   PAYMENT: 'Débité', DEPOSIT: 'Confirmé', REFUND: 'Effectué', WITHDRAWAL: 'Versé',
   ESCROW_LOCK: 'Séquestré', ESCROW_RELEASE: 'Libéré', COMMISSION: 'Versé',
-  AMBASSADOR_COMMISSION: 'Versé', DEBT_RECOVERY: 'Recouvré', TRANSFER: 'Effectué',
+  AMBASSADOR_COMMISSION: 'Versé', DEBT_RECOVERY: 'Recouvré',
 };
 const ORDER_STATUS_LABEL = {
   PENDING: 'En attente vendeur', ACCEPTED: 'Acceptée', IN_PREPARATION: 'En préparation', READY: 'Prête',

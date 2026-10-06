@@ -9,9 +9,9 @@ const TYPE_LABEL = {
   DEPOSIT: 'Recharge', ESCROW_LOCK: 'Séquestre', ESCROW_RELEASE: 'Libération séquestre',
   PAYMENT: 'Commande', REFUND: 'Remboursement', WITHDRAWAL: 'Retrait',
   COMMISSION: 'Commission', AMBASSADOR_COMMISSION: 'Commission ambassadeur',
-  DEBT_RECOVERY: 'Recouvrement créance', TRANSFER: 'Transfert',
+  DEBT_RECOVERY: 'Recouvrement créance',
 };
-const TICKET_TYPES = new Set(['ESCROW_LOCK', 'ESCROW_RELEASE', 'PAYMENT', 'REFUND', 'TRANSFER']);
+const TICKET_TYPES = new Set(['ESCROW_LOCK', 'ESCROW_RELEASE', 'PAYMENT', 'REFUND']);
 const TYPE_BADGE_CLASS = {
   REFUND: 'badge-red', WITHDRAWAL: 'badge-green', DEPOSIT: 'badge-peach',
   PAYMENT: 'badge-blue', ESCROW_LOCK: 'badge-amber', ESCROW_RELEASE: 'badge-amber',
@@ -19,7 +19,7 @@ const TYPE_BADGE_CLASS = {
 const COMPLETED_LABEL = {
   PAYMENT: 'Débité', DEPOSIT: 'Confirmé', REFUND: 'Effectué', WITHDRAWAL: 'Versé',
   ESCROW_LOCK: 'Séquestré', ESCROW_RELEASE: 'Libéré', COMMISSION: 'Versé',
-  AMBASSADOR_COMMISSION: 'Versé', DEBT_RECOVERY: 'Recouvré', TRANSFER: 'Effectué',
+  AMBASSADOR_COMMISSION: 'Versé', DEBT_RECOVERY: 'Recouvré',
 };
 
 function initialsOf(name) {
@@ -148,19 +148,6 @@ export default function TransactionDetail() {
                       <span className="initials init-orange" style={{ width: 32, height: 32, fontSize: 12 }}>{initialsOf(vendorName)}</span>
                       <div style={{ fontWeight: 600 }}>{vendorName}</div>
                     </div>
-                  </div>
-                )}
-
-                {t.sender && (
-                  <div style={{ padding: '12px 14px', background: '#F8FAFC', borderRadius: 10, border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8 }}>Expéditeur</div>
-                    <div style={{ fontWeight: 600 }}>{`${t.sender.firstName ?? ''} ${t.sender.lastName ?? ''}`.trim() || '—'}</div>
-                  </div>
-                )}
-                {t.receiver && (
-                  <div style={{ padding: '12px 14px', background: '#F8FAFC', borderRadius: 10, border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8 }}>Destinataire</div>
-                    <div style={{ fontWeight: 600 }}>{`${t.receiver.firstName ?? ''} ${t.receiver.lastName ?? ''}`.trim() || '—'}</div>
                   </div>
                 )}
               </div>
