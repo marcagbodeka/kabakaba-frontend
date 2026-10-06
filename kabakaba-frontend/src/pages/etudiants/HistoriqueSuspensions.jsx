@@ -11,12 +11,10 @@ function formatDateTime(iso) {
 
 const STATUS_LABEL = { ACTIVE: 'Active', LIFTED: 'Levée', EXPIRED: 'Expirée' };
 const STATUS_BADGE = { ACTIVE: 'badge-red', LIFTED: 'badge-green', EXPIRED: 'badge-gray' };
-const TRIGGER_LABEL = { MANUAL: 'Manuelle', AUTOMATIC: 'Automatique' };
 
 export default function HistoriqueSuspensions() {
   const [events, setEvents] = useState([]);
   const [statusFilter, setStatusFilter] = useState('');
-  const [triggerFilter, setTriggerFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -40,7 +38,6 @@ export default function HistoriqueSuspensions() {
   const applyFilters = () => {
     load({
       status: statusFilter || undefined,
-      trigger: triggerFilter || undefined,
     });
   };
 
@@ -54,7 +51,7 @@ export default function HistoriqueSuspensions() {
         <div className="page-header">
       <div className="eyebrow">Supervision · Étudiants</div>
           <h1>Historique des suspensions</h1>
-          <p>Toutes les suspensions (actives, levées) et bannissements définitifs, avec origine et motif</p>
+          <p>Toutes les suspensions (actives, levées) et bannissements définitifs, avec motif</p>
         </div>
 
         <div className="filters-row" style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
@@ -63,11 +60,6 @@ export default function HistoriqueSuspensions() {
             <option value="ACTIVE">Active</option>
             <option value="LIFTED">Levée</option>
             <option value="EXPIRED">Expirée</option>
-          </select>
-          <select value={triggerFilter} onChange={(e) => setTriggerFilter(e.target.value)}>
-            <option value="">Toute origine</option>
-            <option value="MANUAL">Manuelle</option>
-            <option value="AUTOMATIC">Automatique</option>
           </select>
           <button className="action-btn" onClick={applyFilters}>Filtrer</button>
         </div>
@@ -84,19 +76,18 @@ export default function HistoriqueSuspensions() {
             <table>
               <thead>
                 <tr>
-                  <th>Étudiant</th><th>Origine</th><th>Motif</th><th>Suspendu le</th><th>Levé le</th><th>Statut</th>
+                  <th>Étudiant</th><th>Motif</th><th>Suspendu le</th><th>Levé le</th><th>Statut</th>
                 </tr>
               </thead>
               <tbody>
-                {loading && <tr><td colSpan={6}>Chargement...</td></tr>}
-                {!loading && events.length === 0 && <tr><td colSpan={6}>Aucun événement.</td></tr>}
+                {loading && <tr><td colSpan={5}>Chargement...</td></tr>}
+                {!loading && events.length === 0 && <tr><td colSpan={5}>Aucun événement.</td></tr>}
                 {!loading && events.map((e) => (
                   <tr key={e.id}>
                     <td className="name-cell">
                       <strong>{e.student?.firstName} {e.student?.lastName}</strong>
                       {e.student?.isBanned && <span className="badge-black" style={{ marginLeft: 8 }}>Banni</span>}
                     </td>
-                    <td>{TRIGGER_LABEL[e.trigger] || e.trigger}</td>
                     <td>{e.reason}</td>
                     <td>{formatDateTime(e.suspendedAt)}</td>
                     <td>{formatDateTime(e.liftedAt)}</td>
