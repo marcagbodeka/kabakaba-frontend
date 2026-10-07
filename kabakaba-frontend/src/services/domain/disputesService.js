@@ -22,12 +22,12 @@ export function getDisputes(page = 1, limit = 10, filters = {}, range) {
   return apiFetch(`/disputes?${params.toString()}`);
 }
 
-// GET /disputes/:id/context — détail enrichi (parties, timeline, signaux).
-export function getDisputeContext(id) {
-  return apiFetch(`/disputes/${id}/context`);
+// GET /disputes/:id — signalement avec parties et résumé de la commande.
+export function getDispute(id) {
+  return apiFetch(`/disputes/${id}`);
 }
 
-// PATCH /disputes/:id — { status, decision, decisionNote }
+// PATCH /disputes/:id — { status, treatedByWebUserId }
 export function updateDispute(id, patch) {
   return apiFetch(`/disputes/${id}`, { method: 'PATCH', body: patch });
 }

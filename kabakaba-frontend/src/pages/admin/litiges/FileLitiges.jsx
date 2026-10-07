@@ -118,7 +118,7 @@ export default function FileLitiges() {
           <div className="kpi-card">
             <div className="kpi-label">Traités ce mois</div>
             <div className="kpi-value">{stats ? stats.resolvedThisMonth : '…'}</div>
-            <div className="kpi-sub">{stats ? `dont ${stats.refundedThisMonth} remboursés` : '—'}</div>
+            <div className="kpi-sub">signalements clos</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Délai moyen</div>
