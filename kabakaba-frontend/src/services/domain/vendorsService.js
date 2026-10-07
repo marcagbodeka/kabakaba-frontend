@@ -37,18 +37,3 @@ export function getVendorForAdmin(id) {
 export function updateVendor(id, patch) {
   return apiFetch(`/vendors/${id}`, { method: 'PATCH', body: patch });
 }
-
-// GET /vendors/:vendorId/schedules — horaires typiques d'ouverture.
-export function getVendorSchedules(vendorId) {
-  return apiFetch(`/vendors/${vendorId}/schedules`);
-}
-
-// POST /vendors/:vendorId/schedules — { day, startTime, endTime }.
-export function createVendorSchedule(vendorId, schedule) {
-  return apiFetch(`/vendors/${vendorId}/schedules`, { method: 'POST', body: schedule });
-}
-
-// DELETE /vendors/:vendorId/schedules/:id
-export function deleteVendorSchedule(vendorId, id) {
-  return apiFetch(`/vendors/${vendorId}/schedules/${id}`, { method: 'DELETE' });
-}

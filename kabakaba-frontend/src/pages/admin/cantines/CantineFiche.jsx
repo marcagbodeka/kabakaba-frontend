@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Utensils, Plus, Pencil, X, Clock, Building2, Trash2 } from 'lucide-react';
+import { Utensils, Plus, Pencil, X, Building2 } from 'lucide-react';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
-import { getVendorForAdmin, updateVendor, getVendorSchedules, createVendorSchedule, deleteVendorSchedule } from '../../../services/domain/vendorsService';
+import { getVendorForAdmin, updateVendor } from '../../../services/domain/vendorsService';
 import { getMenuItemsByVendor, getMenuComponents } from '../../../services/domain/catalogService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
-
-const DAY_LABEL = { MONDAY: 'Lun', TUESDAY: 'Mar', WEDNESDAY: 'Mer', THURSDAY: 'Jeu', FRIDAY: 'Ven', SATURDAY: 'Sam', SUNDAY: 'Dim' };
-const DAY_ORDER = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
 
 function initialsOf(name) {
   return (name || '?')
@@ -45,13 +42,6 @@ export default function CantineFiche() {
   const [suspending, setSuspending] = useState(false);
   const [suspendError, setSuspendError] = useState(null);
 
-  const [schedules, setSchedules] = useState([]);
-  const [newDay, setNewDay] = useState('MONDAY');
-  const [newStart, setNewStart] = useState('07:30');
-  const [newEnd, setNewEnd] = useState('15:00');
-  const [scheduleBusy, setScheduleBusy] = useState(false);
-  const [scheduleError, setScheduleError] = useState(null);
-
   const [menuItems, setMenuItems] = useState([]);
 
   const [allCampuses, setAllCampuses] = useState([]);
@@ -72,7 +62,6 @@ export default function CantineFiche() {
     setError(null);
     Promise.all([
       loadVendor(),
-      getVendorSchedules(id).then(setSchedules),
       getMenuItemsByVendor(id).then((res) => setMenuItems(res.data)),
       findAllCampuses().then(setAllCampuses),
     ])
@@ -110,10 +99,6 @@ export default function CantineFiche() {
     const affiliatedIds = new Set((vendor?.campuses ?? []).map((c) => c.id));
     return allCampuses.filter((c) => !affiliatedIds.has(c.id));
   }, [allCampuses, vendor]);
-  const sortedSchedules = useMemo(
-    () => [...schedules].sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day)),
-    [schedules],
-  );
 
   async function handleSaveName() {
     setSavingName(true);
@@ -152,32 +137,6 @@ export default function CantineFiche() {
       setSuspendError(err.message || 'Échec de la réactivation.');
     } finally {
       setSuspending(false);
-    }
-  }
-
-  async function handleAddSchedule() {
-    setScheduleBusy(true);
-    setScheduleError(null);
-    try {
-      const created = await createVendorSchedule(id, { day: newDay, startTime: newStart, endTime: newEnd });
-      setSchedules((prev) => [...prev, created]);
-    } catch (err) {
-      setScheduleError(err.message || "Échec de l'ajout.");
-    } finally {
-      setScheduleBusy(false);
-    }
-  }
-
-  async function handleDeleteSchedule(scheduleId) {
-    setScheduleBusy(true);
-    setScheduleError(null);
-    try {
-      await deleteVendorSchedule(id, scheduleId);
-      setSchedules((prev) => prev.filter((s) => s.id !== scheduleId));
-    } catch (err) {
-      setScheduleError(err.message || 'Échec de la suppression.');
-    } finally {
-      setScheduleBusy(false);
     }
   }
 
@@ -289,43 +248,6 @@ export default function CantineFiche() {
                   <input className="fg-input" value={vendor.user?.phone || '—'} disabled style={{ background: '#F8FAFC', color: 'var(--muted)' }} />
                 </div>
               </div>
-            </div>
-
-            <div className="card">
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--indigo)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 7, textTransform: 'uppercase', letterSpacing: '.04em' }}>
-                <Clock size={15} /> Horaires typiques d&apos;ouverture
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>
-                Indicatif — l&apos;ouverture réelle reste gérée par le vendeur depuis l&apos;application mobile.
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {sortedSchedules.length === 0 && (
-                  <div style={{ fontSize: 13, color: 'var(--muted)' }}>Aucune plage horaire renseignée.</div>
-                )}
-                {sortedSchedules.map((s) => (
-                  <div className="horaire-row" key={s.id}>
-                    <div style={{ width: 44, fontWeight: 600, fontSize: 13 }}>{DAY_LABEL[s.day]}</div>
-                    <div className="horaire-times">
-                      <span style={{ fontSize: 13 }}>{s.startTime}</span>
-                      <span style={{ color: 'var(--muted)' }}>→</span>
-                      <span style={{ fontSize: 13 }}>{s.endTime}</span>
-                    </div>
-                    <button className="icon-btn" disabled={scheduleBusy} style={{ color: '#EF4444', borderColor: '#FEE2E2' }} title="Supprimer" onClick={() => handleDeleteSchedule(s.id)}>
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 12, flexWrap: 'wrap' }}>
-                <select className="filter-select" value={newDay} onChange={(e) => setNewDay(e.target.value)}>
-                  {DAY_ORDER.map((d) => <option key={d} value={d}>{DAY_LABEL[d]}</option>)}
-                </select>
-                <input className="fg-input" type="time" value={newStart} onChange={(e) => setNewStart(e.target.value)} style={{ width: 110, height: 36 }} />
-                <span style={{ color: 'var(--muted)' }}>→</span>
-                <input className="fg-input" type="time" value={newEnd} onChange={(e) => setNewEnd(e.target.value)} style={{ width: 110, height: 36 }} />
-                <button className="btn-secondary-sm" disabled={scheduleBusy} onClick={handleAddSchedule}><Plus size={13} /> Ajouter une plage</button>
-              </div>
-              {scheduleError && <p style={{ color: '#DC2626', fontSize: 13, marginTop: 8 }}>{scheduleError}</p>}
             </div>
 
             <div className="card">
