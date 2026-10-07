@@ -57,11 +57,3 @@ export function cancelWithdrawal(id, reason) {
     body: { reason },
   });
 }
-
-export function resolveWithdrawalAppeal(appealId, resolutionNote, approved) {
-  const qs = new URLSearchParams({ approved: String(Boolean(approved)) });
-  return apiFetch(`/withdrawals/appeals/${encodeURIComponent(appealId)}/resolve?${qs.toString()}`, {
-    method: 'PATCH',
-    body: { resolutionNote },
-  });
-}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, CheckCircle2, XCircle, Ban, Upload, FileImage, Clock, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, Ban, Upload, FileImage, AlertTriangle } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
@@ -11,13 +11,12 @@ import {
   confirmWithdrawal,
   failWithdrawal,
   cancelWithdrawal,
-  resolveWithdrawalAppeal,
 } from '../../../services/domain/withdrawalsService';
 
 const STATUS_LABEL = {
   PENDING: 'En attente',
   PROCESSING: 'En cours de traitement',
-  COMPLETED: 'Versé — fenêtre de signalement ouverte',
+  COMPLETED: 'Versé — confirmation automatique en attente',
   FAILED: 'Non abouti',
   CANCELLED: 'Annulé',
 };
@@ -27,10 +26,6 @@ const STATUS_TONE = {
   COMPLETED: 'badge-green',
   FAILED: 'badge-gray',
   CANCELLED: 'badge-red',
-};
-const APPEAL_LABEL = {
-  NOT_RECEIVED: 'Argent non reçu',
-  AMOUNT_MISMATCH: 'Montant incorrect',
 };
 
 function fcfa(n) {
@@ -70,8 +65,6 @@ export default function RetraitDetail() {
   const [file, setFile] = useState(null);
   const [proofUrl, setProofUrl] = useState(null);
   const [proofLoading, setProofLoading] = useState(false);
-  const [appealNote, setAppealNote] = useState({});
-  const [appealBusy, setAppealBusy] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -129,25 +122,6 @@ export default function RetraitDetail() {
     }
   };
 
-  const resolveAppeal = async (appealId, approved) => {
-    const note = String(appealNote[appealId] || '').trim();
-    if (note.length < 3) {
-      setActionError('Ajoutez une note de vérification avant de traiter la contestation.');
-      return;
-    }
-    setAppealBusy(appealId);
-    setActionError(null);
-    try {
-      await resolveWithdrawalAppeal(appealId, note, approved);
-      setAppealNote((current) => ({ ...current, [appealId]: '' }));
-      await load();
-    } catch (err) {
-      setActionError(errorMessage(err));
-    } finally {
-      setAppealBusy(null);
-    }
-  };
-
   if (loading) {
     return (
       <>
@@ -175,7 +149,6 @@ export default function RetraitDetail() {
   const canProcess = withdrawal.status === 'PROCESSING';
   const canCancel = ['PENDING', 'PROCESSING'].includes(withdrawal.status);
   const deadline = withdrawal.confirmationDeadlineAt ? new Date(withdrawal.confirmationDeadlineAt) : null;
-  const deadlineActive = deadline && deadline.getTime() > Date.now() && !withdrawal.autoConfirmedAt;
 
   return (
     <>
@@ -258,46 +231,6 @@ export default function RetraitDetail() {
               )}
             </div>
 
-            {withdrawal.appeals?.length > 0 && (
-              <div className="card">
-                <div className="card-title">Contestations vendeur</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {withdrawal.appeals.map((appeal) => (
-                    <div key={appeal.id} style={{ padding: 14, border: '1px solid var(--border)', borderRadius: 10 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
-                        <strong>{APPEAL_LABEL[appeal.type] || appeal.type}</strong>
-                        <span className={appeal.status === 'PENDING' ? 'badge-amber' : appeal.status === 'APPROVED' ? 'badge-green' : 'badge-gray'}>
-                          {appeal.status === 'PENDING' ? 'À vérifier' : appeal.status === 'APPROVED' ? 'Approuvée' : 'Rejetée'}
-                        </span>
-                      </div>
-                      <p style={{ marginBottom: 8 }}>{appeal.reason}</p>
-                      <div style={{ fontSize: 12, color: 'var(--muted)' }}>Signalement : {dateTime(appeal.createdAt)}</div>
-                      {appeal.status === 'PENDING' && (
-                        <div style={{ marginTop: 12 }}>
-                          <textarea
-                            rows={3}
-                            className="form-input"
-                            placeholder="Note de vérification (obligatoire)"
-                            value={appealNote[appeal.id] || ''}
-                            onChange={(e) => setAppealNote((current) => ({ ...current, [appeal.id]: e.target.value }))}
-                            maxLength={1000}
-                          />
-                          <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-                            <button className="btn-primary-sm" disabled={appealBusy === appeal.id} onClick={() => resolveAppeal(appeal.id, true)}>
-                              <CheckCircle2 size={15} /> Confirmer après vérification
-                            </button>
-                            <button className="btn-secondary-sm" disabled={appealBusy === appeal.id} onClick={() => resolveAppeal(appeal.id, false)}>
-                              <XCircle size={15} /> Rejeter
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      {appeal.resolutionNote && <div style={{ marginTop: 10, fontSize: 13, color: 'var(--muted)' }}>Résolution : {appeal.resolutionNote}</div>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -357,13 +290,8 @@ export default function RetraitDetail() {
               <DetailRow label="Statut" value={<span className={STATUS_TONE[withdrawal.status] || 'badge-gray'}>{STATUS_LABEL[withdrawal.status]}</span>} />
               <DetailRow label="Preuve" value={hasProof ? 'Déposée' : 'Manquante'} />
               {withdrawal.paidAt && <DetailRow label="Paiement validé" value={dateTime(withdrawal.paidAt)} />}
-              {deadline && <DetailRow label="Fin du délai de signalement" value={dateTime(deadline)} />}
+              {deadline && <DetailRow label="Fin du délai de confirmation automatique" value={dateTime(deadline)} />}
               {withdrawal.autoConfirmedAt && <DetailRow label="Auto-confirmé" value={dateTime(withdrawal.autoConfirmedAt)} />}
-              {deadlineActive && (
-                <div style={{ marginTop: 12, display: 'flex', gap: 8, color: 'var(--muted)', fontSize: 12 }}>
-                  <Clock size={15} /> Le vendeur peut encore signaler un problème pendant cette fenêtre.
-                </div>
-              )}
               {withdrawal.failureReason && <div style={{ marginTop: 12, color: '#B91C1C', fontSize: 13 }}><AlertTriangle size={14} style={{ verticalAlign: 'middle' }} /> {withdrawal.failureReason}</div>}
               {withdrawal.cancellationReason && <div style={{ marginTop: 12, color: 'var(--muted)', fontSize: 13 }}>Motif d&apos;annulation : {withdrawal.cancellationReason}</div>}
             </div>
