@@ -7,7 +7,7 @@ import LineChart from '../../../components/LineChart';
 import { chartPeriodTitle, formatChartDate } from '../../../utils/chartLabels';
 import { getCampusComparison, getTopCanteens, getVendorPerformance, getVendorFinancials } from '../../../services/domain/analyticsService';
 import { getVendors } from '../../../services/domain/vendorsService';
-import { getPendingAmbassadors, getNewPartnerApplications } from '../../../services/domain/applicationsService';
+import { getNewPartnerApplications } from '../../../services/domain/applicationsService';
 import { countOrdersByStatus } from '../../../services/domain/ordersService';
 import { startOfDay, daysAgo } from '../../../utils/dates';
 
@@ -86,7 +86,6 @@ export default function VueVendeurs() {
           weekPerf,
           financials,
           campusComparison1d,
-          pendingAmbassadors,
           newPartners,
           statusCounts,
         ] = await Promise.all([
@@ -96,7 +95,6 @@ export default function VueVendeurs() {
           getVendorPerformance(7),
           getVendorFinancials(),
           getCampusComparison(1),
-          getPendingAmbassadors(),
           getNewPartnerApplications(),
           Promise.all(
             Object.entries(STATUS_GROUPS).map(async ([label, statuses]) => {
@@ -112,7 +110,6 @@ export default function VueVendeurs() {
           weekPerf,
           financials,
           campusComparison1d,
-          pendingAmbassadors: pendingAmbassadors.data || [],
           newPartners: newPartners.data || [],
           statusCounts,
         });
@@ -172,7 +169,6 @@ export default function VueVendeurs() {
     weekPerf,
     financials,
     campusComparison1d,
-    pendingAmbassadors,
     newPartners,
     statusCounts,
   } = live;
@@ -207,27 +203,9 @@ export default function VueVendeurs() {
       title: `Taux d'acceptation bas — ${v.name}`,
       text: `${v.acceptanceRate}% sur 7 jours · seuil d'alerte : ${ACCEPTANCE_ALERT_THRESHOLD}%`,
     })),
-    ...(pendingAmbassadors.length > 0
-      ? [{ level: 'amber', title: `${pendingAmbassadors.length} demande(s) ambassadeur en attente`, text: 'En attente de décision' }]
-      : []),
   ];
 
   const notifications = [
-    ...pendingAmbassadors.map((a) => {
-      const fullName = [a.user?.firstName, a.user?.lastName].filter(Boolean).join(' ') || `Candidature #${a.id.slice(0, 8)}`;
-      return {
-        type: 'Ambassadeur',
-        tone: 'badge-blue',
-        name: fullName,
-        initials: initialsOf(fullName),
-        init: 'init-indigo',
-        campus: a.user?.campus?.name || '—',
-        time: timeAgo(a.createdAt),
-        status: 'En attente',
-        statusTone: 'badge-amber',
-        createdAt: a.createdAt,
-      };
-    }),
     ...newPartners.map((p) => ({
       type: 'Partenaire',
       tone: 'badge-peach',
@@ -475,7 +453,7 @@ export default function VueVendeurs() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <div>
               <div className="card-title" style={{ marginBottom: 0 }}>Notifications à traiter</div>
-              <div className="card-sub" style={{ marginBottom: 0 }}>Demandes ambassadeur et candidatures partenaires en attente</div>
+              <div className="card-sub" style={{ marginBottom: 0 }}>Candidatures partenaires en attente</div>
             </div>
             <span className="badge-orange">{notifications.length} en attente</span>
           </div>

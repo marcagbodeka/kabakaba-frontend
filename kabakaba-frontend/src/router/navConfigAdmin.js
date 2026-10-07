@@ -2,7 +2,6 @@ import {
   LayoutDashboard,
   Utensils,
   AlertTriangle,
-  Trophy,
   UserPlus,
   Monitor,
   Banknote,
@@ -26,7 +25,7 @@ export const navSections = [
         children: [
           { label: 'Liste des cantines', path: '/admin/cantines' },
           { label: 'Créer une cantine', path: '/admin/cantines/creer' },
-          { label: 'Campus & facultés', path: '/admin/cantines/campus' },
+          { label: 'Campus', path: '/admin/cantines/campus' },
         ],
       },
       {
@@ -35,14 +34,6 @@ export const navSections = [
         children: [
           { label: 'File des litiges', path: '/admin/litiges' },
           { label: 'Comptes suspendus', path: '/admin/litiges/suspensions' },
-        ],
-      },
-      {
-        label: 'Ambassadeurs',
-        icon: Trophy,
-        children: [
-          { label: 'Liste ambassadeurs', path: '/admin/ambassadeurs' },
-          { label: 'Demandes en attente', path: '/admin/ambassadeurs/demandes', count: 3 },
         ],
       },
       {

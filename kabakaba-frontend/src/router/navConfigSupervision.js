@@ -4,7 +4,6 @@ import {
   Utensils,
   Users,
   Star,
-  Trophy,
   ShieldCheck,
   Settings,
 } from 'lucide-react';
@@ -55,18 +54,6 @@ export const navSections = [
         children: [
           { label: 'Notes & alertes', path: '/supervision/qualite/notes' },
           { label: 'Commentaires', path: '/supervision/qualite/commentaires' },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'Programme',
-    items: [
-      {
-        label: 'Ambassadeurs',
-        icon: Trophy,
-        children: [
-          { label: 'Supervision ambassadeurs', path: '/supervision/ambassadeurs' },
         ],
       },
     ],

@@ -24,8 +24,6 @@ const ComptesSuspendus = lazy(() => import('./pages/etudiants/ComptesSuspendus')
 const HistoriqueSuspensions = lazy(() => import('./pages/etudiants/HistoriqueSuspensions'));
 const NotesAlertes = lazy(() => import('./pages/qualite/NotesAlertes'));
 const Commentaires = lazy(() => import('./pages/qualite/Commentaires'));
-const SupervisionAmbassadeurs = lazy(() => import('./pages/ambassadeurs/SupervisionAmbassadeurs'));
-const DetailAmbassadeur = lazy(() => import('./pages/ambassadeurs/DetailAmbassadeur'));
 const ParametresSupervision = lazy(() => import('./pages/parametres/Parametres'));
 const ComptesSupervision = lazy(() => import('./pages/comptes/ComptesSupervision'));
 const ComptesAdmin = lazy(() => import('./pages/comptes/ComptesAdmin'));
@@ -40,9 +38,6 @@ const ArticleConfig = lazy(() => import('./pages/admin/cantines/ArticleConfig'))
 const FileLitiges = lazy(() => import('./pages/admin/litiges/FileLitiges'));
 const LitigeDetail = lazy(() => import('./pages/admin/litiges/LitigeDetail'));
 const ComptesSuspendusAdmin = lazy(() => import('./pages/admin/litiges/ComptesSuspendus'));
-const ListeAmbassadeurs = lazy(() => import('./pages/admin/ambassadeurs/ListeAmbassadeurs'));
-const AmbassadeurFiche = lazy(() => import('./pages/admin/ambassadeurs/AmbassadeurFiche'));
-const DemandesAmbassadeur = lazy(() => import('./pages/admin/ambassadeurs/DemandesAmbassadeur'));
 const Candidatures = lazy(() => import('./pages/admin/partenaires/Candidatures'));
 const Transactions = lazy(() => import('./pages/admin/transactions/Transactions'));
 const TransactionDetail = lazy(() => import('./pages/admin/transactions/TransactionDetail'));
@@ -119,8 +114,6 @@ export default function App() {
           <Route path="/supervision/etudiants/historique" element={<HistoriqueSuspensions />} />
           <Route path="/supervision/qualite/notes" element={<NotesAlertes />} />
           <Route path="/supervision/qualite/commentaires" element={<Commentaires />} />
-          <Route path="/supervision/ambassadeurs" element={<SupervisionAmbassadeurs />} />
-          <Route path="/supervision/ambassadeurs/:id" element={<DetailAmbassadeur />} />
           <Route path="/supervision/comptes/supervision" element={<ComptesSupervision />} />
           <Route path="/supervision/comptes/admin" element={<ComptesAdmin />} />
           <Route path="/supervision/parametres" element={<ParametresSupervision />} />
@@ -167,9 +160,6 @@ export default function App() {
           <Route path="/admin/litiges" element={<FileLitiges />} />
           <Route path="/admin/litiges/suspensions" element={<ComptesSuspendusAdmin />} />
           <Route path="/admin/litiges/:id" element={<LitigeDetail />} />
-          <Route path="/admin/ambassadeurs" element={<ListeAmbassadeurs />} />
-          <Route path="/admin/ambassadeurs/demandes" element={<DemandesAmbassadeur />} />
-          <Route path="/admin/ambassadeurs/:id" element={<AmbassadeurFiche />} />
           <Route path="/admin/partenaires" element={<Candidatures />} />
           <Route path="/admin/transactions" element={<Transactions />} />
           <Route path="/admin/transactions/:ref" element={<TransactionDetail />} />

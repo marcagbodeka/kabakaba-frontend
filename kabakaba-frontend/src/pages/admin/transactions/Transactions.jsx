@@ -19,7 +19,7 @@ const ESCROWED_STATUSES = ['PENDING', 'ACCEPTED', 'IN_PREPARATION'];
 const TYPE_LABEL = {
   DEPOSIT: 'Recharge', ESCROW_LOCK: 'Séquestre', ESCROW_RELEASE: 'Libération séquestre',
   PAYMENT: 'Commande', REFUND: 'Remboursement', WITHDRAWAL: 'Retrait',
-  COMMISSION: 'Commission', AMBASSADOR_COMMISSION: 'Commission ambassadeur',
+  COMMISSION: 'Commission',
   DEBT_RECOVERY: 'Recouvrement créance',
 };
 // Classe de badge par type — cohérent avec les badges utilisés partout
@@ -40,7 +40,7 @@ const TICKET_TYPES = new Set(['ESCROW_LOCK', 'ESCROW_RELEASE', 'PAYMENT', 'REFUN
 const COMPLETED_LABEL = {
   PAYMENT: 'Débité', DEPOSIT: 'Confirmé', REFUND: 'Effectué', WITHDRAWAL: 'Versé',
   ESCROW_LOCK: 'Séquestré', ESCROW_RELEASE: 'Libéré', COMMISSION: 'Versé',
-  AMBASSADOR_COMMISSION: 'Versé', DEBT_RECOVERY: 'Recouvré',
+  DEBT_RECOVERY: 'Recouvré',
 };
 const ORDER_STATUS_LABEL = {
   PENDING: 'En attente vendeur', ACCEPTED: 'Acceptée', IN_PREPARATION: 'En préparation', READY: 'Prête',

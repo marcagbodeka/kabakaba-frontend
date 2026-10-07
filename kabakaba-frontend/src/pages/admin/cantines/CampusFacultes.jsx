@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Building2, Plus, Pencil, X, Check } from 'lucide-react';
+import { Building2, Plus, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import { findAllCampuses, createCampus, updateCampus } from '../../../services/domain/campusesService';
-import { getFaculties, createFaculty, updateFaculty } from '../../../services/domain/facultiesService';
 import { getVendorsForAdmin } from '../../../services/domain/vendorsService';
 
 const INIT_CLASSES = ['init-indigo', 'init-gray', 'init-orange'];
@@ -15,11 +14,7 @@ export default function CampusFacultes() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [campuses, setCampuses] = useState([]); // enrichi : { ...campus, faculties, canteens }
-
-  const [addingTo, setAddingTo] = useState(null);
-  const [newFaculty, setNewFaculty] = useState('');
-  const [busyFacultyId, setBusyFacultyId] = useState(null);
+  const [campuses, setCampuses] = useState([]); // enrichi : { ...campus, canteens }
 
   const [campusModal, setCampusModal] = useState(null); // null | 'new' | campus à éditer
   const [form, setForm] = useState({ name: '', city: '', institution: '' });
@@ -33,11 +28,8 @@ export default function CampusFacultes() {
       .then(async (list) => {
         const enriched = await Promise.all(
           list.map(async (c) => {
-            const [faculties, vendorsRes] = await Promise.all([
-              getFaculties(c.id),
-              getVendorsForAdmin(1, 50, { campusId: c.id }),
-            ]);
-            return { ...c, faculties, canteens: vendorsRes.data };
+            const vendorsRes = await getVendorsForAdmin(1, 50, { campusId: c.id });
+            return { ...c, canteens: vendorsRes.data };
           }),
         );
         setCampuses(enriched);
@@ -47,32 +39,6 @@ export default function CampusFacultes() {
   }
 
   useEffect(() => { load(); }, []);
-
-  async function toggleFaculty(campusId, faculty) {
-    setBusyFacultyId(faculty.id);
-    try {
-      const updated = await updateFaculty(campusId, faculty.id, { active: !faculty.active });
-      setCampuses((prev) => prev.map((c) => (
-        c.id !== campusId ? c : { ...c, faculties: c.faculties.map((f) => (f.id === faculty.id ? updated : f)) }
-      )));
-    } catch (err) {
-      setError(err.message || 'Échec de la mise à jour.');
-    } finally {
-      setBusyFacultyId(null);
-    }
-  }
-
-  async function addFaculty(campusId) {
-    if (!newFaculty.trim()) return;
-    try {
-      const created = await createFaculty(campusId, newFaculty.trim());
-      setCampuses((prev) => prev.map((c) => (c.id !== campusId ? c : { ...c, faculties: [...c.faculties, created] })));
-      setNewFaculty('');
-      setAddingTo(null);
-    } catch (err) {
-      setError(err.message || "Échec de l'ajout.");
-    }
-  }
 
   function openNewCampus() {
     setForm({ name: '', city: '', institution: '' });
@@ -103,12 +69,11 @@ export default function CampusFacultes() {
     }
   }
 
-  const totalFaculties = campuses.reduce((n, c) => n + c.faculties.length, 0);
 
   if (loading) {
     return (
       <>
-        <Topbar icon={Building2} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Campus & facultés' }]} />
+        <Topbar icon={Building2} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Campus' }]} />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
@@ -116,14 +81,14 @@ export default function CampusFacultes() {
 
   return (
     <>
-      <Topbar icon={Building2} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Campus & facultés' }]}>
+      <Topbar icon={Building2} breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: 'Campus' }]}>
         <button className="btn-primary-sm" onClick={openNewCampus}><Plus size={14} /> Ajouter un campus</button>
       </Topbar>
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Admin web · Cantines</div>
-          <h1>Campus & facultés</h1>
-          <p>{campuses.length} université{campuses.length === 1 ? '' : 's'} couverte{campuses.length === 1 ? '' : 's'} · {totalFaculties} faculté{totalFaculties === 1 ? '' : 's'} configurée{totalFaculties === 1 ? '' : 's'}</p>
+          <h1>Campus</h1>
+          <p>{campuses.length} université{campuses.length === 1 ? '' : 's'} couverte{campuses.length === 1 ? '' : 's'}</p>
         </div>
 
         {error && <p style={{ color: '#DC2626', fontSize: 14, marginBottom: 16 }}>{error}</p>}
@@ -143,53 +108,6 @@ export default function CampusFacultes() {
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <span className="badge-green">Actif</span>
                 <button className="icon-btn" title="Modifier le campus" onClick={() => openEditCampus(c)}><Pencil size={15} /></button>
-              </div>
-            </div>
-
-            <div style={{ padding: '0 22px 18px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
-                  Facultés & instituts
-                </div>
-                <button className="btn-secondary-sm" style={{ padding: '6px 12px', fontSize: 13 }} onClick={() => setAddingTo(addingTo === c.id ? null : c.id)}>
-                  <Plus size={12} /> Ajouter
-                </button>
-              </div>
-
-              {addingTo === c.id && (
-                <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                  <input
-                    className="fg-input"
-                    style={{ flex: 1 }}
-                    placeholder="Ex : Faculté de Pharmacie"
-                    value={newFaculty}
-                    onChange={(e) => setNewFaculty(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addFaculty(c.id)}
-                    autoFocus
-                  />
-                  <button className="btn-primary-sm" onClick={() => addFaculty(c.id)}><Check size={14} /></button>
-                </div>
-              )}
-
-              <div className="faculty-grid">
-                {c.faculties.length === 0 && <div style={{ fontSize: 13, color: 'var(--muted)' }}>Aucune faculté configurée.</div>}
-                {c.faculties.map((f) => (
-                  <div className={`faculty-pill ${f.active ? 'active' : 'inactive'}`} key={f.id} style={busyFacultyId === f.id ? { opacity: 0.5 } : undefined}>
-                    <span>{f.name}</span>
-                    <button
-                      className="faculty-del"
-                      style={!f.active ? { color: '#22C55E' } : undefined}
-                      title={f.active ? 'Désactiver' : 'Réactiver'}
-                      disabled={busyFacultyId === f.id}
-                      onClick={() => toggleFaculty(c.id, f)}
-                    >
-                      {f.active ? <X size={12} /> : <Check size={12} />}
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>
-                Les facultés désactivées n&apos;apparaissent plus dans la liste proposée aux étudiants lors de la demande ambassadeur.
               </div>
             </div>
 

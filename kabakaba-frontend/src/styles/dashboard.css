@@ -1048,31 +1048,6 @@ textarea.fg-input {
   background: var(--indigo);
 }
 
-/* ── Niveaux ambassadeur ──────────────────────────────── */
-.level-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 11px;
-  border-radius: 20px;
-}
-
-.level-badge.or {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.level-badge.argent {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.level-badge.bronze {
-  background: #fde3cf;
-  color: #9a4a1f;
-}
-
 /* ── Cartes de demande expansibles ────────────────────── */
 .demande-card {
   border: 1px solid var(--border);
@@ -1111,7 +1086,7 @@ textarea.fg-input {
   transform: rotate(180deg);
 }
 
-/* ── Campus & facultés ────────────────────────────────── */
+/* ── Campus ────────────────────────────────── */
 .campus-block {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1128,43 +1103,6 @@ textarea.fg-input {
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
   gap: 10px;
-}
-
-.faculty-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.faculty-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 8px 7px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  border: 1px solid var(--border);
-  background: #f8fafc;
-  color: var(--text);
-}
-
-.faculty-pill.inactive {
-  opacity: 0.55;
-  text-decoration: line-through;
-}
-
-.faculty-del {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0, 0, 0, 0.05);
-  color: #ef4444;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
 }
 
 /* ── Type d'article (sélecteur) ────────────────────────── */

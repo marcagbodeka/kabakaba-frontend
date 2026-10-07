@@ -8,7 +8,7 @@ import { getTransaction } from '../../../services/domain/transactionsService';
 const TYPE_LABEL = {
   DEPOSIT: 'Recharge', ESCROW_LOCK: 'Séquestre', ESCROW_RELEASE: 'Libération séquestre',
   PAYMENT: 'Commande', REFUND: 'Remboursement', WITHDRAWAL: 'Retrait',
-  COMMISSION: 'Commission', AMBASSADOR_COMMISSION: 'Commission ambassadeur',
+  COMMISSION: 'Commission',
   DEBT_RECOVERY: 'Recouvrement créance',
 };
 const TICKET_TYPES = new Set(['ESCROW_LOCK', 'ESCROW_RELEASE', 'PAYMENT', 'REFUND']);
@@ -19,7 +19,7 @@ const TYPE_BADGE_CLASS = {
 const COMPLETED_LABEL = {
   PAYMENT: 'Débité', DEPOSIT: 'Confirmé', REFUND: 'Effectué', WITHDRAWAL: 'Versé',
   ESCROW_LOCK: 'Séquestré', ESCROW_RELEASE: 'Libéré', COMMISSION: 'Versé',
-  AMBASSADOR_COMMISSION: 'Versé', DEBT_RECOVERY: 'Recouvré',
+  DEBT_RECOVERY: 'Recouvré',
 };
 
 function initialsOf(name) {

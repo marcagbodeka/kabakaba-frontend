@@ -34,11 +34,3 @@ export function getVendorFinancials(days = 30, range) {
 export function getReviewsQuality(days = 30, range) {
   return apiFetch(`/admin/analytics/reviews?days=${days}${rangeParams(range)}`);
 }
-
-export function getAmbassadorRanking(days = 30, range) {
-  return apiFetch(`/admin/analytics/ambassadors?days=${days}${rangeParams(range)}`);
-}
-
-export function getAmbassadorDetail(id, days = 30, range) {
-  return apiFetch(`/admin/analytics/ambassadors/${id}?days=${days}${rangeParams(range)}`);
-}
