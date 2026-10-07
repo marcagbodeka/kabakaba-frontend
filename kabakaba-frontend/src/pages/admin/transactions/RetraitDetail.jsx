@@ -16,7 +16,7 @@ import {
 const STATUS_LABEL = {
   PENDING: 'En attente',
   PROCESSING: 'En cours de traitement',
-  COMPLETED: 'Versé — confirmation automatique en attente',
+  COMPLETED: 'Versé',
   FAILED: 'Non abouti',
   CANCELLED: 'Annulé',
 };
@@ -148,7 +148,6 @@ export default function RetraitDetail() {
   const canAccept = withdrawal.status === 'PENDING';
   const canProcess = withdrawal.status === 'PROCESSING';
   const canCancel = ['PENDING', 'PROCESSING'].includes(withdrawal.status);
-  const deadline = withdrawal.confirmationDeadlineAt ? new Date(withdrawal.confirmationDeadlineAt) : null;
 
   return (
     <>
@@ -290,8 +289,6 @@ export default function RetraitDetail() {
               <DetailRow label="Statut" value={<span className={STATUS_TONE[withdrawal.status] || 'badge-gray'}>{STATUS_LABEL[withdrawal.status]}</span>} />
               <DetailRow label="Preuve" value={hasProof ? 'Déposée' : 'Manquante'} />
               {withdrawal.paidAt && <DetailRow label="Paiement validé" value={dateTime(withdrawal.paidAt)} />}
-              {deadline && <DetailRow label="Fin du délai de confirmation automatique" value={dateTime(deadline)} />}
-              {withdrawal.autoConfirmedAt && <DetailRow label="Auto-confirmé" value={dateTime(withdrawal.autoConfirmedAt)} />}
               {withdrawal.failureReason && <div style={{ marginTop: 12, color: '#B91C1C', fontSize: 13 }}><AlertTriangle size={14} style={{ verticalAlign: 'middle' }} /> {withdrawal.failureReason}</div>}
               {withdrawal.cancellationReason && <div style={{ marginTop: 12, color: 'var(--muted)', fontSize: 13 }}>Motif d&apos;annulation : {withdrawal.cancellationReason}</div>}
             </div>
