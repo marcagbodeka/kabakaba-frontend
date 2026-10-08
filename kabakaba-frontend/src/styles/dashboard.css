@@ -449,6 +449,10 @@ table tr.rank1 td {
   background: #dc2626;
 }
 
+.dot-gray {
+  background: #94A0B4;
+}
+
 /* ── Barres horizontales (répartition) ───────────────── */
 .h-bars {
   display: flex;

@@ -5,6 +5,7 @@ import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import { getVendorsForAdmin } from '../../../services/domain/vendorsService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
+import { CAPACITY_BADGE, CAPACITY_LABEL } from '../../../utils/vendorCapacity';
 
 const PAGE_SIZE = 5;
 const INIT_CLASSES = ['init-indigo', 'init-orange', 'init-gray'];
@@ -161,7 +162,7 @@ export default function ListeCantines() {
                         <span className="badge-red">Suspendu</span>
                       )}
                     </td>
-                    <td><span className={c.isOpen ? 'badge-green' : 'badge-gray'}>{c.isOpen ? 'Ouverte' : 'Fermée'}</span></td>
+                    <td><span className={CAPACITY_BADGE[c.capacityStatus]}>{CAPACITY_LABEL[c.capacityStatus]}</span></td>
                     <td style={{ fontWeight: 700, color: c.isActive ? 'var(--indigo)' : 'var(--muted)' }}>{c.todayOrders}</td>
                     <td>
                       {c.debtFcfa > 0 ? (

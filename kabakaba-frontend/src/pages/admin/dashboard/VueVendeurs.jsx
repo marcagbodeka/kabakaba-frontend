@@ -10,6 +10,7 @@ import { getVendors } from '../../../services/domain/vendorsService';
 import { getNewPartnerApplications } from '../../../services/domain/applicationsService';
 import { countOrdersByStatus } from '../../../services/domain/ordersService';
 import { startOfDay, daysAgo } from '../../../utils/dates';
+import { CAPACITY_BADGE, CAPACITY_DOT, CAPACITY_LABEL, CAPACITY_RANK } from '../../../utils/vendorCapacity';
 
 const ACCEPTANCE_ALERT_THRESHOLD = 70;
 
@@ -174,7 +175,9 @@ export default function VueVendeurs() {
   } = live;
 
   const vendorById = new Map(vendors.map((v) => [v.id, v]));
-  const openCount = vendors.filter((v) => v.isOpen).length;
+  const openCount = vendors.filter((v) => v.capacityStatus === 'OPEN').length;
+  const busyCount = vendors.filter((v) => v.capacityStatus === 'BUSY').length;
+  const closedCount = vendors.filter((v) => v.capacityStatus === 'CLOSED').length;
 
   const ordersToday = campusComparison1d.summary.totalOrders;
   const ordersYesterday = campusComparison1d.summary.totalOrdersPrevPeriod;
@@ -182,11 +185,11 @@ export default function VueVendeurs() {
 
   const statutTempsReel = vendors
     .slice()
-    .sort((a, b) => Number(b.isOpen) - Number(a.isOpen))
+    .sort((a, b) => CAPACITY_RANK[a.capacityStatus] - CAPACITY_RANK[b.capacityStatus])
     .slice(0, 5)
     .map((v) => {
       const todayStats = todayCanteens.find((c) => c.id === v.id);
-      return { name: v.canteenName, open: v.isOpen, orders: v.isOpen ? `${todayStats?.orders ?? 0} cmd` : 'Fermée' };
+      return { name: v.canteenName, capacity: v.capacityStatus, orders: v.capacityStatus !== 'CLOSED' ? `${todayStats?.orders ?? 0} cmd` : 'Fermée' };
     });
 
   const blockedVendors = financials.vendors.filter((v) => v.blocked);
@@ -239,7 +242,7 @@ export default function VueVendeurs() {
         orders: c.orders,
         acceptance: `${c.acceptanceRate}%`,
         status: c.acceptanceRate >= ACCEPTANCE_ALERT_THRESHOLD ? 'green' : 'orange',
-        isOpen: vendor?.isOpen ?? null,
+        capacityStatus: vendor?.capacityStatus ?? null,
       };
     });
 
@@ -270,7 +273,7 @@ export default function VueVendeurs() {
           <div className="kpi-card">
             <div className="kpi-label">Cantines ouvertes</div>
             <div className="kpi-value">{openCount} <span style={{ fontSize: 16, color: '#94A3B8', fontWeight: 400 }}>/ {vendors.length}</span></div>
-            <div className="kpi-sub">{vendors.length - openCount} fermée(s) actuellement</div>
+            <div className="kpi-sub">{busyCount} occupée(s) · {closedCount} fermée(s)</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Commandes (24h)</div>
@@ -335,8 +338,8 @@ export default function VueVendeurs() {
                         <span className={v.status === 'green' ? 'badge-green' : 'badge-orange'}>{v.acceptance}</span>
                       </td>
                       <td>
-                        {v.isOpen === null ? '—' : (
-                          <><span className={`status-dot dot-${v.isOpen ? 'green' : 'orange'}`} /> {v.isOpen ? 'Ouverte' : 'Fermée'}</>
+                        {v.capacityStatus === null ? '—' : (
+                          <><span className={`status-dot ${CAPACITY_DOT[v.capacityStatus]}`} /> {CAPACITY_LABEL[v.capacityStatus]}</>
                         )}
                       </td>
                     </tr>
@@ -356,12 +359,12 @@ export default function VueVendeurs() {
                   <div key={c.name}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span className={`status-dot ${c.open ? 'dot-green' : 'dot-orange'}`} />
-                        <span style={{ fontSize: 14, fontWeight: c.open ? 500 : 400, color: c.open ? 'inherit' : 'var(--muted)' }}>
+                        <span className={`status-dot ${CAPACITY_DOT[c.capacity]}`} />
+                        <span style={{ fontSize: 14, fontWeight: c.capacity !== 'CLOSED' ? 500 : 400, color: c.capacity !== 'CLOSED' ? 'inherit' : 'var(--muted)' }}>
                           {c.name}
                         </span>
                       </div>
-                      <span className={c.open ? 'badge-green' : 'badge-gray'}>{c.orders}</span>
+                      <span className={CAPACITY_BADGE[c.capacity]}>{c.orders}</span>
                     </div>
                   </div>
                 ))}

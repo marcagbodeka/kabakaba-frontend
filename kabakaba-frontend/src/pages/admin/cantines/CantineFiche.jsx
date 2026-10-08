@@ -6,6 +6,7 @@ import PageContent from '../../../components/PageContent';
 import { getVendorForAdmin, updateVendor } from '../../../services/domain/vendorsService';
 import { getMenuItemsByVendor, getMenuComponents } from '../../../services/domain/catalogService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
+import { CAPACITY_LABEL } from '../../../utils/vendorCapacity';
 
 function initialsOf(name) {
   return (name || '?')
@@ -200,7 +201,7 @@ export default function CantineFiche() {
       <Topbar
         icon={Utensils}
         breadcrumb={[{ label: 'Cantines', path: '/admin/cantines' }, { label: vendor.canteenName }]}
-        badge={{ text: `${vendor.isActive ? 'Actif' : 'Suspendu'} · ${vendor.isOpen ? 'Ouverte' : 'Fermée'}`, tone: vendor.isActive ? 'default' : 'red' }}
+        badge={{ text: `${vendor.isActive ? 'Actif' : 'Suspendu'} · ${CAPACITY_LABEL[vendor.capacityStatus]}`, tone: vendor.isActive ? 'default' : 'red' }}
       >
         <button className="btn-secondary-sm" onClick={() => navigate('/admin/cantines')}>← Retour à la liste</button>
       </Topbar>
