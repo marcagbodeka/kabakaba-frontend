@@ -82,7 +82,6 @@ export default function VueGenerale() {
   const revenueBreakdown = [
     { label: 'Revenus Générés', value: revSummary?.surplus ?? 0 },
     { label: 'Retraits couverts', value: revSummary?.uncoveredFees ?? 0 },
-    { label: 'Revenus ambassadeurs', value: revSummary?.commissions ?? 0 },
     { label: 'Bénéfices nets', value: revSummary?.net ?? 0, color: 'var(--indigo)' },
   ];
 

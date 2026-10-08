@@ -40,7 +40,7 @@ export default function VolumeRevenus() {
     <>
       <Topbar
         icon={BarChart3}
-        breadcrumb={[{ label: 'Par campus', path: '/supervision/campus' }, { label: 'Volume & revenus' }]}
+        breadcrumb={[{ label: 'Par campus' }, { label: 'Volume & revenus' }]}
       >
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>
@@ -63,10 +63,6 @@ export default function VolumeRevenus() {
             <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.surplus ?? 0)}</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Revenus ambassadeurs</div>
-            <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.commissions ?? 0)}</div>
-          </div>
-          <div className="kpi-card">
             <div className="kpi-label">Bénéfices nets</div>
             <div className="kpi-value kpi-value-sm" style={{ color: 'var(--indigo)' }}>
               {loading ? '—' : formatFcfa(summary?.net ?? 0)}
@@ -79,22 +75,20 @@ export default function VolumeRevenus() {
           <div className="table-scroll">
             <table style={{ tableLayout: 'fixed' }}>
               <colgroup>
-                <col style={{ width: '34%' }} />
-                <col style={{ width: '22%' }} />
-                <col style={{ width: '22%' }} />
-                <col style={{ width: '22%' }} />
+                <col style={{ width: '40%' }} />
+                <col style={{ width: '30%' }} />
+                <col style={{ width: '30%' }} />
               </colgroup>
               <thead>
-                <tr><th>Campus</th><th>Recharges (brut)</th><th>Commissions versées</th><th>Net</th></tr>
+                <tr><th>Campus</th><th>Recharges (brut)</th><th>Net</th></tr>
               </thead>
               <tbody>
-                {loading && <tr><td colSpan={4}>Chargement...</td></tr>}
-                {!loading && (data?.perCampus?.length ?? 0) === 0 && <tr><td colSpan={4}>Aucune donnée.</td></tr>}
+                {loading && <tr><td colSpan={3}>Chargement...</td></tr>}
+                {!loading && (data?.perCampus?.length ?? 0) === 0 && <tr><td colSpan={3}>Aucune donnée.</td></tr>}
                 {!loading && data?.perCampus?.map((c) => (
                   <tr key={c.id}>
                     <td><strong>{c.name}</strong></td>
                     <td>{formatFcfa(c.rechargesGross)}</td>
-                    <td>{formatFcfa(c.commissions)}</td>
                     <td>{formatFcfa(c.net)}</td>
                   </tr>
                 ))}

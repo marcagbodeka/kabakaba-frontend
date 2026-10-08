@@ -22,7 +22,6 @@ export const navSections = [
         label: 'Par campus',
         icon: Building2,
         children: [
-          { label: 'Comparaison campus', path: '/supervision/campus' },
           { label: 'Volume & revenus', path: '/supervision/campus/revenus' },
         ],
       },

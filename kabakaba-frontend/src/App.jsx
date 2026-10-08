@@ -15,7 +15,6 @@ import { navSections as adminNav } from './router/navConfigAdmin';
 
 // Supervision
 const VueGenerale = lazy(() => import('./pages/dashboard/VueGenerale'));
-const ComparaisonCampus = lazy(() => import('./pages/campus/ComparaisonCampus'));
 const VolumeRevenus = lazy(() => import('./pages/campus/VolumeRevenus'));
 const PerformanceVendeurs = lazy(() => import('./pages/cantines/PerformanceVendeurs'));
 const SoldeCreances = lazy(() => import('./pages/cantines/SoldeCreances'));
@@ -105,7 +104,6 @@ export default function App() {
           }
         >
           <Route path="/supervision/dashboard" element={<VueGenerale />} />
-          <Route path="/supervision/campus" element={<ComparaisonCampus />} />
           <Route path="/supervision/campus/revenus" element={<VolumeRevenus />} />
           <Route path="/supervision/cantines/performance" element={<PerformanceVendeurs />} />
           <Route path="/supervision/cantines/solde" element={<SoldeCreances />} />

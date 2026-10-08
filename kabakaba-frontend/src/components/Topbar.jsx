@@ -5,7 +5,6 @@ import {
   Utensils,
   Star,
   ShieldAlert,
-  Trophy,
   CheckCircle2,
   Menu,
 } from 'lucide-react';
@@ -19,7 +18,6 @@ const EVENT_ICON_BY_TYPE = {
   NEW_VENDOR: Utensils,
   BAD_REVIEW: Star,
   SUSPENSION: ShieldAlert,
-  NEW_AMBASSADOR: Trophy,
   DISPUTE_RESOLVED: CheckCircle2,
 };
 
