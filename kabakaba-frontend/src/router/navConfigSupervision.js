@@ -30,7 +30,7 @@ export const navSections = [
         icon: Utensils,
         children: [
           { label: 'Performance vendeurs', path: '/supervision/cantines/performance' },
-          { label: 'Solde & créances', path: '/supervision/cantines/solde' },
+          { label: 'Solde des cantines', path: '/supervision/cantines/solde' },
         ],
       },
       {

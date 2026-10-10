@@ -13,20 +13,19 @@ export function getVendors(page = 1, limit = 100) {
 export function createVendor(vendor, canteen) {
   return apiFetch('/vendors', { method: 'POST', body: { vendor, canteen } });
 }
-// GET /vendors/admin/list — liste enrichie (propriétaire, créance, commandes
-// du jour, campus) pour le dashboard admin. filters: { search, campusId,
-// status: 'active'|'suspended', hasDebt: 'true' }
+// GET /vendors/admin/list — liste enrichie (propriétaire, commandes du jour,
+// campus) pour le dashboard admin. filters: { search, campusId,
+// status: 'active'|'suspended' }
 export function getVendorsForAdmin(page = 1, limit = 10, filters = {}) {
   const params = new URLSearchParams({ page, limit });
   if (filters.search) params.set('search', filters.search);
   if (filters.campusId) params.set('campusId', filters.campusId);
   if (filters.status) params.set('status', filters.status);
-  if (filters.hasDebt) params.set('hasDebt', filters.hasDebt);
   return apiFetch(`/vendors/admin/list?${params.toString()}`);
 }
 
 // GET /vendors/admin/:id — détail complet pour la fiche admin (contact
-// vendeur, créance, suspension, campus en entier). Différent de
+// vendeur, suspension, campus en entier). Différent de
 // GET /vendors/:id, qui est la route publique vitrine étudiante.
 export function getVendorForAdmin(id) {
   return apiFetch(`/vendors/admin/${id}`);

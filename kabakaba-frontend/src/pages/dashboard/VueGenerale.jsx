@@ -5,7 +5,7 @@ import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import LineChart from '../../components/LineChart';
 import { chartPeriodTitle, formatChartDate } from '../../utils/chartLabels';
-import { getCampusComparison, getRevenueBreakdown, getVendorPerformance } from '../../services/domain/analyticsService';
+import { getCampusComparison, getRevenueBreakdown } from '../../services/domain/analyticsService';
 import { getSupervisionStats } from '../../services/domain/adminStatsService';
 import { startOfDay, daysAgo } from '../../utils/dates';
 
@@ -34,7 +34,6 @@ export default function VueGenerale() {
   const [range, setRange] = useState({ from: daysAgo(6), to: startOfDay(new Date()) });
   const [campus, setCampus] = useState(null);
   const [revenue, setRevenue] = useState(null);
-  const [vendorPerf, setVendorPerf] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,15 +43,13 @@ export default function VueGenerale() {
       setLoading(true);
       setError(null);
       try {
-        const [campusData, revenueData, perfData, statsData] = await Promise.all([
+        const [campusData, revenueData, statsData] = await Promise.all([
           getCampusComparison(undefined, range),
           getRevenueBreakdown(undefined, range),
-          getVendorPerformance(undefined, range),
           getSupervisionStats(),
         ]);
         setCampus(campusData);
         setRevenue(revenueData);
-        setVendorPerf(perfData);
         setStats(statsData);
       } catch (err) {
         setError(err.message || 'Impossible de charger le tableau de bord.');
@@ -76,8 +73,6 @@ export default function VueGenerale() {
   const totalOrders = summary?.totalOrders ?? 0;
   const completedPct = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
   const otherPct = totalOrders > 0 ? 100 - completedPct : 0;
-
-  const acceptanceRate = vendorPerf?.summary?.avgAcceptanceRate ?? 0;
 
   const revenueBreakdown = [
     { label: 'Revenus Générés', value: revSummary?.surplus ?? 0 },
@@ -188,9 +183,6 @@ export default function VueGenerale() {
                 </div>
               ))}
             </div>
-            <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 12 }}>
-              Taux d&apos;acceptation vendeurs (décisions) : {loading ? '—' : `${acceptanceRate} %`}
-            </p>
           </div>
         </div>
       </PageContent>

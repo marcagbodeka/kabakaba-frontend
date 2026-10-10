@@ -11,11 +11,6 @@ export function getTransactionsStats() {
   return apiFetch('/transactions/stats');
 }
 
-// GET /transactions/debts — créances vendeur actives.
-export function getActiveDebts() {
-  return apiFetch('/transactions/debts');
-}
-
 // GET /transactions — liste paginée. filters: { type, status, vendorId, campusId }
 // range: { from: Date, to: Date } — optionnel, filtre par date de création.
 export function getTransactions(page = 1, limit = 10, filters = {}, range) {

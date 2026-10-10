@@ -1,28 +1,25 @@
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, TrendingUp, TrendingDown, Trophy, AlertTriangle, Search } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, TrendingDown, Trophy, Search } from 'lucide-react';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import DateRangePicker from '../../../components/DateRangePicker';
 import LineChart from '../../../components/LineChart';
 import { chartPeriodTitle, formatChartDate } from '../../../utils/chartLabels';
-import { getCampusComparison, getTopCanteens, getVendorPerformance, getVendorFinancials } from '../../../services/domain/analyticsService';
+import { getCampusComparison, getTopCanteens } from '../../../services/domain/analyticsService';
 import { getVendors } from '../../../services/domain/vendorsService';
 import { getNewPartnerApplications } from '../../../services/domain/applicationsService';
 import { countOrdersByStatus } from '../../../services/domain/ordersService';
 import { startOfDay, daysAgo } from '../../../utils/dates';
 import { CAPACITY_BADGE, CAPACITY_DOT, CAPACITY_LABEL, CAPACITY_RANK } from '../../../utils/vendorCapacity';
 
-const ACCEPTANCE_ALERT_THRESHOLD = 70;
-
-// Regroupement des statuts bruts de commande en 4 catégories affichées.
+// Regroupement des statuts bruts de commande en 3 catégories affichées.
 // Compteurs cumulés (l'API ne filtre pas encore ces totaux par date).
 const STATUS_GROUPS = {
-  'Complétées': ['RECEIVED', 'AUTO_RECEIVED'],
-  'En cours': ['PENDING', 'ACCEPTED', 'IN_PREPARATION', 'READY'],
-  'Annulées': ['CANCELLED_VENDOR', 'REFUNDED'],
-  'Refusées': ['REFUSED'],
+  'Complétées': ['RECEIVED'],
+  'En cours': ['CONFIRMED', 'IN_PREPARATION', 'READY'],
+  'Annulées': ['CANCELLED'],
 };
-const STATUS_COLOR = { 'Complétées': '#22C55E', 'En cours': '#F07840', 'Annulées': '#F59E0B', 'Refusées': '#EF4444' };
+const STATUS_COLOR = { 'Complétées': '#22C55E', 'En cours': '#F07840', 'Annulées': '#F59E0B' };
 
 function initialsOf(name) {
   return (name || '?')
@@ -31,10 +28,6 @@ function initialsOf(name) {
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase())
     .join('') || '?';
-}
-
-function formatFcfa(n) {
-  return `${Number(n || 0).toLocaleString('fr-FR')} FCFA`;
 }
 
 function timeAgo(dateStr) {
@@ -62,13 +55,13 @@ function TrendBadge({ value }) {
 export default function VueVendeurs() {
   const [search, setSearch] = useState('');
 
-  // Bloc temps réel : cantines, alertes, notifications — indépendant de la
+  // Bloc temps réel : cantines, notifications — indépendant de la
   // plage de dates choisie ci-dessous, toujours "maintenant".
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [live, setLive] = useState(null);
 
-  // Bloc analyse : classement, graphe, acceptation par campus — piloté par
+  // Bloc analyse : classement, graphe — piloté par
   // la plage de dates, même logique que /supervision.
   const [range, setRange] = useState({ from: daysAgo(6), to: startOfDay(new Date()) });
   const [rangeLoading, setRangeLoading] = useState(true);
@@ -83,18 +76,12 @@ export default function VueVendeurs() {
         const [
           vendorsRes,
           todayCanteens,
-          todayPerf,
-          weekPerf,
-          financials,
           campusComparison1d,
           newPartners,
           statusCounts,
         ] = await Promise.all([
           getVendors(1, 100),
           getTopCanteens(1, 5),
-          getVendorPerformance(1),
-          getVendorPerformance(7),
-          getVendorFinancials(),
           getCampusComparison(1),
           getNewPartnerApplications(),
           Promise.all(
@@ -107,9 +94,6 @@ export default function VueVendeurs() {
         setLive({
           vendors: vendorsRes.data || [],
           todayCanteens,
-          todayPerf,
-          weekPerf,
-          financials,
           campusComparison1d,
           newPartners: newPartners.data || [],
           statusCounts,
@@ -166,9 +150,6 @@ export default function VueVendeurs() {
   const {
     vendors,
     todayCanteens,
-    todayPerf,
-    weekPerf,
-    financials,
     campusComparison1d,
     newPartners,
     statusCounts,
@@ -191,22 +172,6 @@ export default function VueVendeurs() {
       const todayStats = todayCanteens.find((c) => c.id === v.id);
       return { name: v.canteenName, capacity: v.capacityStatus, orders: v.capacityStatus !== 'CLOSED' ? `${todayStats?.orders ?? 0} cmd` : 'Fermée' };
     });
-
-  const blockedVendors = financials.vendors.filter((v) => v.blocked);
-  const lowAcceptanceVendors = weekPerf.vendors.filter((v) => v.acceptanceRate < ACCEPTANCE_ALERT_THRESHOLD);
-
-  const alertes = [
-    ...blockedVendors.map((v) => ({
-      level: 'red',
-      title: `Créance active — ${v.name}`,
-      text: `${formatFcfa(v.debt)} · retrait bloqué`,
-    })),
-    ...lowAcceptanceVendors.map((v) => ({
-      level: 'amber',
-      title: `Taux d'acceptation bas — ${v.name}`,
-      text: `${v.acceptanceRate}% sur 7 jours · seuil d'alerte : ${ACCEPTANCE_ALERT_THRESHOLD}%`,
-    })),
-  ];
 
   const notifications = [
     ...newPartners.map((p) => ({
@@ -240,8 +205,6 @@ export default function VueVendeurs() {
         initials: initialsOf(c.name),
         campus: c.campusName,
         orders: c.orders,
-        acceptance: `${c.acceptanceRate}%`,
-        status: c.acceptanceRate >= ACCEPTANCE_ALERT_THRESHOLD ? 'green' : 'orange',
         capacityStatus: vendor?.capacityStatus ?? null,
       };
     });
@@ -282,18 +245,6 @@ export default function VueVendeurs() {
             </div>
             <div className="kpi-sub">vs 24h précédentes : {ordersYesterday}</div>
           </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Taux d&apos;acceptation moyen</div>
-            <div className="kpi-value orange">{todayPerf.summary.avgAcceptanceRate}%</div>
-            <div className="kpi-sub">vs {weekPerf.summary.avgAcceptanceRate}% sur 7 jours</div>
-          </div>
-          <div className={`kpi-card${financials.summary.totalDebt > 0 ? ' alert-card-red' : ''}`}>
-            <div className="kpi-label">Créances actives</div>
-            <div className="kpi-value" style={{ color: financials.summary.totalDebt > 0 ? '#DC2626' : 'inherit' }}>
-              {formatFcfa(financials.summary.totalDebt)}
-            </div>
-            <div className="kpi-sub">{financials.summary.blockedCount} vendeur(s) concerné(s) · retrait bloqué</div>
-          </div>
         </div>
 
         <div className="two-col">
@@ -310,14 +261,14 @@ export default function VueVendeurs() {
             <div className="table-scroll" style={{ marginTop: 16 }}>
               <table>
                 <thead>
-                  <tr><th>Rang</th><th>Cantine</th><th>Campus</th><th>Commandes</th><th>Acceptation</th><th>Statut</th></tr>
+                  <tr><th>Rang</th><th>Cantine</th><th>Campus</th><th>Commandes</th><th>Statut</th></tr>
                 </thead>
                 <tbody>
                   {rangeLoading && (
-                    <tr><td colSpan={6} style={{ color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>
+                    <tr><td colSpan={5} style={{ color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>
                   )}
                   {!rangeLoading && classement.length === 0 && (
-                    <tr><td colSpan={6} style={{ color: 'var(--muted)', padding: '24px 0' }}>Aucune commande sur cette période.</td></tr>
+                    <tr><td colSpan={5} style={{ color: 'var(--muted)', padding: '24px 0' }}>Aucune commande sur cette période.</td></tr>
                   )}
                   {!rangeLoading && classement.map((v) => (
                     <tr key={v.rank} className={v.rank === 1 ? 'rank1' : ''}>
@@ -334,9 +285,6 @@ export default function VueVendeurs() {
                       </td>
                       <td><span className="badge-blue">{v.campus}</span></td>
                       <td>{v.orders}</td>
-                      <td>
-                        <span className={v.status === 'green' ? 'badge-green' : 'badge-orange'}>{v.acceptance}</span>
-                      </td>
                       <td>
                         {v.capacityStatus === null ? '—' : (
                           <><span className={`status-dot ${CAPACITY_DOT[v.capacityStatus]}`} /> {CAPACITY_LABEL[v.capacityStatus]}</>
@@ -366,33 +314,6 @@ export default function VueVendeurs() {
                       </div>
                       <span className={CAPACITY_BADGE[c.capacity]}>{c.orders}</span>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="card alert-card-red" style={{ marginBottom: 0 }}>
-              <div className="alert-header">
-                <AlertTriangle size={17} color="#DC2626" />
-                <div className="card-title" style={{ color: '#DC2626', marginBottom: 0 }}>Alertes</div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {alertes.length === 0 && <div style={{ fontSize: 13, color: 'var(--muted)' }}>Aucune alerte active.</div>}
-                {alertes.map((a) => (
-                  <div
-                    key={a.title}
-                    style={{
-                      fontSize: 13,
-                      padding: '10px 12px',
-                      background: a.level === 'red' ? '#FEF2F2' : '#FFF7ED',
-                      borderRadius: 8,
-                      borderLeft: `3px solid ${a.level === 'red' ? '#EF4444' : '#F59E0B'}`,
-                    }}
-                  >
-                    <div style={{ fontWeight: 600, color: a.level === 'red' ? '#B91C1C' : '#92400E', marginBottom: 2 }}>
-                      {a.title}
-                    </div>
-                    <div style={{ color: '#64748B' }}>{a.text}</div>
                   </div>
                 ))}
               </div>
@@ -430,24 +351,6 @@ export default function VueVendeurs() {
                   </div>
                 );
               })}
-            </div>
-
-            <div style={{ marginTop: 24, paddingTop: 18, borderTop: '1px solid var(--border)' }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '.04em' }}>
-                Acceptation par campus — {dayLabels.length} jour{dayLabels.length > 1 ? 's' : ''}
-              </div>
-              {rangeLoading ? (
-                <p style={{ color: 'var(--muted)', fontSize: 13 }}>Chargement…</p>
-              ) : (
-                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  {campusRange.campuses.map((c) => (
-                    <div key={c.id} style={{ flex: '1 1 100px', background: '#F8FAFC', border: '1px solid var(--border)', borderRadius: 12, padding: 14, textAlign: 'center' }}>
-                      <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', marginBottom: 6 }}>{c.name}</div>
-                      <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--indigo)' }}>{c.acceptanceRate}%</div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>

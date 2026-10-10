@@ -24,17 +24,12 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function formatFcfa(n) {
-  return `${Number(n || 0).toLocaleString('fr-FR')} FCFA`;
-}
-
 export default function ListeCantines() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [campusFilter, setCampusFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all'); // all | active | suspended
-  const [debtFilter, setDebtFilter] = useState('all'); // all | true
   const [page, setPage] = useState(1);
 
   const [campuses, setCampuses] = useState([]);
@@ -52,7 +47,7 @@ export default function ListeCantines() {
     return () => clearTimeout(t);
   }, [search]);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch, campusFilter, statusFilter, debtFilter]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, campusFilter, statusFilter]);
 
   useEffect(() => {
     setLoading(true);
@@ -61,7 +56,6 @@ export default function ListeCantines() {
       search: debouncedSearch || undefined,
       campusId: campusFilter !== 'all' ? campusFilter : undefined,
       status: statusFilter !== 'all' ? statusFilter : undefined,
-      hasDebt: debtFilter === 'true' ? 'true' : undefined,
     })
       .then((res) => {
         setVendors(res.data);
@@ -69,7 +63,7 @@ export default function ListeCantines() {
       })
       .catch((err) => setError(err.message || 'Impossible de charger les cantines.'))
       .finally(() => setLoading(false));
-  }, [page, debouncedSearch, campusFilter, statusFilter, debtFilter]);
+  }, [page, debouncedSearch, campusFilter, statusFilter]);
 
   const campusCount = useMemo(() => new Set(campuses.map((c) => c.id)).size, [campuses]);
 
@@ -116,13 +110,6 @@ export default function ListeCantines() {
               <button className={`pill${statusFilter === 'suspended' ? ' active' : ''}`} onClick={() => setStatusFilter('suspended')}><span className="status-dot dot-orange" /> Suspendus</button>
             </div>
           </div>
-          <div className="filter-group">
-            <label className="filter-label">Créances</label>
-            <div className="tab-pills">
-              <button className={`pill${debtFilter === 'all' ? ' active' : ''}`} onClick={() => setDebtFilter('all')}>Toutes</button>
-              <button className={`pill${debtFilter === 'true' ? ' active' : ''}`} style={{ color: '#DC2626' }} onClick={() => setDebtFilter('true')}>Actives</button>
-            </div>
-          </div>
         </div>
 
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -131,18 +118,18 @@ export default function ListeCantines() {
               <thead>
                 <tr>
                   <th>Cantine</th><th>Campus</th><th>Vendeur</th><th>Statut compte</th>
-                  <th>Ouverture</th><th>Cmd aujourd&apos;hui</th><th>Créance</th><th>Actions</th>
+                  <th>Ouverture</th><th>Cmd aujourd&apos;hui</th><th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {!loading && !error && vendors.length === 0 && (
-                  <tr><td colSpan={8} style={{ color: 'var(--muted)', padding: '24px 0' }}>Aucune cantine ne correspond à ces filtres.</td></tr>
+                  <tr><td colSpan={7} style={{ color: 'var(--muted)', padding: '24px 0' }}>Aucune cantine ne correspond à ces filtres.</td></tr>
                 )}
                 {loading && (
-                  <tr><td colSpan={8} style={{ color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>
+                  <tr><td colSpan={7} style={{ color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>
                 )}
                 {error && (
-                  <tr><td colSpan={8} style={{ color: '#DC2626', padding: '24px 0' }}>{error}</td></tr>
+                  <tr><td colSpan={7} style={{ color: '#DC2626', padding: '24px 0' }}>{error}</td></tr>
                 )}
                 {!loading && !error && vendors.map((c, i) => (
                   <tr key={c.id} onClick={() => navigate(`/admin/cantines/${c.id}`)} style={{ cursor: 'pointer' }}>
@@ -164,16 +151,6 @@ export default function ListeCantines() {
                     </td>
                     <td><span className={CAPACITY_BADGE[c.capacityStatus]}>{CAPACITY_LABEL[c.capacityStatus]}</span></td>
                     <td style={{ fontWeight: 700, color: c.isActive ? 'var(--indigo)' : 'var(--muted)' }}>{c.todayOrders}</td>
-                    <td>
-                      {c.debtFcfa > 0 ? (
-                        <>
-                          <span style={{ color: '#DC2626', fontWeight: 700, fontSize: 13 }}>{formatFcfa(c.debtFcfa)}</span>
-                          <div style={{ fontSize: 11, color: '#EF4444' }}>Retrait bloqué</div>
-                        </>
-                      ) : (
-                        <span style={{ color: 'var(--muted)' }}>—</span>
-                      )}
-                    </td>
                     <td>
                       <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
                         <button className="icon-btn" title="Voir la fiche" onClick={() => navigate(`/admin/cantines/${c.id}`)}>

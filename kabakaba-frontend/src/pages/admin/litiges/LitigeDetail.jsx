@@ -5,6 +5,7 @@ import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import { getDispute, updateDispute } from '../../../services/domain/disputesService';
 import { useAuth } from '../../../context/AuthContext';
+import { ORDER_STATUS_LABEL } from '../../../utils/orderStatus';
 
 const STATUS_LABEL = { OPEN: 'Ouvert', IN_PROGRESS: 'En cours', RESOLVED: 'Traité' };
 // Classes de badge partagées (styles/dashboard.css), cohérentes avec la liste des litiges.
@@ -138,7 +139,7 @@ export default function LitigeDetail() {
           <div className="card">
             <div className="card-title">Commande #{order?.id.slice(0, 8).toUpperCase()}</div>
             <div style={{ fontSize: 14, color: '#475569' }}>
-              {order?.status} · {formatTickets(order?.totalTickets)} · {order?.consumptionMode === 'TAKEAWAY' ? 'À emporter' : 'Sur place'}
+              {ORDER_STATUS_LABEL[order?.status] ?? order?.status} · {formatTickets(order?.totalTickets)} · {order?.consumptionMode === 'TAKEAWAY' ? 'À emporter' : 'Sur place'}
             </div>
           </div>
 

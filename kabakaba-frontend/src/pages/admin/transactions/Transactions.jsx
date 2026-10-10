@@ -4,23 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import DateRangePicker from '../../../components/DateRangePicker';
-import { getTransactionsStats, getActiveDebts, getTransactions } from '../../../services/domain/transactionsService';
+import { getTransactionsStats, getTransactions } from '../../../services/domain/transactionsService';
 import { getOrders } from '../../../services/domain/ordersService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
 import { getVendors } from '../../../services/domain/vendorsService';
 import { startOfDay, daysAgo } from '../../../utils/dates';
+import { ORDER_STATUS_LABEL, PENDING_AMOUNT_STATUSES } from '../../../utils/orderStatus';
 
 const PAGE_SIZE = 10;
-// La libération d'escrow (crédit du vendeur) se produit dès READY, pas à
-// RECEIVED/AUTO_RECEIVED — voir orders.service.ts (backend). READY est donc
-// exclu d'ici : une commande prête n'est plus en séquestre.
-const ESCROWED_STATUSES = ['PENDING', 'ACCEPTED', 'IN_PREPARATION'];
 
 const TYPE_LABEL = {
-  DEPOSIT: 'Recharge', ESCROW_LOCK: 'Séquestre', ESCROW_RELEASE: 'Libération séquestre',
-  PAYMENT: 'Commande', REFUND: 'Remboursement', WITHDRAWAL: 'Retrait',
-  COMMISSION: 'Commission',
-  DEBT_RECOVERY: 'Recouvrement créance',
+  DEPOSIT: 'Recharge', PAYMENT: 'Commande', REFUND: 'Remboursement',
+  SALE: 'Vente créditée', WITHDRAWAL: 'Retrait',
 };
 // Classe de badge par type — cohérent avec les badges utilisés partout
 // ailleurs dans le dashboard (styles/dashboard.css), plus de styles inline
@@ -29,21 +24,17 @@ const TYPE_BADGE_CLASS = {
   REFUND: 'badge-red',
   WITHDRAWAL: 'badge-green',
   DEPOSIT: 'badge-peach',
-  ESCROW_LOCK: 'badge-amber',
-  ESCROW_RELEASE: 'badge-amber',
+  SALE: 'badge-amber',
   PAYMENT: 'badge-blue',
 };
-// Unité d'affichage par type : les mouvements d'argent (recharge, retrait,
-// commissions) sont en FCFA ; les mouvements liés aux commandes (séquestre,
-// débit, remboursement) sont en tickets, l'unité interne de l'app.
-const TICKET_TYPES = new Set(['ESCROW_LOCK', 'ESCROW_RELEASE', 'PAYMENT', 'REFUND']);
+// Unité d'affichage par type : les mouvements d'argent (recharge, retrait) et
+// les mouvements de la vendeuse (vente créditée) sont en FCFA ; les mouvements
+// liés aux commandes de l'étudiant (débit, remboursement) sont en tickets,
+// l'unité interne de l'app.
+const TICKET_TYPES = new Set(['PAYMENT', 'REFUND']);
 const COMPLETED_LABEL = {
   PAYMENT: 'Débité', DEPOSIT: 'Confirmé', REFUND: 'Effectué', WITHDRAWAL: 'Versé',
-  ESCROW_LOCK: 'Séquestré', ESCROW_RELEASE: 'Libéré', COMMISSION: 'Versé',
-  DEBT_RECOVERY: 'Recouvré',
-};
-const ORDER_STATUS_LABEL = {
-  PENDING: 'En attente vendeur', ACCEPTED: 'Acceptée', IN_PREPARATION: 'En préparation', READY: 'Prête',
+  SALE: 'Crédité',
 };
 
 function initialsOf(name) {
@@ -75,8 +66,8 @@ export default function Transactions() {
   const [vendors, setVendors] = useState([]);
 
   // Plage de dates — s'applique aux onglets basés sur un historique
-  // ("Toutes", "Remboursements"). Séquestres et Créances sont des positions
-  // ouvertes actuelles : la notion de période ne s'y applique pas.
+  // ("Toutes", "Remboursements"). Les montants en attente sont une position
+  // ouverte actuelle : la notion de période ne s'y applique pas.
   const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
 
   // Onglet "Toutes"
@@ -89,18 +80,14 @@ export default function Transactions() {
   const [transactions, setTransactions] = useState([]);
   const [txMeta, setTxMeta] = useState({ total: 0, totalPages: 1 });
 
-  // Onglet "Séquestres"
-  const [escrowLoading, setEscrowLoading] = useState(true);
-  const [escrowOrders, setEscrowOrders] = useState([]);
+  // Onglet "En attente"
+  const [pendingLoading, setPendingLoading] = useState(true);
+  const [pendingOrders, setPendingOrders] = useState([]);
 
   // Onglet "Remboursements"
   const [refundLoading, setRefundLoading] = useState(true);
   const [refundError, setRefundError] = useState(null);
   const [refundOrders, setRefundOrders] = useState([]);
-
-  // Onglet "Créances"
-  const [debtsLoading, setDebtsLoading] = useState(true);
-  const [debts, setDebts] = useState([]);
 
   useEffect(() => {
     getTransactionsStats().then(setStats).catch((err) => setStatsError(err.message));
@@ -125,30 +112,24 @@ export default function Transactions() {
   }, [tab, page, typeFilter, campusFilter, vendorFilter, range]);
 
   useEffect(() => {
-    if (tab !== 'seq') return;
-    setEscrowLoading(true);
-    getOrders(1, 50, { statuses: ESCROWED_STATUSES })
-      .then((res) => setEscrowOrders(res.data))
-      .finally(() => setEscrowLoading(false));
+    if (tab !== 'pending') return;
+    setPendingLoading(true);
+    getOrders(1, 50, { statuses: PENDING_AMOUNT_STATUSES })
+      .then((res) => setPendingOrders(res.data))
+      .finally(() => setPendingLoading(false));
   }, [tab]);
 
   useEffect(() => {
     if (tab !== 'remb') return;
     setRefundLoading(true);
     setRefundError(null);
-    getOrders(1, 50, { status: 'REFUNDED' }, range)
+    getOrders(1, 50, { status: 'CANCELLED' }, range)
       .then((res) => setRefundOrders(res.data))
       .catch((err) => setRefundError(err.message || 'Impossible de charger les remboursements.'))
       .finally(() => setRefundLoading(false));
   }, [tab, range]);
 
-  useEffect(() => {
-    if (tab !== 'creances') return;
-    setDebtsLoading(true);
-    getActiveDebts().then(setDebts).finally(() => setDebtsLoading(false));
-  }, [tab]);
-
-  const escrowTotal = useMemo(() => escrowOrders.reduce((s, o) => s + Number(o.escrowAmount), 0), [escrowOrders]);
+  const pendingTotal = useMemo(() => pendingOrders.reduce((s, o) => s + Number(o.totalTickets), 0), [pendingOrders]);
   const showDateFilter = tab === 'all' || tab === 'remb';
 
   return (
@@ -160,7 +141,7 @@ export default function Transactions() {
         <div className="page-header">
           <div className="eyebrow">Admin web · Transactions</div>
           <h1>Transactions</h1>
-          <p>Suivi en temps réel · Séquestres, débits, remboursements, créances</p>
+          <p>Suivi en temps réel · Montants en attente, débits, remboursements, ventes créditées</p>
         </div>
 
         {statsError && <div className="notice-banner notice-error" style={{ marginBottom: 12 }}>{statsError}</div>}
@@ -172,32 +153,27 @@ export default function Transactions() {
             <div className="kpi-sub">toutes catégories</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">En séquestre</div>
+            <div className="kpi-label">En attente</div>
+            {/* Le backend nomme encore ce champ `escrow` (transactions.service.ts, getStats) : il désigne les commandes CONFIRMED et IN_PREPARATION. */}
             <div className="kpi-value" style={{ color: 'var(--orange)' }}>{stats ? `${stats.escrow.total.toLocaleString('fr-FR')} tickets` : '…'}</div>
             <div className="kpi-sub">{stats ? `${stats.escrow.count} commande${stats.escrow.count === 1 ? '' : 's'} en cours` : '—'}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Débits complétés</div>
             <div className="kpi-value" style={{ color: '#22C55E' }}>{stats ? `${stats.debitsCompleted.toLocaleString('fr-FR')} tickets` : '…'}</div>
-            <div className="kpi-sub">commandes livrées</div>
+            <div className="kpi-sub">commandes prêtes ou récupérées</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Remboursements</div>
             <div className="kpi-value" style={{ color: '#DC2626' }}>{stats ? `${stats.refunds.total.toLocaleString('fr-FR')} tickets` : '…'}</div>
             <div className="kpi-sub">{stats ? `${stats.refunds.count} remboursement${stats.refunds.count === 1 ? '' : 's'}` : '—'}</div>
           </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Créances actives</div>
-            <div className="kpi-value" style={{ color: '#DC2626' }}>{stats ? `${stats.activeDebts.total.toLocaleString('fr-FR')} FCFA` : '…'}</div>
-            <div className="kpi-sub">{stats ? `${stats.activeDebts.vendorCount} vendeur${stats.activeDebts.vendorCount === 1 ? '' : 's'}` : '—'}</div>
-          </div>
         </div>
 
         <div className="tab-bar">
           <button className={`tab-btn ${tab === 'all' ? 'active' : ''}`} onClick={() => setTab('all')}>Toutes ({txMeta.total})</button>
-          <button className={`tab-btn ${tab === 'seq' ? 'active' : ''}`} onClick={() => setTab('seq')}>Séquestres {stats ? `(${stats.escrow.count})` : ''}</button>
+          <button className={`tab-btn ${tab === 'pending' ? 'active' : ''}`} onClick={() => setTab('pending')}>En attente {stats ? `(${stats.escrow.count})` : ''}</button>
           <button className={`tab-btn ${tab === 'remb' ? 'active' : ''}`} onClick={() => setTab('remb')}>Remboursements {stats ? `(${stats.refunds.count})` : ''}</button>
-          <button className={`tab-btn ${tab === 'creances' ? 'active' : ''}`} onClick={() => setTab('creances')}>Créances {stats ? `(${stats.activeDebts.vendorCount})` : ''}</button>
         </div>
 
         {tab === 'all' && (
@@ -210,6 +186,7 @@ export default function Transactions() {
                   <button className={`pill${typeFilter === 'DEPOSIT' ? ' active' : ''}`} onClick={() => setTypeFilter('DEPOSIT')}>Recharge</button>
                   <button className={`pill${typeFilter === 'PAYMENT' ? ' active' : ''}`} onClick={() => setTypeFilter('PAYMENT')}>Commande</button>
                   <button className={`pill${typeFilter === 'REFUND' ? ' active' : ''}`} onClick={() => setTypeFilter('REFUND')}>Remboursement</button>
+                  <button className={`pill${typeFilter === 'SALE' ? ' active' : ''}`} onClick={() => setTypeFilter('SALE')}>Vente créditée</button>
                   <button className={`pill${typeFilter === 'WITHDRAWAL' ? ' active' : ''}`} onClick={() => setTypeFilter('WITHDRAWAL')}>Retrait</button>
                 </div>
               </div>
@@ -282,14 +259,14 @@ export default function Transactions() {
           </>
         )}
 
-        {tab === 'seq' && (
+        {tab === 'pending' && (
           <div className="card">
-            <div className="card-title">Séquestres actifs</div>
-            <div className="card-sub">Tickets réservés pour des commandes en cours — non encore débités</div>
-            {escrowLoading && <p style={{ color: 'var(--muted)' }}>Chargement…</p>}
+            <div className="card-title">Montants en attente</div>
+            <div className="card-sub">Commandes confirmées ou en préparation — tickets débités à l&apos;étudiant, crédités à la cantine quand la commande est prête</div>
+            {pendingLoading && <p style={{ color: 'var(--muted)' }}>Chargement…</p>}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {!escrowLoading && escrowOrders.length === 0 && <p style={{ color: 'var(--muted)', fontSize: 14 }}>Aucune commande en séquestre actuellement.</p>}
-              {escrowOrders.map((o) => {
+              {!pendingLoading && pendingOrders.length === 0 && <p style={{ color: 'var(--muted)', fontSize: 14 }}>Aucune commande en attente actuellement.</p>}
+              {pendingOrders.map((o) => {
                 const studentName = `${o.student?.firstName ?? ''} ${o.student?.lastName ?? ''}`.trim() || '—';
                 return (
                   <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: '#FFF7ED', borderRadius: 10, border: '1px solid #FED7AA', flexWrap: 'wrap', gap: 8 }}>
@@ -305,9 +282,9 @@ export default function Transactions() {
                 );
               })}
             </div>
-            {!escrowLoading && (
+            {!pendingLoading && (
               <div style={{ marginTop: 14, padding: '12px 14px', background: '#F8FAFC', borderRadius: 10, fontSize: 14, color: '#475569' }}>
-                Total en séquestre : <strong style={{ color: 'var(--indigo)' }}>{escrowTotal.toLocaleString('fr-FR')} tickets</strong> · {escrowOrders.length} commande{escrowOrders.length === 1 ? '' : 's'} active{escrowOrders.length === 1 ? '' : 's'}
+                Total en attente : <strong style={{ color: 'var(--indigo)' }}>{pendingTotal.toLocaleString('fr-FR')} tickets</strong> · {pendingOrders.length} commande{pendingOrders.length === 1 ? '' : 's'} active{pendingOrders.length === 1 ? '' : 's'}
               </div>
             )}
           </div>
@@ -332,9 +309,9 @@ export default function Transactions() {
                         <td style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, color: 'var(--indigo)' }}>#{o.id.slice(0, 8)}</td>
                         <td>{studentName}</td>
                         <td>{o.vendor?.canteenName || '—'}</td>
-                        <td style={{ fontWeight: 700, color: '#DC2626' }}>{o.totalTickets} tickets</td>
-                        <td style={{ fontSize: 13, color: 'var(--muted)' }}>{formatDateTime(o.updatedAt)}</td>
-                        <td style={{ fontSize: 13, color: '#475569' }}>{o.reason || '—'}</td>
+                        <td style={{ fontWeight: 700, color: '#DC2626' }}>{o.refundedTickets} tickets</td>
+                        <td style={{ fontSize: 13, color: 'var(--muted)' }}>{formatDateTime(o.cancelledAt)}</td>
+                        <td style={{ fontSize: 13, color: '#475569' }}>{o.cancellationReason || '—'}</td>
                       </tr>
                     );
                   })}
@@ -342,43 +319,6 @@ export default function Transactions() {
               </table>
             </div>
             <div style={{ height: 20 }} />
-          </div>
-        )}
-
-        {tab === 'creances' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {debtsLoading && <div className="card"><p style={{ color: 'var(--muted)' }}>Chargement…</p></div>}
-            {!debtsLoading && debts.length === 0 && <div className="card"><p style={{ color: 'var(--muted)' }}>Aucune créance active.</p></div>}
-            {debts.map((d) => {
-              const pct = d.amount > 0 ? Math.round((d.recoveredAmount / d.amount) * 100) : 0;
-              return (
-                <div className="card" key={d.id}>
-                  <div className="card-title">Créance active</div>
-                  <div className="card-sub">Montant avancé par la plateforme en attente de récupération sur le solde vendeur</div>
-                  <div style={{ padding: 16, background: '#FEF2F2', borderRadius: 12, border: '1px solid #FCA5A5' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-                      <div>
-                        <div style={{ fontSize: 16, fontWeight: 700 }}>{d.canteenName}</div>
-                        <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{d.ownerName} · {d.campusName} · Créance ouverte le {formatDateTime(d.createdAt)}</div>
-                        <div style={{ fontSize: 13, color: '#DC2626', marginTop: 4, fontWeight: 500 }}>Retrait bloqué jusqu&apos;au remboursement intégral</div>
-                        {d.reason && <div style={{ fontSize: 12, color: '#64748B', marginTop: 4 }}>Motif : {d.reason}</div>}
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 28, fontWeight: 700, color: '#DC2626' }}>{d.remainingAmount.toLocaleString('fr-FR')} FCFA</div>
-                        <div style={{ fontSize: 12, color: 'var(--muted)' }}>Solde vendeur actuel : {d.vendorBalance.toLocaleString('fr-FR')} FCFA</div>
-                      </div>
-                    </div>
-                    <div style={{ marginTop: 14, height: 8, background: '#FEE2E2', borderRadius: 4, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pct}%`, background: '#DC2626', borderRadius: 4 }} />
-                    </div>
-                    <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 5 }}>Progression : {d.recoveredAmount.toLocaleString('fr-FR')} / {d.amount.toLocaleString('fr-FR')} FCFA récupérés ({pct}%)</div>
-                  </div>
-                  <div style={{ marginTop: 12, padding: '12px 14px', background: '#F8FAFC', borderRadius: 10, fontSize: 14, color: '#475569' }}>
-                    La créance sera récupérée automatiquement dès que le solde du vendeur l&apos;atteint, à chaque nouvelle commande.
-                  </div>
-                </div>
-              );
-            })}
           </div>
         )}
       </PageContent>

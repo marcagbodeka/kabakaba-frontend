@@ -22,10 +22,6 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function formatFcfa(n) {
-  return `${Number(n || 0).toLocaleString('fr-FR')} FCFA`;
-}
-
 export default function CantineFiche() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -271,7 +267,7 @@ export default function CantineFiche() {
                   </div>
                 </div>
               </div>
-              <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
                 <div style={{ padding: '14px 16px', background: '#F8FAFC', borderRadius: 10, border: '1px solid var(--border)' }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 8 }}>Statut du compte</div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
@@ -285,10 +281,6 @@ export default function CantineFiche() {
                   {!vendor.isActive && vendor.suspensionReason && (
                     <div style={{ fontSize: 12, color: '#B91C1C', marginTop: 8 }}>Motif : {vendor.suspensionReason}</div>
                   )}
-                </div>
-                <div style={{ padding: '14px 16px', background: vendor.debtFcfa > 0 ? '#FFF7ED' : '#F8FAFC', borderRadius: 10, border: vendor.debtFcfa > 0 ? '1px solid #FED7AA' : '1px solid var(--border)' }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: vendor.debtFcfa > 0 ? '#92400E' : 'var(--muted)', textTransform: 'uppercase', marginBottom: 6 }}>Créance active</div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: vendor.debtFcfa > 0 ? '#DC2626' : 'var(--muted)' }}>{formatFcfa(vendor.debtFcfa)}</div>
                 </div>
               </div>
             </div>

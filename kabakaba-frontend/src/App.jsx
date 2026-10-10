@@ -17,7 +17,7 @@ import { navSections as adminNav } from './router/navConfigAdmin';
 const VueGenerale = lazy(() => import('./pages/dashboard/VueGenerale'));
 const VolumeRevenus = lazy(() => import('./pages/campus/VolumeRevenus'));
 const PerformanceVendeurs = lazy(() => import('./pages/cantines/PerformanceVendeurs'));
-const SoldeCreances = lazy(() => import('./pages/cantines/SoldeCreances'));
+const SoldeCantines = lazy(() => import('./pages/cantines/SoldeCantines'));
 const ComportementEtudiants = lazy(() => import('./pages/etudiants/ComportementEtudiants'));
 const ComptesSuspendus = lazy(() => import('./pages/etudiants/ComptesSuspendus'));
 const HistoriqueSuspensions = lazy(() => import('./pages/etudiants/HistoriqueSuspensions'));
@@ -106,7 +106,7 @@ export default function App() {
           <Route path="/supervision/dashboard" element={<VueGenerale />} />
           <Route path="/supervision/campus/revenus" element={<VolumeRevenus />} />
           <Route path="/supervision/cantines/performance" element={<PerformanceVendeurs />} />
-          <Route path="/supervision/cantines/solde" element={<SoldeCreances />} />
+          <Route path="/supervision/cantines/solde" element={<SoldeCantines />} />
           <Route path="/supervision/etudiants" element={<ComportementEtudiants />} />
           <Route path="/supervision/etudiants/suspendus" element={<ComptesSuspendus />} />
           <Route path="/supervision/etudiants/historique" element={<HistoriqueSuspensions />} />

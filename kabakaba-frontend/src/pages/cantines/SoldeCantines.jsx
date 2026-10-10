@@ -10,7 +10,7 @@ function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
 }
 
-export default function SoldeCreances() {
+export default function SoldeCantines() {
   const [range, setRange] = useState({ from: daysAgo(29), to: startOfDay(new Date()) });
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,15 +37,15 @@ export default function SoldeCreances() {
     <>
       <Topbar
         icon={Wallet}
-        breadcrumb={[{ label: 'Par cantine', path: '/supervision/cantines/performance' }, { label: 'Solde & créances' }]}
+        breadcrumb={[{ label: 'Par cantine', path: '/supervision/cantines/performance' }, { label: 'Solde des cantines' }]}
       >
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>
       <PageContent>
         <div className="page-header">
       <div className="eyebrow">Supervision · Analyse cantines</div>
-          <h1>Solde & créances</h1>
-          <p>Solde actuel, créances actives et retraits par vendeur</p>
+          <h1>Solde des cantines</h1>
+          <p>Solde actuel et retraits par cantine</p>
         </div>
 
         {error && (
@@ -59,15 +59,6 @@ export default function SoldeCreances() {
             <div className="kpi-label">Solde total vendeurs</div>
             <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.totalBalance ?? 0)}</div>
           </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Créances actives</div>
-            <div className="kpi-value kpi-value-sm">{loading ? '—' : formatFcfa(summary?.totalDebt ?? 0)}</div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Vendeurs bloqués</div>
-            <div className="kpi-value">{loading ? '—' : summary?.blockedCount}</div>
-            <div className="kpi-sub">retrait suspendu (créance active)</div>
-          </div>
         </div>
 
         <div className="card">
@@ -75,29 +66,22 @@ export default function SoldeCreances() {
           <div className="table-scroll">
             <table>
               <thead>
-                <tr><th>Cantine</th><th>Campus</th><th>Solde</th><th>Créance</th><th>Retraits (période)</th><th>Statut</th></tr>
+                <tr><th>Cantine</th><th>Campus</th><th>Solde</th><th>Retraits (période)</th></tr>
               </thead>
               <tbody>
-                {loading && <tr><td colSpan={6}>Chargement...</td></tr>}
-                {!loading && vendors.length === 0 && <tr><td colSpan={6}>Aucun vendeur.</td></tr>}
+                {loading && <tr><td colSpan={4}>Chargement...</td></tr>}
+                {!loading && vendors.length === 0 && <tr><td colSpan={4}>Aucun vendeur.</td></tr>}
                 {!loading && vendors.map((v) => (
                   <tr key={v.id}>
                     <td><strong>{v.name}</strong></td>
                     <td>{v.campusName}</td>
                     <td>{formatFcfa(v.balance)}</td>
-                    <td>{formatFcfa(v.debt)}</td>
                     <td>{v.withdrawals30d}</td>
-                    <td>
-                      {v.blocked ? <span className="badge-red">Retrait bloqué</span> : <span className="badge-green">Disponible</span>}
-                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 12 }}>
-            Une créance active bloque le retrait tant qu&apos;elle n&apos;est pas régularisée.
-          </p>
         </div>
       </PageContent>
     </>
