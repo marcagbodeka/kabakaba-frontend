@@ -893,43 +893,6 @@ textarea.fg-input {
   box-shadow: 0 0 0 3px rgba(27, 42, 107, 0.1);
 }
 
-/* ── Cartes d'articles (catalogue cantine) ────────────── */
-.article-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  flex-wrap: wrap;
-}
-
-.article-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-
-.article-img-placeholder {
-  width: 52px;
-  height: 52px;
-  border-radius: 10px;
-  background: #f1f4fa;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.article-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
 /* ── Modale ───────────────────────────────────────────── */
 .modal-box {
   background: var(--surface);
@@ -938,26 +901,6 @@ textarea.fg-input {
   max-width: 440px;
   width: 100%;
   box-shadow: 0 20px 50px rgba(13, 20, 56, 0.2);
-}
-
-/* ── Pastille radio (sélecteur de type d'article) ─────── */
-.decision-radio {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid var(--border-strong);
-  flex-shrink: 0;
-  margin-top: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.decision-radio-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--indigo);
 }
 
 /* ── Cartes de demande expansibles ────────────────────── */
@@ -1015,72 +958,6 @@ textarea.fg-input {
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
   gap: 10px;
-}
-
-/* ── Type d'article (sélecteur) ────────────────────────── */
-.type-card {
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.type-card:hover {
-  background: #f8fafc;
-}
-
-.type-card.selected {
-  border-color: var(--indigo);
-  background: #f5f7fd;
-}
-
-/* ── Grille composants (article personnalisable) ──────── */
-.comp-grid {
-  display: grid;
-  grid-template-columns: 1.6fr 1.2fr 0.7fr 0.7fr 0.8fr 40px;
-  gap: 10px;
-  align-items: center;
-}
-
-.comp-header {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--muted-light);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin-bottom: 8px;
-}
-
-.comp-row {
-  display: grid;
-  grid-template-columns: 1.6fr 1.2fr 0.7fr 0.7fr 0.8fr 40px;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.comp-input {
-  height: 36px;
-  font-size: 13px;
-}
-
-.comp-unit {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 11px;
-  color: var(--indigo);
-  font-weight: 600;
-  pointer-events: none;
-}
-
-@media (max-width: 760px) {
-  .comp-grid,
-  .comp-row {
-    grid-template-columns: 1fr;
-  }
 }
 
 .modal-overlay {

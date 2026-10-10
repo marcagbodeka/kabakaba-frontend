@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Utensils, Plus, Pencil, X, Building2 } from 'lucide-react';
+import { Utensils, X, Building2 } from 'lucide-react';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import { getVendorForAdmin, updateVendor } from '../../../services/domain/vendorsService';
-import { getMenuItemsByVendor, getMenuComponents } from '../../../services/domain/catalogService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
 import { CAPACITY_LABEL } from '../../../utils/vendorCapacity';
 
@@ -39,13 +38,10 @@ export default function CantineFiche() {
   const [suspending, setSuspending] = useState(false);
   const [suspendError, setSuspendError] = useState(null);
 
-  const [menuItems, setMenuItems] = useState([]);
-
   const [allCampuses, setAllCampuses] = useState([]);
   const [campusToAdd, setCampusToAdd] = useState('');
   const [campusBusy, setCampusBusy] = useState(false);
   const [campusError, setCampusError] = useState(null);
-  const [minPriceByItemId, setMinPriceByItemId] = useState({});
 
   function loadVendor() {
     return getVendorForAdmin(id).then((v) => {
@@ -59,7 +55,6 @@ export default function CantineFiche() {
     setError(null);
     Promise.all([
       loadVendor(),
-      getMenuItemsByVendor(id).then((res) => setMenuItems(res.data)),
       findAllCampuses().then(setAllCampuses),
     ])
       .catch((err) => setError(err.message || 'Impossible de charger cette cantine.'))
@@ -67,31 +62,6 @@ export default function CantineFiche() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const menuTypeCount = useMemo(() => new Set(menuItems.map((m) => m.type)).size, [menuItems]);
-
-  // Pour un article "Personnalisable", le prix stocké sur l'article lui-même
-  // (souvent 0) ne reflète pas ce que l'étudiant paiera au minimum : c'est
-  // la somme de sa base + de ses composants obligatoires (minQty > 0,
-  // chacun compté minQty × son prix unitaire) qui donne le vrai plancher
-  // "dès X tickets" annoncé. On la calcule une fois les articles chargés.
-  useEffect(() => {
-    const customizable = menuItems.filter((m) => m.type === 'CUSTOMIZABLE');
-    if (customizable.length === 0) return;
-    let cancelled = false;
-    Promise.all(
-      customizable.map((item) =>
-        getMenuComponents(item.id).then((res) => {
-          const mandatoryTotal = res.data
-            .filter((c) => c.minQty > 0)
-            .reduce((sum, c) => sum + c.minQty * c.unitPriceTickets, 0);
-          return [item.id, item.priceTickets + mandatoryTotal];
-        }),
-      ),
-    ).then((pairs) => {
-      if (!cancelled) setMinPriceByItemId(Object.fromEntries(pairs));
-    });
-    return () => { cancelled = true; };
-  }, [menuItems]);
   const availableCampusesToAdd = useMemo(() => {
     const affiliatedIds = new Set((vendor?.campuses ?? []).map((c) => c.id));
     return allCampuses.filter((c) => !affiliatedIds.has(c.id));
@@ -223,7 +193,6 @@ export default function CantineFiche() {
 
         <div className="tab-bar">
           <button className={`tab-btn ${tab === 'infos' ? 'active' : ''}`} onClick={() => setTab('infos')}>Infos & accès</button>
-          <button className={`tab-btn ${tab === 'catalogue' ? 'active' : ''}`} onClick={() => setTab('catalogue')}>Catalogue & menus</button>
           <button className={`tab-btn ${tab === 'campus' ? 'active' : ''}`} onClick={() => setTab('campus')}>Campus couverts</button>
         </div>
 
@@ -285,48 +254,6 @@ export default function CantineFiche() {
               </div>
             </div>
           </div>
-        )}
-
-        {tab === 'catalogue' && (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '4px 0 18px', flexWrap: 'wrap', gap: 10 }}>
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 700 }}>Articles disponibles</div>
-                <div style={{ fontSize: 14, color: 'var(--muted)' }}>{menuItems.length} article{menuItems.length === 1 ? '' : 's'} configuré{menuItems.length === 1 ? '' : 's'} · {menuTypeCount} type{menuTypeCount === 1 ? '' : 's'}</div>
-              </div>
-              <button className="btn-primary-sm" onClick={() => navigate(`/admin/cantines/${id}/articles/nouveau`)}><Plus size={14} /> Ajouter un article</button>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {menuItems.length === 0 && (
-                <div className="card" style={{ textAlign: 'center', color: 'var(--muted)', padding: '32px 0' }}>Aucun article configuré pour le moment.</div>
-              )}
-              {menuItems.map((a) => (
-                <div className="article-card" key={a.id} style={a.isAvailable ? undefined : { opacity: 0.65 }}>
-                  <div className="article-left">
-                    <div className="article-img-placeholder">
-                      <Utensils size={20} color="#94A3B8" />
-                    </div>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <span style={{ fontSize: 15, fontWeight: 600 }}>{a.name}</span>
-                        <span className={a.type === 'FIXED' ? 'badge-blue' : 'badge-peach'} style={{ fontSize: 11 }}>{a.type === 'FIXED' ? 'Fixe' : 'Personnalisable'}</span>
-                      </div>
-                      {a.description && <div style={{ fontSize: 13, color: 'var(--muted)' }}>{a.description}</div>}
-                    </div>
-                  </div>
-                  <div className="article-right">
-                    <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--indigo)' }}>
-                      {a.type === 'CUSTOMIZABLE'
-                        ? `dès ${minPriceByItemId[a.id] ?? '…'} tickets`
-                        : `${a.priceTickets} tickets`}
-                    </span>
-                    <span className={a.isAvailable ? 'badge-green' : 'badge-gray'}>{a.isAvailable ? 'Disponible' : 'Indisponible'}</span>
-                    <button className="icon-btn" title="Modifier" onClick={() => navigate(`/admin/cantines/${id}/articles/${a.id}`)}><Pencil size={15} /></button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
         )}
 
         {tab === 'campus' && (
