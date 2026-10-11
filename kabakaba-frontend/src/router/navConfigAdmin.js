@@ -37,8 +37,7 @@ export const navSections = [
       {
         label: 'Étudiants',
         icon: Users,
-        // Le chemin /admin/litiges/suspensions est conservé tel quel (consigne de l'étape).
-        children: [{ label: 'Comptes suspendus', path: '/admin/litiges/suspensions' }],
+        children: [{ label: 'Comptes suspendus', path: '/admin/etudiants/suspensions' }],
       },
       {
         label: 'Partenaires',

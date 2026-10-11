@@ -4,7 +4,6 @@ import { AlertTriangle } from 'lucide-react';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import { getReport, updateReport } from '../../../services/domain/reportsService';
-import { useAuth } from '../../../context/AuthContext';
 import { ORDER_STATUS_LABEL } from '../../../utils/orderStatus';
 import { REPORT_TYPE_LABEL, REPORT_STATUS_LABEL, REPORT_STATUS_BADGE } from '../../../utils/reportLabels';
 
@@ -26,7 +25,6 @@ function timeAgo(iso) {
 export default function SignalementDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { user: currentAdmin } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,10 +45,7 @@ export default function SignalementDetail() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const updated = await updateReport(id, {
-        status,
-        ...(currentAdmin?.id ? { treatedByWebUserId: currentAdmin.id } : {}),
-      });
+      const updated = await updateReport(id, { status });
       setReport((prev) => ({ ...prev, ...updated }));
     } catch (err) {
       setSubmitError(err.message || 'Échec de la mise à jour.');
@@ -136,6 +131,19 @@ export default function SignalementDetail() {
             <div style={{ fontSize: 14, color: '#475569' }}>
               {ORDER_STATUS_LABEL[order?.status] ?? order?.status} · {formatTickets(order?.totalTickets)} · {order?.consumptionMode === 'TAKEAWAY' ? 'À emporter' : 'Sur place'}
             </div>
+            {order?.items?.length > 0 && (
+              <ul style={{ listStyle: 'none', margin: '12px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {order.items.map((item) => (
+                  <li
+                    key={item.id}
+                    style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '8px 12px', background: '#F8FAFC', borderRadius: 8, border: '1px solid var(--border)', fontSize: 14 }}
+                  >
+                    <span>{item.name}</span>
+                    <span style={{ fontWeight: 600 }}>× {item.quantity}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {report.status !== 'RESOLVED' && (

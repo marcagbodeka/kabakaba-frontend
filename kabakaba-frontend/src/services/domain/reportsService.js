@@ -23,12 +23,13 @@ export function getReports(page = 1, limit = 10, filters = {}, range) {
   return apiFetch(`/reports?${params.toString()}`);
 }
 
-// GET /reports/:id — signalement avec étudiant, cantine et résumé de la commande.
+// GET /reports/:id — signalement avec étudiant, cantine et commande (avec ses lignes : nom, quantité,
+// prix unitaire, kind = MENU ou COMPONENT).
 export function getReport(id) {
   return apiFetch(`/reports/${id}`);
 }
 
-// PATCH /reports/:id — { status, treatedByWebUserId }
+// PATCH /reports/:id — { status } ; l'administrateur qui traite est déduit du jeton par le serveur.
 export function updateReport(id, patch) {
   return apiFetch(`/reports/${id}`, { method: 'PATCH', body: patch });
 }

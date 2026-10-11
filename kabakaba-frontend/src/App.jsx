@@ -154,7 +154,7 @@ export default function App() {
           <Route path="/admin/cantines/:id" element={<CantineFiche />} />
           <Route path="/admin/signalements" element={<FileSignalements />} />
           <Route path="/admin/signalements/:id" element={<SignalementDetail />} />
-          <Route path="/admin/litiges/suspensions" element={<ComptesSuspendusAdmin />} />
+          <Route path="/admin/etudiants/suspensions" element={<ComptesSuspendusAdmin />} />
           <Route path="/admin/partenaires" element={<Candidatures />} />
           <Route path="/admin/transactions" element={<Transactions />} />
           <Route path="/admin/transactions/:ref" element={<TransactionDetail />} />
