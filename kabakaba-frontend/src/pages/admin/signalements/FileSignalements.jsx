@@ -34,6 +34,10 @@ function timeAgo(iso) {
   const days = Math.floor(hours / 24);
   return days === 1 ? 'Hier' : `Il y a ${days}j`;
 }
+function formatDateTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
 function formatDelay(minutes) {
   if (minutes == null) return '—';
   const h = Math.floor(minutes / 60);
@@ -182,7 +186,10 @@ export default function FileSignalements() {
                       <td>{l.student?.campus?.name ? <span className="badge-blue">{l.student.campus.name}</span> : <span style={{ color: 'var(--muted)' }}>—</span>}</td>
                       <td style={{ fontWeight: 500 }}>{REPORT_TYPE_LABEL[l.type] ?? l.type}</td>
                       <td style={{ maxWidth: 220, minWidth: 160, whiteSpace: 'normal', wordBreak: 'break-word', fontSize: 13, color: '#475569', lineHeight: 1.4 }}>{l.comment || '—'}</td>
-                      <td style={{ fontWeight: 600 }}>{l.order?.orderNumber || '—'}</td>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>{l.order?.orderNumber || '—'}</div>
+                        <div style={{ fontSize: 12, color: 'var(--muted)', whiteSpace: 'nowrap' }}>Passée le {formatDateTime(l.order?.createdAt)}</div>
+                      </td>
                       <td>
                         <span className={REPORT_STATUS_BADGE[l.status]}>{REPORT_STATUS_LABEL[l.status]}</span>
                       </td>

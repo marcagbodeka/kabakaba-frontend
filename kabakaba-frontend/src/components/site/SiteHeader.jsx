@@ -4,12 +4,11 @@ import { handleAnchorClick } from '../../utils/scrollTo';
 import ComingSoonModal from './ComingSoonModal';
 
 // Ordre conforme à celui des sections dans la page (Home.jsx) :
-// Pourquoi kabakaba → Devenir vendeur → Nos technologies → Ambassadeur → Nos campus.
+// Pourquoi kabakaba → Devenir vendeur → Nos technologies → Nos campus.
 const NAV = [
   { label: 'Pourquoi kabakaba', id: 'pourquoi' },
   { label: 'Devenir vendeur', id: 'partenaire' },
   { label: 'Nos technologies', id: 'technologies' },
-  { label: 'Ambassadeur', id: 'ambassadeur' },
   { label: 'Nos campus', id: 'campus' },
 ];
 

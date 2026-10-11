@@ -4,7 +4,7 @@
 
 /* Compense le header sticky : les ancres internes (#pourquoi, #campus…)
    ne doivent pas passer sous la barre de navigation au scroll. */
-#pourquoi, #partenaire, #technologies, #ambassadeur, #campus { scroll-margin-top: 84px; }
+#pourquoi, #partenaire, #technologies, #campus { scroll-margin-top: 84px; }
 
 /* ── Header ───────────────────────────────────────────────── */
 .site-header {
@@ -405,7 +405,6 @@
 
 .section-head h2,
 .why-card h3,
-.amb-poster h2,
 .partner-text h2 {
   font-weight: 800;
   color: var(--indigo-dark);
@@ -561,89 +560,6 @@
 .feat-card h4 { font-size: 15px; font-weight: 800; color: var(--indigo-dark); margin: 0 0 7px; }
 .feat-card p { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0; }
 
-/* ── Ambassadeur ──────────────────────────────────────────── */
-.amb-section {
-  background: linear-gradient(135deg, var(--indigo), var(--indigo-dark) 70%);
-  border-radius: 20px;
-  padding: 56px 40px;
-  position: relative;
-  overflow: hidden;
-}
-
-.amb-section::after {
-  content: "";
-  position: absolute;
-  width: 340px; height: 340px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(240, 120, 64, 0.25), transparent 70%);
-  right: -100px; top: -100px;
-}
-
-.amb-poster {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.amb-eyebrow {
-  position: relative;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.75);
-  margin-bottom: 18px;
-}
-
-.amb-brand { color: #fff; font-weight: 800; }
-.amb-brand span { color: var(--orange); }
-
-.amb-poster h2 {
-  position: relative;
-  color: #fff;
-  font-size: clamp(28px, 4.5vw, 40px);
-  font-weight: 800;
-  margin: 0 0 4px;
-  line-height: 1.15;
-}
-
-.amb-highlight-wrap { position: relative; display: inline-block; margin: 4px 0 24px; }
-
-.amb-highlight {
-  position: relative;
-  display: inline-block;
-  background: var(--orange);
-  color: var(--indigo-dark);
-  font-size: clamp(26px, 5vw, 40px);
-  font-weight: 800;
-  padding: 4px 16px;
-  border-radius: 6px;
-  transform: rotate(-1deg);
-}
-
-.amb-poster-desc {
-  position: relative;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 15.5px;
-  line-height: 1.6;
-  max-width: 460px;
-  margin: 0 0 4px;
-}
-
-.amb-underline { color: var(--orange); font-weight: 700; border-bottom: 2px solid var(--orange); }
-
-.amb-channels {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-  flex-wrap: wrap;
-  margin: 30px 0 34px;
-}
-
-.amb-channels span { color: rgba(255, 255, 255, 0.32); font-size: 17px; font-weight: 800; }
-
 /* ── Devenir vendeur ──────────────────────────────────────── */
 .partner-block { background: var(--indigo-soft, #eef0fa); border-radius: 20px; padding: 48px; display: flex; gap: 48px; align-items: flex-start; flex-wrap: wrap; }
 .partner-text { flex: 1 1 300px; min-width: 0; padding-top: 4px; }
@@ -704,7 +620,7 @@
 /* ── Nos campus ───────────────────────────────────────────── */
 .campus-logo-img { height: 52px; width: auto; object-fit: contain; }
 
-/* ── Modal « disponible uniquement sur l'app » ────────────── */
+/* ── Modal « Bientôt disponible » ─────────────────────────── */
 .site-modal-overlay {
   position: fixed;
   inset: 0;
@@ -751,8 +667,6 @@
 
 .site-modal h3 { font-size: 19px; font-weight: 800; color: var(--indigo-dark); margin: 0 0 10px; }
 .site-modal p { font-size: 14px; color: var(--muted); line-height: 1.6; margin: 0 0 22px; }
-
-.site-modal-badges { justify-content: center; }
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 960px) {

@@ -3,10 +3,8 @@ import { X } from 'lucide-react';
 /**
  * Popup affichée quand on clique sur un bouton de téléchargement de l'app
  * (Google Play, App Store, "Télécharger l'app") alors que l'app n'est pas
- * encore publiée sur les stores. Même pattern visuel que AppOnlyModal
- * (site-modal-overlay / site-modal), mais sans les StoreBadges à l'intérieur
- * pour éviter une boucle (le bouton qui ouvre le popup ne doit pas se
- * retrouver dans le popup lui-même).
+ * encore publiée sur les stores. Pas de StoreBadges à l'intérieur : le bouton
+ * qui ouvre le popup ne doit pas se retrouver dans le popup lui-même.
  * Ferme au clic sur le fond, sur la croix, ou sur Échap.
  */
 export default function ComingSoonModal({ open, onClose }) {

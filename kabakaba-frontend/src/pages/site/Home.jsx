@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { ShieldCheck, Bell, Ticket } from 'lucide-react';
 import SiteHeader from '../../components/site/SiteHeader';
 import SiteFooter from '../../components/site/SiteFooter';
@@ -6,7 +5,6 @@ import StoreBadges from '../../components/site/StoreBadges';
 import PhoneShot from '../../components/site/PhoneShot';
 import PartnerForm from '../../components/site/PartnerForm';
 import TechPartners from '../../components/site/TechPartners';
-import AppOnlyModal from '../../components/site/AppOnlyModal';
 import CampusSection from '../../components/site/CampusSection';
 import '../../styles/site.css';
 
@@ -18,8 +16,6 @@ const FEATURES = [
 
 
 export default function Home() {
-  const [showAmbassadorModal, setShowAmbassadorModal] = useState(false);
-
   return (
     <div id="top">
       <SiteHeader />
@@ -155,41 +151,9 @@ export default function Home() {
         <TechPartners />
       </section>
 
-      {/* ── Ambassadeur ──────────────────────────────────────── */}
-      <section id="ambassadeur" className="site-section">
-        <div className="amb-section amb-poster">
-          <div className="amb-eyebrow">
-            Rejoins la communauté <span className="amb-brand">kaba<span>kaba</span></span>
-          </div>
-          <h2>Gagne jusqu&apos;à</h2>
-          <div className="amb-highlight-wrap">
-            <span className="amb-highlight">10 000 FCFA / semaine</span>
-          </div>
-          <p className="amb-poster-desc">
-            Gagne <span className="amb-underline">de l&apos;argent</span> en partageant ton code avec tes amis.
-          </p>
-          <p className="amb-poster-desc">Sois récompensé via&nbsp;:</p>
-          <div className="amb-channels">
-            <span>Moov Flooz</span>
-            <span>Mixx by Yas</span>
-            <span>Portefeuille kabakaba</span>
-          </div>
-          <button type="button" className="btn-accent" onClick={() => setShowAmbassadorModal(true)}>
-            Devenir ambassadeur
-          </button>
-        </div>
-      </section>
-
       <CampusSection />
 
       <SiteFooter />
-
-      <AppOnlyModal
-        open={showAmbassadorModal}
-        onClose={() => setShowAmbassadorModal(false)}
-        title="Disponible uniquement sur l'app"
-        text="Le programme ambassadeur s'active directement dans l'application kabakaba. Télécharge-la pour générer ton code et commencer à gagner des commissions."
-      />
     </div>
   );
 }

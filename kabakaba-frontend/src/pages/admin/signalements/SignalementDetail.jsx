@@ -131,6 +131,7 @@ export default function SignalementDetail() {
             <div style={{ fontSize: 14, color: '#475569' }}>
               {ORDER_STATUS_LABEL[order?.status] ?? order?.status} · {formatTickets(order?.totalTickets)} · {order?.consumptionMode === 'TAKEAWAY' ? 'À emporter' : 'Sur place'}
             </div>
+            <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>Passée le {formatDateTime(order?.createdAt)}</div>
             {order?.items?.length > 0 && (
               <ul style={{ listStyle: 'none', margin: '12px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {order.items.map((item) => (

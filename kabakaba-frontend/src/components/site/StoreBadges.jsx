@@ -1,6 +1,6 @@
 /**
- * Badges de téléchargement Google Play / App Store, réutilisés dans le hero,
- * le pied de page et la modale ambassadeur. Icônes en SVG inline (poids
+ * Badges de téléchargement Google Play / App Store, réutilisés dans le hero
+ * et le pied de page. Icônes en SVG inline (poids
  * négligeable, pas de requête réseau supplémentaire).
  *
  * L'app n'étant pas encore publiée sur les stores, les badges ouvrent un

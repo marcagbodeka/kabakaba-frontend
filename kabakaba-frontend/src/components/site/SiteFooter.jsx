@@ -29,7 +29,6 @@ export default function SiteFooter() {
             <a href="#pourquoi" onClick={handleAnchorClick('pourquoi')}>Pourquoi kabakaba</a>
             <a href="#partenaire" onClick={handleAnchorClick('partenaire')}>Devenir vendeur</a>
             <a href="#technologies" onClick={handleAnchorClick('technologies')}>Nos technologies</a>
-            <a href="#ambassadeur" onClick={handleAnchorClick('ambassadeur')}>Programme ambassadeur</a>
             <a href="#campus" onClick={handleAnchorClick('campus')}>Nos campus</a>
           </div>
 

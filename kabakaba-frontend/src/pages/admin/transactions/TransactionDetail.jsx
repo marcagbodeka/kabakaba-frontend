@@ -78,7 +78,7 @@ export default function TransactionDetail() {
     { label: 'Montant', value: formatAmount(t.amount, t.type), big: true },
     { label: 'Statut', badge: statusBadgeClass, value: statusLabel },
     { label: 'Horodatage', value: formatDateTime(t.createdAt) },
-    ...(t.relatedOrder ? [{ label: 'Commande liée', value: `#${t.relatedOrder.id.slice(0, 8).toUpperCase()}`, mono: true }] : []),
+    ...(t.relatedOrder ? [{ label: 'Commande liée', value: t.relatedOrder.orderNumber, mono: true }] : []),
     ...(t.relatedPayment ? [{ label: 'Opérateur', badge: 'badge-gray', value: t.relatedPayment.operator }] : []),
     ...(t.user?.campus?.name ? [{ label: 'Campus', badge: 'badge-blue', value: t.user.campus.name }] : []),
     ...(t.description ? [{ label: 'Description', value: t.description }] : []),
