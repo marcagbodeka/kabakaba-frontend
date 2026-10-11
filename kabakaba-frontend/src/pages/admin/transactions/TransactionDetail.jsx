@@ -152,16 +152,6 @@ export default function TransactionDetail() {
               </div>
             </div>
 
-            <div className="card" style={{ background: '#F8FAFC' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 10 }}>
-                Actions disponibles
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <button className="btn-secondary-sm" style={{ justifyContent: 'center', opacity: 0.6, cursor: 'not-allowed' }} disabled title="Pas encore disponible : aucun formulaire de création de litige n'existe dans le dashboard admin">
-                  Ouvrir un litige sur cette transaction
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </PageContent>

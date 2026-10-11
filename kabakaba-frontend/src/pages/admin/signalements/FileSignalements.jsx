@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, ShieldAlert } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
 import DateRangePicker from '../../../components/DateRangePicker';
-import { getDisputesStats, getDisputes } from '../../../services/domain/disputesService';
+import { getReportsStats, getReports } from '../../../services/domain/reportsService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
 import { startOfDay, daysAgo } from '../../../utils/dates';
+import { REPORT_TYPE_LABEL } from '../../../utils/reportType';
 
 const PAGE_SIZE = 10;
 
@@ -27,9 +28,6 @@ const ACTION_LABEL = { OPEN: 'Traiter →', IN_PROGRESS: 'Continuer →', RESOLV
 function initialsOf(name) {
   return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?';
 }
-function formatAmount(n) {
-  return n != null ? `${Number(n).toLocaleString('fr-FR')} tickets` : '—';
-}
 function timeAgo(iso) {
   const hours = Math.floor((Date.now() - new Date(iso).getTime()) / 3600000);
   if (hours < 1) return "À l'instant";
@@ -43,7 +41,7 @@ function formatDelay(minutes) {
   const m = minutes % 60;
   return h > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${m} min`;
 }
-export default function FileLitiges() {
+export default function FileSignalements() {
   const navigate = useNavigate();
 
   const [stats, setStats] = useState(null);
@@ -51,17 +49,17 @@ export default function FileLitiges() {
 
   const [statusFilter, setStatusFilter] = useState('all');
   const [campusFilter, setCampusFilter] = useState('all');
-  // undefined = pas de filtre période (tous les litiges, quelle que soit la date)
+  // undefined = pas de filtre période (tous les signalements, quelle que soit la date)
   const [range, setRange] = useState(undefined);
   const [page, setPage] = useState(1);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [litiges, setLitiges] = useState([]);
+  const [reports, setReports] = useState([]);
   const [meta, setMeta] = useState({ total: 0, totalPages: 1 });
 
   useEffect(() => {
-    getDisputesStats().then(setStats).catch(() => setStats(null));
+    getReportsStats().then(setStats).catch(() => setStats(null));
     findAllCampuses().then(setCampuses).catch(() => setCampuses([]));
   }, []);
 
@@ -70,18 +68,18 @@ export default function FileLitiges() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    getDisputes(page, PAGE_SIZE, {
+    getReports(page, PAGE_SIZE, {
       status: statusFilter !== 'all' ? statusFilter : undefined,
       campusId: campusFilter !== 'all' ? campusFilter : undefined,
     }, range)
-      .then((res) => { setLitiges(res.data); setMeta(res.meta); })
-      .catch((err) => setError(err.message || 'Impossible de charger les litiges.'))
+      .then((res) => { setReports(res.data); setMeta(res.meta); })
+      .catch((err) => setError(err.message || 'Impossible de charger les signalements.'))
       .finally(() => setLoading(false));
   }, [page, statusFilter, campusFilter, range]);
 
   return (
     <>
-      <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Gestion' }, { label: 'Litiges' }]}>
+      <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Gestion' }, { label: 'Signalements' }]}>
         <DateRangePicker
           value={range ?? { from: daysAgo(29), to: startOfDay(new Date()) }}
           onChange={setRange}
@@ -93,15 +91,12 @@ export default function FileLitiges() {
       <PageContent>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div className="page-header" style={{ marginBottom: 0 }}>
-            <div className="eyebrow">Admin web · Litiges</div>
-            <h1>Litiges</h1>
+            <div className="eyebrow">Admin web · Signalements</div>
+            <h1>Signalements</h1>
             <p>
-              {stats ? `${stats.open} litige${stats.open === 1 ? '' : 's'} ouvert${stats.open === 1 ? '' : 's'} · ${stats.inProgress} en cours de traitement · ${stats.resolvedThisMonth} traité${stats.resolvedThisMonth === 1 ? '' : 's'} ce mois` : '…'}
+              {stats ? `${stats.open} signalement${stats.open === 1 ? '' : 's'} ouvert${stats.open === 1 ? '' : 's'} · ${stats.inProgress} en cours de traitement · ${stats.resolvedThisMonth} traité${stats.resolvedThisMonth === 1 ? '' : 's'} ce mois` : '…'}
             </p>
           </div>
-          <button className="btn-secondary-sm" onClick={() => navigate('/admin/litiges/suspensions')}>
-            <ShieldAlert size={15} /> Comptes suspendus
-          </button>
         </div>
 
         <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
@@ -150,23 +145,23 @@ export default function FileLitiges() {
             <table>
               <thead>
                 <tr>
-                  <th>Ref. litige</th><th>Étudiant</th><th>Cantine</th><th>Campus</th>
-                  <th>Motif</th><th>Montant</th><th>Statut</th><th>Signalé le</th><th>Action</th>
+                  <th>Réf.</th><th>Étudiant</th><th>Cantine</th><th>Campus</th>
+                  <th>Type</th><th>Commentaire</th><th>Statut</th><th>Signalé le</th><th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {loading && <tr><td colSpan={9} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
                 {error && <tr><td colSpan={9} style={{ padding: '24px 0', color: '#DC2626' }}>{error}</td></tr>}
-                {!loading && !error && litiges.length === 0 && (
-                  <tr><td colSpan={9} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun litige ne correspond à ces filtres.</td></tr>
+                {!loading && !error && reports.length === 0 && (
+                  <tr><td colSpan={9} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun signalement ne correspond à ces filtres.</td></tr>
                 )}
-                {!loading && !error && litiges.map((l) => {
+                {!loading && !error && reports.map((l) => {
                   const studentName = `${l.student?.firstName ?? ''} ${l.student?.lastName ?? ''}`.trim() || '—';
                   const shortRef = l.id.slice(0, 8).toUpperCase();
                   return (
                     <tr
                       key={l.id}
-                      onClick={() => navigate(`/admin/litiges/${l.id}`)}
+                      onClick={() => navigate(`/admin/signalements/${l.id}`)}
                       style={{ cursor: 'pointer', borderLeft: `3px solid ${URGENCY_COLOR[l.status]}` }}
                     >
                       <td style={{ fontWeight: 700, color: 'var(--indigo)' }}>#{shortRef}</td>
@@ -176,10 +171,8 @@ export default function FileLitiges() {
                       </td>
                       <td style={{ fontWeight: 500 }}>{l.vendor?.canteenName || '—'}</td>
                       <td>{l.student?.campus?.name ? <span className="badge-blue">{l.student.campus.name}</span> : <span style={{ color: 'var(--muted)' }}>—</span>}</td>
-                      <td style={{ maxWidth: 220, minWidth: 160, whiteSpace: 'normal', wordBreak: 'break-word', fontSize: 13, color: '#475569', lineHeight: 1.4 }}>{l.reason}</td>
-                      <td style={{ fontWeight: l.status === 'RESOLVED' ? 500 : 700, color: l.status === 'RESOLVED' ? 'var(--muted)' : '#DC2626' }}>
-                        {formatAmount(l.ticketAmount)}
-                      </td>
+                      <td style={{ fontWeight: 500 }}>{REPORT_TYPE_LABEL[l.type] || l.type}</td>
+                      <td style={{ maxWidth: 220, minWidth: 160, whiteSpace: 'normal', wordBreak: 'break-word', fontSize: 13, color: '#475569', lineHeight: 1.4 }}>{l.comment || '—'}</td>
                       <td>
                         <span className={STATUS_BADGE_CLASS[l.status]}>{STATUS_LABEL[l.status]}</span>
                       </td>
@@ -188,7 +181,7 @@ export default function FileLitiges() {
                         <button
                           className="action-btn"
                           style={l.status === 'RESOLVED' ? { color: 'var(--muted)', borderColor: 'var(--border)' } : undefined}
-                          onClick={(e) => { e.stopPropagation(); navigate(`/admin/litiges/${l.id}`); }}
+                          onClick={(e) => { e.stopPropagation(); navigate(`/admin/signalements/${l.id}`); }}
                         >
                           {ACTION_LABEL[l.status]}
                         </button>
@@ -200,7 +193,7 @@ export default function FileLitiges() {
             </table>
           </div>
           <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, color: 'var(--muted)' }}>
-            <span>Affichage {meta.total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, meta.total)} sur {meta.total} litige{meta.total === 1 ? '' : 's'}</span>
+            <span>Affichage {meta.total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, meta.total)} sur {meta.total} signalement{meta.total === 1 ? '' : 's'}</span>
             <div style={{ display: 'flex', gap: 6 }}>
               <button className="icon-btn" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>←</button>
               {Array.from({ length: Math.min(meta.totalPages, 7) }, (_, i) => i + 1).map((n) => (

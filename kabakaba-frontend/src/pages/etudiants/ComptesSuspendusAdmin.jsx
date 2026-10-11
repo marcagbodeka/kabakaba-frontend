@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { ShieldAlert, X } from 'lucide-react';
-import Topbar from '../../../components/Topbar';
-import PageContent from '../../../components/PageContent';
-import { findSuspensionEvents } from '../../../services/domain/suspensionsService';
-import { updateUser } from '../../../services/domain/usersService';
+import Topbar from '../../components/Topbar';
+import PageContent from '../../components/PageContent';
+import { findSuspensionEvents } from '../../services/domain/suspensionsService';
+import { updateUser } from '../../services/domain/usersService';
 
 function initialsOf(first, last) {
   return `${(first || '?')[0]}${(last || '?')[0]}`.toUpperCase();
@@ -84,10 +84,10 @@ export default function ComptesSuspendus() {
 
   return (
     <>
-      <Topbar icon={ShieldAlert} breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }, { label: 'Comptes suspendus' }]} />
+      <Topbar icon={ShieldAlert} breadcrumb={[{ label: 'Étudiants' }, { label: 'Comptes suspendus' }]} />
       <PageContent>
         <div className="page-header">
-      <div className="eyebrow">Admin web · Litiges</div>
+      <div className="eyebrow">Admin web · Étudiants</div>
           <h1>Comptes suspendus</h1>
           <p>Étudiants bloqués pour comportement abusif — {rows.length} actif{rows.length === 1 ? '' : 's'}</p>
         </div>

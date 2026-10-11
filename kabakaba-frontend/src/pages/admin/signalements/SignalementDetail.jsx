@@ -3,12 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
-import { getDispute, updateDispute } from '../../../services/domain/disputesService';
+import { getReport, updateReport } from '../../../services/domain/reportsService';
 import { useAuth } from '../../../context/AuthContext';
 import { ORDER_STATUS_LABEL } from '../../../utils/orderStatus';
+import { REPORT_TYPE_LABEL } from '../../../utils/reportType';
 
 const STATUS_LABEL = { OPEN: 'Ouvert', IN_PROGRESS: 'En cours', RESOLVED: 'Traité' };
-// Classes de badge partagées (styles/dashboard.css), cohérentes avec la liste des litiges.
+// Classes de badge partagées (styles/dashboard.css), cohérentes avec la liste des signalements.
 const STATUS_BADGE_CLASS = { OPEN: 'badge-red', IN_PROGRESS: 'badge-orange', RESOLVED: 'badge-green' };
 
 function initialsOf(name) {
@@ -26,23 +27,23 @@ function timeAgo(iso) {
   return `il y a ${Math.floor(hours / 24)}j`;
 }
 
-export default function LitigeDetail() {
+export default function SignalementDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user: currentAdmin } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [dispute, setDispute] = useState(null);
+  const [report, setReport] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    getDispute(id)
-      .then(setDispute)
-      .catch((err) => setError(err.message || 'Litige introuvable.'))
+    getReport(id)
+      .then(setReport)
+      .catch((err) => setError(err.message || 'Signalement introuvable.'))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -50,11 +51,11 @@ export default function LitigeDetail() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const updated = await updateDispute(id, {
+      const updated = await updateReport(id, {
         status,
         ...(currentAdmin?.id ? { treatedByWebUserId: currentAdmin.id } : {}),
       });
-      setDispute((prev) => ({ ...prev, ...updated }));
+      setReport((prev) => ({ ...prev, ...updated }));
     } catch (err) {
       setSubmitError(err.message || 'Échec de la mise à jour.');
     } finally {
@@ -65,51 +66,51 @@ export default function LitigeDetail() {
   if (loading) {
     return (
       <>
-        <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }]} />
+        <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Signalements', path: '/admin/signalements' }]} />
         <PageContent><p>Chargement…</p></PageContent>
       </>
     );
   }
 
-  if (error || !dispute) {
+  if (error || !report) {
     return (
       <>
-        <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }]} />
-        <PageContent><p style={{ color: '#DC2626' }}>{error || 'Litige introuvable.'}</p></PageContent>
+        <Topbar icon={AlertTriangle} breadcrumb={[{ label: 'Signalements', path: '/admin/signalements' }]} />
+        <PageContent><p style={{ color: '#DC2626' }}>{error || 'Signalement introuvable.'}</p></PageContent>
       </>
     );
   }
 
-  const { student, vendor, order } = dispute;
+  const { student, vendor, order } = report;
   const studentName = `${student?.firstName ?? ''} ${student?.lastName ?? ''}`.trim();
-  const shortRef = dispute.id.slice(0, 8).toUpperCase();
+  const shortRef = report.id.slice(0, 8).toUpperCase();
 
   return (
     <>
       <Topbar
         icon={AlertTriangle}
-        breadcrumb={[{ label: 'Litiges', path: '/admin/litiges' }, { label: `#${shortRef}` }]}
-        badge={{ text: STATUS_LABEL[dispute.status], tone: dispute.status === 'OPEN' ? 'red' : 'default' }}
+        breadcrumb={[{ label: 'Signalements', path: '/admin/signalements' }, { label: `#${shortRef}` }]}
+        badge={{ text: STATUS_LABEL[report.status], tone: report.status === 'OPEN' ? 'red' : 'default' }}
       >
-        <button className="btn-secondary-sm" onClick={() => navigate('/admin/litiges')}>← Retour</button>
+        <button className="btn-secondary-sm" onClick={() => navigate('/admin/signalements')}>← Retour</button>
       </Topbar>
       <PageContent>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-          <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-.02em' }}>Litige #{shortRef}</h1>
-          <span className={STATUS_BADGE_CLASS[dispute.status]}>{STATUS_LABEL[dispute.status]}</span>
-          <span style={{ fontSize: 14, color: 'var(--muted)' }}>Signalé {timeAgo(dispute.createdAt)}{vendor ? ` · ${vendor.canteenName}` : ''}</span>
+          <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-.02em' }}>Signalement #{shortRef}</h1>
+          <span className={STATUS_BADGE_CLASS[report.status]}>{STATUS_LABEL[report.status]}</span>
+          <span style={{ fontSize: 14, color: 'var(--muted)' }}>Signalé {timeAgo(report.createdAt)}{vendor ? ` · ${vendor.canteenName}` : ''}</span>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="card">
-            <div className="card-title">Signalement</div>
-            <div style={{ fontSize: 14, color: '#475569', lineHeight: 1.6 }}>{dispute.reason}</div>
-            {dispute.ticketAmount != null && (
-              <div style={{ fontSize: 13, marginTop: 8 }}>Montant concerné : <strong>{formatTickets(dispute.ticketAmount)}</strong></div>
+            <div className="card-title">Problème signalé</div>
+            <div style={{ fontSize: 15, fontWeight: 600 }}>{REPORT_TYPE_LABEL[report.type] || report.type}</div>
+            {report.comment && (
+              <div style={{ fontSize: 14, color: '#475569', lineHeight: 1.6, marginTop: 6 }}>{report.comment}</div>
             )}
             <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>
-              Signalé le {formatDateTime(dispute.createdAt)}
-              {dispute.resolvedAt ? ` · traité le ${formatDateTime(dispute.resolvedAt)}` : ''}
+              Signalé le {formatDateTime(report.createdAt)}
+              {report.resolvedAt ? ` · traité le ${formatDateTime(report.resolvedAt)}` : ''}
             </div>
           </div>
 
@@ -137,18 +138,18 @@ export default function LitigeDetail() {
           </div>
 
           <div className="card">
-            <div className="card-title">Commande #{order?.id.slice(0, 8).toUpperCase()}</div>
+            <div className="card-title">Commande {order?.orderNumber ?? '—'}</div>
             <div style={{ fontSize: 14, color: '#475569' }}>
               {ORDER_STATUS_LABEL[order?.status] ?? order?.status} · {formatTickets(order?.totalTickets)} · {order?.consumptionMode === 'TAKEAWAY' ? 'À emporter' : 'Sur place'}
             </div>
           </div>
 
-          {dispute.status !== 'RESOLVED' && (
+          {report.status !== 'RESOLVED' && (
             <div className="card">
               <div className="card-title">Traitement</div>
               {submitError && <p style={{ color: '#DC2626', fontSize: 13, marginBottom: 8 }}>{submitError}</p>}
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                {dispute.status === 'OPEN' && (
+                {report.status === 'OPEN' && (
                   <button className="btn-secondary-sm" disabled={submitting} onClick={() => handleStatus('IN_PROGRESS')}>
                     Prendre en charge
                   </button>

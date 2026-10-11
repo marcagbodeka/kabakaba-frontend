@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Utensils,
+  Users,
   AlertTriangle,
   UserPlus,
   Monitor,
@@ -29,12 +30,14 @@ export const navSections = [
         ],
       },
       {
-        label: 'Litiges',
+        label: 'Signalements',
         icon: AlertTriangle,
-        children: [
-          { label: 'File des litiges', path: '/admin/litiges' },
-          { label: 'Comptes suspendus', path: '/admin/litiges/suspensions' },
-        ],
+        children: [{ label: 'File des signalements', path: '/admin/signalements' }],
+      },
+      {
+        label: 'Étudiants',
+        icon: Users,
+        children: [{ label: 'Comptes suspendus', path: '/admin/litiges/suspensions' }],
       },
       {
         label: 'Partenaires',

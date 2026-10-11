@@ -33,9 +33,9 @@ const ListeCantines = lazy(() => import('./pages/admin/cantines/ListeCantines'))
 const CantineFiche = lazy(() => import('./pages/admin/cantines/CantineFiche'));
 const CreerCantine = lazy(() => import('./pages/admin/cantines/CreerCantine'));
 const CampusFacultes = lazy(() => import('./pages/admin/cantines/CampusFacultes'));
-const FileLitiges = lazy(() => import('./pages/admin/litiges/FileLitiges'));
-const LitigeDetail = lazy(() => import('./pages/admin/litiges/LitigeDetail'));
-const ComptesSuspendusAdmin = lazy(() => import('./pages/admin/litiges/ComptesSuspendus'));
+const FileSignalements = lazy(() => import('./pages/admin/signalements/FileSignalements'));
+const SignalementDetail = lazy(() => import('./pages/admin/signalements/SignalementDetail'));
+const ComptesSuspendusAdmin = lazy(() => import('./pages/etudiants/ComptesSuspendusAdmin'));
 const Candidatures = lazy(() => import('./pages/admin/partenaires/Candidatures'));
 const Transactions = lazy(() => import('./pages/admin/transactions/Transactions'));
 const TransactionDetail = lazy(() => import('./pages/admin/transactions/TransactionDetail'));
@@ -152,9 +152,9 @@ export default function App() {
           <Route path="/admin/cantines/creer" element={<CreerCantine />} />
           <Route path="/admin/cantines/campus" element={<CampusFacultes />} />
           <Route path="/admin/cantines/:id" element={<CantineFiche />} />
-          <Route path="/admin/litiges" element={<FileLitiges />} />
+          <Route path="/admin/signalements" element={<FileSignalements />} />
           <Route path="/admin/litiges/suspensions" element={<ComptesSuspendusAdmin />} />
-          <Route path="/admin/litiges/:id" element={<LitigeDetail />} />
+          <Route path="/admin/signalements/:id" element={<SignalementDetail />} />
           <Route path="/admin/partenaires" element={<Candidatures />} />
           <Route path="/admin/transactions" element={<Transactions />} />
           <Route path="/admin/transactions/:ref" element={<TransactionDetail />} />

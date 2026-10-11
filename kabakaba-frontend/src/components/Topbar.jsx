@@ -18,7 +18,7 @@ const EVENT_ICON_BY_TYPE = {
   NEW_VENDOR: Utensils,
   BAD_REVIEW: Star,
   SUSPENSION: ShieldAlert,
-  DISPUTE_RESOLVED: CheckCircle2,
+  REPORT_RESOLVED: CheckCircle2,
 };
 
 function formatRelativeTime(isoDate) {
