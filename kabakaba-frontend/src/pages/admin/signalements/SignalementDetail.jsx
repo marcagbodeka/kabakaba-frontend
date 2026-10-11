@@ -6,11 +6,7 @@ import PageContent from '../../../components/PageContent';
 import { getReport, updateReport } from '../../../services/domain/reportsService';
 import { useAuth } from '../../../context/AuthContext';
 import { ORDER_STATUS_LABEL } from '../../../utils/orderStatus';
-import { REPORT_TYPE_LABEL } from '../../../utils/reportType';
-
-const STATUS_LABEL = { OPEN: 'Ouvert', IN_PROGRESS: 'En cours', RESOLVED: 'Traité' };
-// Classes de badge partagées (styles/dashboard.css), cohérentes avec la liste des signalements.
-const STATUS_BADGE_CLASS = { OPEN: 'badge-red', IN_PROGRESS: 'badge-orange', RESOLVED: 'badge-green' };
+import { REPORT_TYPE_LABEL, REPORT_STATUS_LABEL, REPORT_STATUS_BADGE } from '../../../utils/reportLabels';
 
 function initialsOf(name) {
   return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?';
@@ -90,24 +86,22 @@ export default function SignalementDetail() {
       <Topbar
         icon={AlertTriangle}
         breadcrumb={[{ label: 'Signalements', path: '/admin/signalements' }, { label: `#${shortRef}` }]}
-        badge={{ text: STATUS_LABEL[report.status], tone: report.status === 'OPEN' ? 'red' : 'default' }}
+        badge={{ text: REPORT_STATUS_LABEL[report.status], tone: report.status === 'OPEN' ? 'red' : 'default' }}
       >
         <button className="btn-secondary-sm" onClick={() => navigate('/admin/signalements')}>← Retour</button>
       </Topbar>
       <PageContent>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
           <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-.02em' }}>Signalement #{shortRef}</h1>
-          <span className={STATUS_BADGE_CLASS[report.status]}>{STATUS_LABEL[report.status]}</span>
+          <span className={REPORT_STATUS_BADGE[report.status]}>{REPORT_STATUS_LABEL[report.status]}</span>
           <span style={{ fontSize: 14, color: 'var(--muted)' }}>Signalé {timeAgo(report.createdAt)}{vendor ? ` · ${vendor.canteenName}` : ''}</span>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="card">
             <div className="card-title">Problème signalé</div>
-            <div style={{ fontSize: 15, fontWeight: 600 }}>{REPORT_TYPE_LABEL[report.type] || report.type}</div>
-            {report.comment && (
-              <div style={{ fontSize: 14, color: '#475569', lineHeight: 1.6, marginTop: 6 }}>{report.comment}</div>
-            )}
+            <div style={{ fontSize: 15, fontWeight: 600 }}>{REPORT_TYPE_LABEL[report.type] ?? report.type}</div>
+            <div style={{ fontSize: 14, color: '#475569', lineHeight: 1.6, marginTop: 6 }}>{report.comment || 'Aucun commentaire.'}</div>
             <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>
               Signalé le {formatDateTime(report.createdAt)}
               {report.resolvedAt ? ` · traité le ${formatDateTime(report.resolvedAt)}` : ''}
@@ -138,7 +132,7 @@ export default function SignalementDetail() {
           </div>
 
           <div className="card">
-            <div className="card-title">Commande {order?.orderNumber ?? '—'}</div>
+            <div className="card-title">Commande {order?.orderNumber ?? `#${order?.id.slice(0, 8).toUpperCase()}`}</div>
             <div style={{ fontSize: 14, color: '#475569' }}>
               {ORDER_STATUS_LABEL[order?.status] ?? order?.status} · {formatTickets(order?.totalTickets)} · {order?.consumptionMode === 'TAKEAWAY' ? 'À emporter' : 'Sur place'}
             </div>

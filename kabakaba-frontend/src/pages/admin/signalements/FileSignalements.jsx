@@ -7,7 +7,7 @@ import DateRangePicker from '../../../components/DateRangePicker';
 import { getReportsStats, getReports } from '../../../services/domain/reportsService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
 import { startOfDay, daysAgo } from '../../../utils/dates';
-import { REPORT_TYPE_LABEL } from '../../../utils/reportType';
+import { REPORT_TYPE_LABEL, REPORT_STATUS_LABEL, REPORT_STATUS_BADGE } from '../../../utils/reportLabels';
 
 const PAGE_SIZE = 10;
 
@@ -17,11 +17,10 @@ const STATUS_PILLS = [
   { key: 'IN_PROGRESS', label: 'En cours' },
   { key: 'RESOLVED', label: 'Traités' },
 ];
-const STATUS_LABEL = { OPEN: 'Ouvert', IN_PROGRESS: 'En cours', RESOLVED: 'Traité' };
-// Classes de badge partagées (styles/dashboard.css) — remplace les styles
-// inline ad hoc qui n'avaient ni le point de statut ni le même padding que
-// badge-green (colonne "Statut" désalignée selon la ligne).
-const STATUS_BADGE_CLASS = { OPEN: 'badge-red', IN_PROGRESS: 'badge-orange', RESOLVED: 'badge-green' };
+const TYPE_PILLS = [
+  { key: 'all', label: 'Tous' },
+  ...Object.entries(REPORT_TYPE_LABEL).map(([key, label]) => ({ key, label })),
+];
 const URGENCY_COLOR = { OPEN: '#EF4444', IN_PROGRESS: 'var(--orange)', RESOLVED: '#22C55E' };
 const ACTION_LABEL = { OPEN: 'Traiter →', IN_PROGRESS: 'Continuer →', RESOLVED: 'Voir →' };
 
@@ -48,6 +47,7 @@ export default function FileSignalements() {
   const [campuses, setCampuses] = useState([]);
 
   const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [campusFilter, setCampusFilter] = useState('all');
   // undefined = pas de filtre période (tous les signalements, quelle que soit la date)
   const [range, setRange] = useState(undefined);
@@ -63,19 +63,20 @@ export default function FileSignalements() {
     findAllCampuses().then(setCampuses).catch(() => setCampuses([]));
   }, []);
 
-  useEffect(() => { setPage(1); }, [statusFilter, campusFilter, range]);
+  useEffect(() => { setPage(1); }, [statusFilter, typeFilter, campusFilter, range]);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
     getReports(page, PAGE_SIZE, {
       status: statusFilter !== 'all' ? statusFilter : undefined,
+      type: typeFilter !== 'all' ? typeFilter : undefined,
       campusId: campusFilter !== 'all' ? campusFilter : undefined,
     }, range)
       .then((res) => { setReports(res.data); setMeta(res.meta); })
       .catch((err) => setError(err.message || 'Impossible de charger les signalements.'))
       .finally(() => setLoading(false));
-  }, [page, statusFilter, campusFilter, range]);
+  }, [page, statusFilter, typeFilter, campusFilter, range]);
 
   return (
     <>
@@ -132,6 +133,14 @@ export default function FileSignalements() {
             </div>
           </div>
           <div className="filter-group">
+            <label className="filter-label">Type</label>
+            <div className="tab-pills">
+              {TYPE_PILLS.map((p) => (
+                <button key={p.key} className={`pill${typeFilter === p.key ? ' active' : ''}`} onClick={() => setTypeFilter(p.key)}>{p.label}</button>
+              ))}
+            </div>
+          </div>
+          <div className="filter-group">
             <label className="filter-label">Campus</label>
             <select className="filter-select" value={campusFilter} onChange={(e) => setCampusFilter(e.target.value)}>
               <option value="all">Tous les campus</option>
@@ -145,15 +154,15 @@ export default function FileSignalements() {
             <table>
               <thead>
                 <tr>
-                  <th>Réf.</th><th>Étudiant</th><th>Cantine</th><th>Campus</th>
-                  <th>Type</th><th>Commentaire</th><th>Statut</th><th>Signalé le</th><th>Action</th>
+                  <th>Ref. signalement</th><th>Étudiant</th><th>Cantine</th><th>Campus</th>
+                  <th>Type</th><th>Commentaire</th><th>Commande</th><th>Statut</th><th>Signalé le</th><th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {loading && <tr><td colSpan={9} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
-                {error && <tr><td colSpan={9} style={{ padding: '24px 0', color: '#DC2626' }}>{error}</td></tr>}
+                {loading && <tr><td colSpan={10} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
+                {error && <tr><td colSpan={10} style={{ padding: '24px 0', color: '#DC2626' }}>{error}</td></tr>}
                 {!loading && !error && reports.length === 0 && (
-                  <tr><td colSpan={9} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun signalement ne correspond à ces filtres.</td></tr>
+                  <tr><td colSpan={10} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun signalement ne correspond à ces filtres.</td></tr>
                 )}
                 {!loading && !error && reports.map((l) => {
                   const studentName = `${l.student?.firstName ?? ''} ${l.student?.lastName ?? ''}`.trim() || '—';
@@ -171,10 +180,11 @@ export default function FileSignalements() {
                       </td>
                       <td style={{ fontWeight: 500 }}>{l.vendor?.canteenName || '—'}</td>
                       <td>{l.student?.campus?.name ? <span className="badge-blue">{l.student.campus.name}</span> : <span style={{ color: 'var(--muted)' }}>—</span>}</td>
-                      <td style={{ fontWeight: 500 }}>{REPORT_TYPE_LABEL[l.type] || l.type}</td>
+                      <td style={{ fontWeight: 500 }}>{REPORT_TYPE_LABEL[l.type] ?? l.type}</td>
                       <td style={{ maxWidth: 220, minWidth: 160, whiteSpace: 'normal', wordBreak: 'break-word', fontSize: 13, color: '#475569', lineHeight: 1.4 }}>{l.comment || '—'}</td>
+                      <td style={{ fontWeight: 600 }}>{l.order?.orderNumber || '—'}</td>
                       <td>
-                        <span className={STATUS_BADGE_CLASS[l.status]}>{STATUS_LABEL[l.status]}</span>
+                        <span className={REPORT_STATUS_BADGE[l.status]}>{REPORT_STATUS_LABEL[l.status]}</span>
                       </td>
                       <td style={{ fontSize: 13, color: 'var(--muted)' }}>{timeAgo(l.createdAt)}</td>
                       <td>

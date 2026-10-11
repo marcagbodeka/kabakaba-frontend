@@ -151,7 +151,6 @@ export default function TransactionDetail() {
                 )}
               </div>
             </div>
-
           </div>
         </div>
       </PageContent>

@@ -23,7 +23,7 @@ export function getReports(page = 1, limit = 10, filters = {}, range) {
   return apiFetch(`/reports?${params.toString()}`);
 }
 
-// GET /reports/:id — signalement avec parties et résumé de la commande.
+// GET /reports/:id — signalement avec étudiant, cantine et résumé de la commande.
 export function getReport(id) {
   return apiFetch(`/reports/${id}`);
 }

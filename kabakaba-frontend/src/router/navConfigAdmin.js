@@ -1,8 +1,8 @@
 import {
   LayoutDashboard,
   Utensils,
-  Users,
   AlertTriangle,
+  Users,
   UserPlus,
   Monitor,
   Banknote,
@@ -37,6 +37,7 @@ export const navSections = [
       {
         label: 'Étudiants',
         icon: Users,
+        // Le chemin /admin/litiges/suspensions est conservé tel quel (consigne de l'étape).
         children: [{ label: 'Comptes suspendus', path: '/admin/litiges/suspensions' }],
       },
       {

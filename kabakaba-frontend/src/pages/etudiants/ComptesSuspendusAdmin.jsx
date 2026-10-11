@@ -22,7 +22,7 @@ function remainingLabel(untilIso) {
   return { label: `${hours}h restantes`, tone: 'var(--muted)' };
 }
 
-export default function ComptesSuspendus() {
+export default function ComptesSuspendusAdmin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rows, setRows] = useState([]);
