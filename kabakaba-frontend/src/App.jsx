@@ -18,6 +18,7 @@ const VueGenerale = lazy(() => import('./pages/dashboard/VueGenerale'));
 const VolumeRevenus = lazy(() => import('./pages/campus/VolumeRevenus'));
 const PerformanceVendeurs = lazy(() => import('./pages/cantines/PerformanceVendeurs'));
 const SoldeCantines = lazy(() => import('./pages/cantines/SoldeCantines'));
+const SuiviStock = lazy(() => import('./pages/stock/SuiviStock'));
 const ComportementEtudiants = lazy(() => import('./pages/etudiants/ComportementEtudiants'));
 const ComptesSuspendus = lazy(() => import('./pages/etudiants/ComptesSuspendus'));
 const HistoriqueSuspensions = lazy(() => import('./pages/etudiants/HistoriqueSuspensions'));
@@ -104,6 +105,7 @@ export default function App() {
         >
           <Route path="/supervision/dashboard" element={<VueGenerale />} />
           <Route path="/supervision/campus/revenus" element={<VolumeRevenus />} />
+          <Route path="/supervision/stock" element={<SuiviStock />} />
           <Route path="/supervision/cantines/performance" element={<PerformanceVendeurs />} />
           <Route path="/supervision/cantines/solde" element={<SoldeCantines />} />
           <Route path="/supervision/etudiants" element={<ComportementEtudiants />} />
@@ -156,6 +158,7 @@ export default function App() {
           <Route path="/admin/signalements/:id" element={<SignalementDetail />} />
           <Route path="/admin/etudiants/suspensions" element={<ComptesSuspendusAdmin />} />
           <Route path="/admin/partenaires" element={<Candidatures />} />
+          <Route path="/admin/stock" element={<SuiviStock />} />
           <Route path="/admin/transactions" element={<Transactions />} />
           <Route path="/admin/transactions/:ref" element={<TransactionDetail />} />
           <Route path="/admin/retraits" element={<Retraits />} />

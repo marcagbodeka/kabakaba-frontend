@@ -40,13 +40,13 @@ export default function VolumeRevenus() {
     <>
       <Topbar
         icon={BarChart3}
-        breadcrumb={[{ label: 'Par campus' }, { label: 'Volume & revenus' }]}
+        breadcrumb={[{ label: 'Finances' }, { label: 'Volume & revenus' }]}
       >
         <DateRangePicker value={range} onChange={setRange} />
       </Topbar>
       <PageContent>
         <div className="page-header">
-      <div className="eyebrow">Supervision · Analyse campus</div>
+      <div className="eyebrow">Supervision · Finances</div>
           <h1>Volume & revenus</h1>
           <p>Détails financiers de l'application</p>
         </div>

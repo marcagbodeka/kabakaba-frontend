@@ -9,13 +9,13 @@ import { getOrders } from '../../../services/domain/ordersService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
 import { getVendors } from '../../../services/domain/vendorsService';
 import { startOfDay, daysAgo } from '../../../utils/dates';
-import { ORDER_STATUS_LABEL, PENDING_AMOUNT_STATUSES } from '../../../utils/orderStatus';
+import { ORDER_STATUS_LABEL, PENDING_AMOUNT_STATUSES, consumptionModeLabel } from '../../../utils/orderStatus';
 
 const PAGE_SIZE = 10;
 
 const TYPE_LABEL = {
   DEPOSIT: 'Recharge', PAYMENT: 'Commande', REFUND: 'Remboursement',
-  SALE: 'Vente créditée', WITHDRAWAL: 'Retrait',
+  SALE: 'Vente créditée', WITHDRAWAL: 'Retrait', REFERRAL_BONUS: 'Bonus de parrainage',
 };
 // Classe de badge par type — cohérent avec les badges utilisés partout
 // ailleurs dans le dashboard (styles/dashboard.css), plus de styles inline
@@ -26,15 +26,16 @@ const TYPE_BADGE_CLASS = {
   DEPOSIT: 'badge-peach',
   SALE: 'badge-amber',
   PAYMENT: 'badge-blue',
+  REFERRAL_BONUS: 'badge-green',
 };
 // Unité d'affichage par type : les mouvements d'argent (recharge, retrait) et
-// les mouvements de la vendeuse (vente créditée) sont en FCFA ; les mouvements
+// les mouvements de la vendeuse (vente créditée) sont en FCFA ; le bonus de parrainage et les mouvements
 // liés aux commandes de l'étudiant (débit, remboursement) sont en tickets,
 // l'unité interne de l'app.
-const TICKET_TYPES = new Set(['PAYMENT', 'REFUND']);
+const TICKET_TYPES = new Set(['PAYMENT', 'REFUND', 'REFERRAL_BONUS']);
 const COMPLETED_LABEL = {
   PAYMENT: 'Débité', DEPOSIT: 'Confirmé', REFUND: 'Effectué', WITHDRAWAL: 'Versé',
-  SALE: 'Crédité',
+  SALE: 'Crédité', REFERRAL_BONUS: 'Crédité',
 };
 
 function initialsOf(name) {
@@ -188,6 +189,7 @@ export default function Transactions() {
                   <button className={`pill${typeFilter === 'REFUND' ? ' active' : ''}`} onClick={() => setTypeFilter('REFUND')}>Remboursement</button>
                   <button className={`pill${typeFilter === 'SALE' ? ' active' : ''}`} onClick={() => setTypeFilter('SALE')}>Vente créditée</button>
                   <button className={`pill${typeFilter === 'WITHDRAWAL' ? ' active' : ''}`} onClick={() => setTypeFilter('WITHDRAWAL')}>Retrait</button>
+                  <button className={`pill${typeFilter === 'REFERRAL_BONUS' ? ' active' : ''}`} onClick={() => setTypeFilter('REFERRAL_BONUS')}>Bonus de parrainage</button>
                 </div>
               </div>
               <div className="filter-group">
@@ -274,7 +276,7 @@ export default function Transactions() {
                       <span className="initials init-indigo" style={{ width: 28, height: 28, fontSize: 11 }}>{initialsOf(studentName)}</span>
                       <div>
                         <div style={{ fontWeight: 600, fontSize: 14 }}>{studentName} · {o.vendor?.canteenName}</div>
-                        <div style={{ fontSize: 12, color: 'var(--muted)' }}>Commande #{o.id.slice(0, 8)} · {ORDER_STATUS_LABEL[o.status] || o.status} · depuis {minutesAgo(o.createdAt)} min</div>
+                        <div style={{ fontSize: 12, color: 'var(--muted)' }}>Commande {o.orderNumber} · {consumptionModeLabel(o)} · {ORDER_STATUS_LABEL[o.status] || o.status} · depuis {minutesAgo(o.createdAt)} min</div>
                       </div>
                     </div>
                     <span style={{ fontWeight: 700, color: 'var(--orange)' }}>{o.totalTickets} tickets</span>
@@ -298,17 +300,19 @@ export default function Transactions() {
             {refundError && <div className="notice-banner notice-error" style={{ margin: '14px 22px 0' }}>{refundError}</div>}
             <div className="table-scroll" style={{ marginTop: 16 }}>
               <table>
-                <thead><tr><th>Réf.</th><th>Étudiant</th><th>Vendeur</th><th>Montant</th><th>Date</th><th>Motif</th></tr></thead>
+                <thead><tr><th>Réf.</th><th>N°</th><th>Étudiant</th><th>Vendeur</th><th>Mode</th><th>Montant</th><th>Date</th><th>Motif</th></tr></thead>
                 <tbody>
-                  {refundLoading && <tr><td colSpan={6} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
-                  {!refundLoading && !refundError && refundOrders.length === 0 && <tr><td colSpan={6} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun remboursement sur cette période.</td></tr>}
+                  {refundLoading && <tr><td colSpan={8} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
+                  {!refundLoading && !refundError && refundOrders.length === 0 && <tr><td colSpan={8} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun remboursement sur cette période.</td></tr>}
                   {refundOrders.map((o) => {
                     const studentName = `${o.student?.firstName ?? ''} ${o.student?.lastName ?? ''}`.trim() || '—';
                     return (
                       <tr key={o.id}>
                         <td style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, color: 'var(--indigo)' }}>#{o.id.slice(0, 8)}</td>
+                        <td style={{ fontWeight: 600 }}>{o.orderNumber}</td>
                         <td>{studentName}</td>
                         <td>{o.vendor?.canteenName || '—'}</td>
+                        <td style={{ fontSize: 13 }}>{consumptionModeLabel(o)}</td>
                         <td style={{ fontWeight: 700, color: '#DC2626' }}>{o.refundedTickets} tickets</td>
                         <td style={{ fontSize: 13, color: 'var(--muted)' }}>{formatDateTime(o.cancelledAt)}</td>
                         <td style={{ fontSize: 13, color: '#475569' }}>{o.cancellationReason || '—'}</td>

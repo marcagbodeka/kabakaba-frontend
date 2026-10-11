@@ -6,6 +6,7 @@ import {
   UserPlus,
   Monitor,
   Banknote,
+  Package,
   Settings,
 } from 'lucide-react';
 
@@ -51,6 +52,7 @@ export const navSections = [
     items: [
       { label: 'Transactions', path: '/admin/transactions', icon: Monitor },
       { label: 'Retraits', path: '/admin/retraits', icon: Banknote },
+      { label: 'Suivi du stock', path: '/admin/stock', icon: Package },
     ],
   },
   {

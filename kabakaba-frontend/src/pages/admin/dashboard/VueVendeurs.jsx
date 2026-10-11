@@ -5,7 +5,7 @@ import PageContent from '../../../components/PageContent';
 import DateRangePicker from '../../../components/DateRangePicker';
 import LineChart from '../../../components/LineChart';
 import { chartPeriodTitle, formatChartDate } from '../../../utils/chartLabels';
-import { getCampusComparison, getTopCanteens } from '../../../services/domain/analyticsService';
+import { getOrdersSummary, getTopCanteens } from '../../../services/domain/analyticsService';
 import { getVendors } from '../../../services/domain/vendorsService';
 import { getNewPartnerApplications } from '../../../services/domain/applicationsService';
 import { countOrdersByStatus } from '../../../services/domain/ordersService';
@@ -76,13 +76,14 @@ export default function VueVendeurs() {
         const [
           vendorsRes,
           todayCanteens,
-          campusComparison1d,
+          ordersTwoDays,
           newPartners,
           statusCounts,
         ] = await Promise.all([
           getVendors(1, 100),
           getTopCanteens(1, 5),
-          getCampusComparison(1),
+          // Hier et aujourd'hui (jours UTC) : daily[0] = hier, daily[1] = aujourd'hui.
+          getOrdersSummary({ from: daysAgo(1), to: startOfDay(new Date()) }),
           getNewPartnerApplications(),
           Promise.all(
             Object.entries(STATUS_GROUPS).map(async ([label, statuses]) => {
@@ -94,7 +95,7 @@ export default function VueVendeurs() {
         setLive({
           vendors: vendorsRes.data || [],
           todayCanteens,
-          campusComparison1d,
+          ordersTwoDays,
           newPartners: newPartners.data || [],
           statusCounts,
         });
@@ -111,11 +112,11 @@ export default function VueVendeurs() {
       setRangeLoading(true);
       setRangeError(null);
       try {
-        const [campusComparisonRange, topCanteensRange] = await Promise.all([
-          getCampusComparison(undefined, range),
+        const [ordersRange, topCanteensRange] = await Promise.all([
+          getOrdersSummary(range),
           getTopCanteens(undefined, 50, range),
         ]);
-        setAnalysis({ campusComparisonRange, topCanteensRange });
+        setAnalysis({ ordersRange, topCanteensRange });
       } catch (err) {
         setRangeError(err.message || "Impossible de charger l'analyse sur cette période.");
       } finally {
@@ -150,7 +151,7 @@ export default function VueVendeurs() {
   const {
     vendors,
     todayCanteens,
-    campusComparison1d,
+    ordersTwoDays,
     newPartners,
     statusCounts,
   } = live;
@@ -160,8 +161,8 @@ export default function VueVendeurs() {
   const busyCount = vendors.filter((v) => v.capacityStatus === 'BUSY').length;
   const closedCount = vendors.filter((v) => v.capacityStatus === 'CLOSED').length;
 
-  const ordersToday = campusComparison1d.summary.totalOrders;
-  const ordersYesterday = campusComparison1d.summary.totalOrdersPrevPeriod;
+  const ordersYesterday = ordersTwoDays.daily[0]?.orders ?? 0;
+  const ordersToday = ordersTwoDays.daily[1]?.orders ?? 0;
   const ordersDeltaPct = ordersYesterday > 0 ? Math.round(((ordersToday - ordersYesterday) / ordersYesterday) * 100) : null;
 
   const statutTempsReel = vendors
@@ -189,11 +190,11 @@ export default function VueVendeurs() {
   ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   // --- Bloc analyse (dépend de `range`) ---
-  const campusRange = analysis?.campusComparisonRange;
+  const ordersRange = analysis?.ordersRange;
   const topCanteensRange = analysis?.topCanteensRange ?? [];
 
-  const dayLabels = campusRange?.dailyVolume?.labels ?? [];
-  const dailySeries = campusRange?.dailyVolume?.series?.['Tous les campus'] ?? [];
+  const dayLabels = (ordersRange?.daily ?? []).map((d) => d.date);
+  const dailySeries = (ordersRange?.daily ?? []).map((d) => d.orders);
 
   const classement = topCanteensRange
     .filter((c) => c.name.toLowerCase().includes(search.trim().toLowerCase()))
@@ -239,11 +240,32 @@ export default function VueVendeurs() {
             <div className="kpi-sub">{busyCount} occupée(s) · {closedCount} fermée(s)</div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-label">Commandes (24h)</div>
+            <div className="kpi-label">Commandes aujourd&apos;hui</div>
             <div className="kpi-value kpi-value-sm">
               {ordersToday} {ordersDeltaPct !== null && <TrendBadge value={ordersDeltaPct} />}
             </div>
-            <div className="kpi-sub">vs 24h précédentes : {ordersYesterday}</div>
+            <div className="kpi-sub">vs hier : {ordersYesterday}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Chiffre d&apos;affaires</div>
+            <div className="kpi-value kpi-value-sm">
+              {rangeLoading ? '—' : `${(ordersRange?.totals.revenueTickets ?? 0).toLocaleString('fr-FR')} FCFA`}
+            </div>
+            <div className="kpi-sub">sur la période choisie</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Commandes annulées</div>
+            <div className="kpi-value kpi-value-sm">
+              {rangeLoading ? '—' : (ordersRange?.totals.cancelledOrders ?? 0).toLocaleString('fr-FR')}
+            </div>
+            <div className="kpi-sub">sur la période choisie</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Commandes non récupérées</div>
+            <div className="kpi-value kpi-value-sm">
+              {rangeLoading ? '—' : (ordersRange?.totals.unclaimedOrders ?? 0).toLocaleString('fr-FR')}
+            </div>
+            <div className="kpi-sub">sur la période choisie</div>
           </div>
         </div>
 

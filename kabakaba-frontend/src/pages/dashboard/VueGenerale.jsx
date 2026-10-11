@@ -5,9 +5,9 @@ import PageContent from '../../components/PageContent';
 import DateRangePicker from '../../components/DateRangePicker';
 import LineChart from '../../components/LineChart';
 import { chartPeriodTitle, formatChartDate } from '../../utils/chartLabels';
-import { getCampusComparison, getRevenueBreakdown } from '../../services/domain/analyticsService';
+import { getOrdersSummary, getRevenueBreakdown } from '../../services/domain/analyticsService';
 import { getSupervisionStats } from '../../services/domain/adminStatsService';
-import { startOfDay, daysAgo } from '../../utils/dates';
+import { startOfDay, daysAgo, previousRange } from '../../utils/dates';
 
 function formatFcfa(n) {
   return `${Number(n).toLocaleString('fr-FR')} FCFA`;
@@ -32,7 +32,8 @@ function TrendBadge({ value }) {
 
 export default function VueGenerale() {
   const [range, setRange] = useState({ from: daysAgo(6), to: startOfDay(new Date()) });
-  const [campus, setCampus] = useState(null);
+  const [orders, setOrders] = useState(null);
+  const [prevOrders, setPrevOrders] = useState(null);
   const [revenue, setRevenue] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -43,12 +44,14 @@ export default function VueGenerale() {
       setLoading(true);
       setError(null);
       try {
-        const [campusData, revenueData, statsData] = await Promise.all([
-          getCampusComparison(undefined, range),
+        const [ordersData, prevOrdersData, revenueData, statsData] = await Promise.all([
+          getOrdersSummary(range),
+          getOrdersSummary(previousRange(range)),
           getRevenueBreakdown(undefined, range),
           getSupervisionStats(),
         ]);
-        setCampus(campusData);
+        setOrders(ordersData);
+        setPrevOrders(prevOrdersData);
         setRevenue(revenueData);
         setStats(statsData);
       } catch (err) {
@@ -59,20 +62,18 @@ export default function VueGenerale() {
     })();
   }, [range]);
 
-  const summary = campus?.summary;
+  const totals = orders?.totals;
   const revSummary = revenue?.summary;
-  const revenueChange = summary ? pctChange(summary.totalRevenue, summary.totalRevenuePrevPeriod) : null;
+  const revenueChange = totals && prevOrders ? pctChange(totals.revenueTickets, prevOrders.totals.revenueTickets) : null;
 
-  const dailySeries = campus?.dailyVolume?.series?.['Tous les campus'] ?? [];
-  const dayLabels = campus?.dailyVolume?.labels ?? [];
+  const dailySeries = (orders?.daily ?? []).map((d) => d.orders);
+  const dayLabels = (orders?.daily ?? []).map((d) => d.date);
 
-  let completedOrders = 0;
-  for (const c of campus?.campuses ?? []) {
-    completedOrders += Math.round((c.orders * c.completionRate) / 100);
-  }
-  const totalOrders = summary?.totalOrders ?? 0;
-  const completedPct = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
-  const otherPct = totalOrders > 0 ? 100 - completedPct : 0;
+  const totalOrders = totals?.orders ?? 0;
+  const completedOrders = totals?.receivedOrders ?? 0;
+  const cancelledOrders = totals?.cancelledOrders ?? 0;
+  const otherOrders = Math.max(0, totalOrders - completedOrders - cancelledOrders);
+  const pctOfOrders = (n) => (totalOrders > 0 ? Math.round((n / totalOrders) * 100) : 0);
 
   const revenueBreakdown = [
     { label: 'Revenus Générés', value: revSummary?.surplus ?? 0 },
@@ -81,8 +82,9 @@ export default function VueGenerale() {
   ];
 
   const statusBars = [
-    { value: `${completedPct}%`, height: `${completedPct}%`, color: '#1B2A6B', opacity: 0.88, label: 'Complétées' },
-    { value: `${otherPct}%`, height: `${otherPct}%`, color: '#F07840', opacity: 0.85, label: 'En cours / autres' },
+    { value: `${pctOfOrders(completedOrders)}%`, height: `${pctOfOrders(completedOrders)}%`, color: '#1B2A6B', opacity: 0.88, label: 'Complétées' },
+    { value: `${pctOfOrders(cancelledOrders)}%`, height: `${pctOfOrders(cancelledOrders)}%`, color: '#F59E0B', opacity: 0.88, label: 'Annulées' },
+    { value: `${pctOfOrders(otherOrders)}%`, height: `${pctOfOrders(otherOrders)}%`, color: '#F07840', opacity: 0.85, label: 'En cours / autres' },
   ];
 
   return (
@@ -94,7 +96,7 @@ export default function VueGenerale() {
         <div className="page-header">
       <div className="eyebrow">Supervision · Tableau de bord</div>
           <h1>Vue générale</h1>
-          <p>Synthèse de l&apos;activité kabakaba sur l&apos;ensemble des campus</p>
+          <p>Synthèse de l&apos;activité kabakaba</p>
         </div>
 
         {error && (
@@ -113,7 +115,7 @@ export default function VueGenerale() {
           <div className="kpi-card">
             <div className="kpi-label">Chiffre d&apos;affaires</div>
             <div className="kpi-value kpi-value-sm">
-              {loading ? '—' : formatFcfa(summary?.totalRevenue ?? 0)} {!loading && <TrendBadge value={revenueChange} />}
+              {loading ? '—' : formatFcfa(totals?.revenueTickets ?? 0)} {!loading && <TrendBadge value={revenueChange} />}
             </div>
           </div>
           <div className="kpi-card">
@@ -129,6 +131,34 @@ export default function VueGenerale() {
               {loading ? '—' : (stats?.activeVendors30d ?? 0).toLocaleString('fr-FR')}
             </div>
             <div className="kpi-sub">30 derniers jours</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Étudiants inscrits</div>
+            <div className="kpi-value kpi-value-sm">
+              {loading ? '—' : (stats?.totalStudents ?? 0).toLocaleString('fr-FR')}
+            </div>
+            <div className="kpi-sub">au total</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Vendeuses</div>
+            <div className="kpi-value kpi-value-sm">
+              {loading ? '—' : (stats?.totalVendors ?? 0).toLocaleString('fr-FR')}
+            </div>
+            <div className="kpi-sub">au total</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Commandes annulées</div>
+            <div className="kpi-value kpi-value-sm">
+              {loading ? '—' : cancelledOrders.toLocaleString('fr-FR')}
+            </div>
+            <div className="kpi-sub">sur la période</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-label">Commandes non récupérées</div>
+            <div className="kpi-value kpi-value-sm">
+              {loading ? '—' : (totals?.unclaimedOrders ?? 0).toLocaleString('fr-FR')}
+            </div>
+            <div className="kpi-sub">sur la période</div>
           </div>
         </div>
 
@@ -150,7 +180,7 @@ export default function VueGenerale() {
           <div className="card">
             <div className="card-title">{chartPeriodTitle('Commandes / jour', dayLabels.length)}</div>
             <LineChart
-              labels={campus?.dailyVolume?.labels ?? []}
+              labels={dayLabels}
               values={dailySeries}
               color="#1B2A6B"
               formatLabel={formatChartDate}

@@ -1,8 +1,9 @@
 import { apiFetch } from '../httpClient';
 
-// Forme confirmée par un vrai appel :
-// { totalUsers, totalVendors, totalOrders, totalPayments, totalTransactions,
-//   activeSuspensions, suspensions30d }
+// Forme (admin.service.ts, getSupervisionStatsUncached) :
+// { totalStudents, totalVendors, totalOrders, cancelledOrders, unclaimedOrders, revenueTickets,
+//   totalPayments, totalTransactions, activeSuspensions, suspensions30d,
+//   activeStudents30d, activeVendors30d }
 export function getSupervisionStats() {
   return apiFetch('/admin/stats');
 }

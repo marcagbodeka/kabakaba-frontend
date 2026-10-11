@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
-  Building2,
+  Banknote,
+  Package,
   Utensils,
   Users,
   Star,
@@ -19,12 +20,13 @@ export const navSections = [
     label: 'Analyse',
     items: [
       {
-        label: 'Par campus',
-        icon: Building2,
+        label: 'Finances',
+        icon: Banknote,
         children: [
           { label: 'Volume & revenus', path: '/supervision/campus/revenus' },
         ],
       },
+      { label: 'Suivi du stock', path: '/supervision/stock', icon: Package },
       {
         label: 'Par cantine',
         icon: Utensils,

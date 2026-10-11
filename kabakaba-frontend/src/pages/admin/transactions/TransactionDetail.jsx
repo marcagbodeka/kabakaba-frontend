@@ -7,18 +7,18 @@ import { getTransaction } from '../../../services/domain/transactionsService';
 
 const TYPE_LABEL = {
   DEPOSIT: 'Recharge', PAYMENT: 'Commande', REFUND: 'Remboursement',
-  SALE: 'Vente créditée', WITHDRAWAL: 'Retrait',
+  SALE: 'Vente créditée', WITHDRAWAL: 'Retrait', REFERRAL_BONUS: 'Bonus de parrainage',
 };
-// Les mouvements de commande de l'étudiant sont en tickets ; recharge, retrait et
+// Les mouvements de commande de l'étudiant et le bonus de parrainage sont en tickets ; recharge, retrait et
 // vente créditée à la cantine sont en FCFA.
-const TICKET_TYPES = new Set(['PAYMENT', 'REFUND']);
+const TICKET_TYPES = new Set(['PAYMENT', 'REFUND', 'REFERRAL_BONUS']);
 const TYPE_BADGE_CLASS = {
   REFUND: 'badge-red', WITHDRAWAL: 'badge-green', DEPOSIT: 'badge-peach',
-  PAYMENT: 'badge-blue', SALE: 'badge-amber',
+  PAYMENT: 'badge-blue', SALE: 'badge-amber', REFERRAL_BONUS: 'badge-green',
 };
 const COMPLETED_LABEL = {
   PAYMENT: 'Débité', DEPOSIT: 'Confirmé', REFUND: 'Effectué', WITHDRAWAL: 'Versé',
-  SALE: 'Crédité',
+  SALE: 'Crédité', REFERRAL_BONUS: 'Crédité',
 };
 
 function initialsOf(name) {
