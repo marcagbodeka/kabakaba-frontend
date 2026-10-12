@@ -40,7 +40,7 @@ export default function PartnerForm() {
 
     setSubmitting(true);
     try {
-      // CDC 8.2 : mapping vers les noms attendus par CreatePartnerApplicationDto.
+      // Mapping vers les noms attendus par CreatePartnerApplicationDto.
       await submitPartnerApplication({
         structureName: form.structure.trim(),
         contactName: form.contact.trim(),

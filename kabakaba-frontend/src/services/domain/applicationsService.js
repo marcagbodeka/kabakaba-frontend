@@ -18,7 +18,7 @@ export function updatePartnerApplicationStatus(id, status) {
   return apiFetch(`/partner-applications/${id}`, { method: 'PATCH', body: { status } });
 }
 
-// POST /partner-applications — public (CDC 8.2, formulaire "Devenir
+// POST /partner-applications — public (formulaire "Devenir
 // partenaire" du site vitrine). Le DTO backend attend structureName,
 // contactName, phone, email, targetCampus, message — noms différents des
 // champs du formulaire, mappés par l'appelant.

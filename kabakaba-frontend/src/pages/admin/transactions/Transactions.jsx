@@ -155,9 +155,8 @@ export default function Transactions() {
           </div>
           <div className="kpi-card">
             <div className="kpi-label">En attente</div>
-            {/* Le backend nomme encore ce champ `escrow` (transactions.service.ts, getStats) : il désigne les commandes CONFIRMED et IN_PREPARATION. */}
-            <div className="kpi-value" style={{ color: 'var(--orange)' }}>{stats ? `${stats.escrow.total.toLocaleString('fr-FR')} tickets` : '…'}</div>
-            <div className="kpi-sub">{stats ? `${stats.escrow.count} commande${stats.escrow.count === 1 ? '' : 's'} en cours` : '—'}</div>
+            <div className="kpi-value" style={{ color: 'var(--orange)' }}>{stats ? `${stats.pending.total.toLocaleString('fr-FR')} tickets` : '…'}</div>
+            <div className="kpi-sub">{stats ? `${stats.pending.count} commande${stats.pending.count === 1 ? '' : 's'} en cours` : '—'}</div>
           </div>
           <div className="kpi-card">
             <div className="kpi-label">Débits complétés</div>
@@ -173,7 +172,7 @@ export default function Transactions() {
 
         <div className="tab-bar">
           <button className={`tab-btn ${tab === 'all' ? 'active' : ''}`} onClick={() => setTab('all')}>Toutes ({txMeta.total})</button>
-          <button className={`tab-btn ${tab === 'pending' ? 'active' : ''}`} onClick={() => setTab('pending')}>En attente {stats ? `(${stats.escrow.count})` : ''}</button>
+          <button className={`tab-btn ${tab === 'pending' ? 'active' : ''}`} onClick={() => setTab('pending')}>En attente {stats ? `(${stats.pending.count})` : ''}</button>
           <button className={`tab-btn ${tab === 'remb' ? 'active' : ''}`} onClick={() => setTab('remb')}>Remboursements {stats ? `(${stats.refunds.count})` : ''}</button>
         </div>
 
@@ -300,15 +299,14 @@ export default function Transactions() {
             {refundError && <div className="notice-banner notice-error" style={{ margin: '14px 22px 0' }}>{refundError}</div>}
             <div className="table-scroll" style={{ marginTop: 16 }}>
               <table>
-                <thead><tr><th>Réf.</th><th>N°</th><th>Étudiant</th><th>Vendeur</th><th>Mode</th><th>Montant</th><th>Date</th><th>Motif</th></tr></thead>
+                <thead><tr><th>N°</th><th>Étudiant</th><th>Vendeur</th><th>Mode</th><th>Montant</th><th>Date</th><th>Motif</th></tr></thead>
                 <tbody>
-                  {refundLoading && <tr><td colSpan={8} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
-                  {!refundLoading && !refundError && refundOrders.length === 0 && <tr><td colSpan={8} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun remboursement sur cette période.</td></tr>}
+                  {refundLoading && <tr><td colSpan={7} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
+                  {!refundLoading && !refundError && refundOrders.length === 0 && <tr><td colSpan={7} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun remboursement sur cette période.</td></tr>}
                   {refundOrders.map((o) => {
                     const studentName = `${o.student?.firstName ?? ''} ${o.student?.lastName ?? ''}`.trim() || '—';
                     return (
                       <tr key={o.id}>
-                        <td style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, color: 'var(--indigo)' }}>#{o.id.slice(0, 8)}</td>
                         <td style={{ fontWeight: 600 }}>{o.orderNumber}</td>
                         <td>{studentName}</td>
                         <td>{o.vendor?.canteenName || '—'}</td>

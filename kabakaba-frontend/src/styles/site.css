@@ -142,8 +142,7 @@
 }
 
 /* ── Boutons pleins (actions principales du site) ─────────── */
-.btn-primary,
-.btn-accent {
+.btn-primary {
   font-family: inherit;
   font-size: 13.5px;
   font-weight: 700;
@@ -159,8 +158,7 @@
   transition: transform 0.1s, box-shadow 0.15s, background 0.15s;
 }
 
-.btn-primary:active,
-.btn-accent:active {
+.btn-primary:active {
   transform: scale(0.98);
 }
 
@@ -172,16 +170,6 @@
 .btn-primary:hover {
   background: var(--indigo-dark);
   box-shadow: 0 6px 16px -4px rgba(27, 42, 107, 0.4);
-}
-
-.btn-accent {
-  background: var(--orange);
-  color: #fff;
-}
-
-.btn-accent:hover {
-  background: var(--orange-dark, #d9612c);
-  box-shadow: 0 6px 16px -4px rgba(240, 120, 64, 0.5);
 }
 
 /* ── Badges App Store / Google Play ───────────────────────── */

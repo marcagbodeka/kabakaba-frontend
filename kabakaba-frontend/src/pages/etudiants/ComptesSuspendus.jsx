@@ -47,8 +47,7 @@ export default function ComptesSuspendus() {
     load();
   }, []);
 
-  // walletBalance uniquement : escrowBalance n'existe plus côté backend
-  // (champ mort supprimé — il valait toujours 0, jamais maintenu).
+  // Fonds bloqués : solde du portefeuille (walletBalance) des étudiants suspendus.
   const blockedFunds = students.reduce((sum, s) => sum + (s.walletBalance || 0), 0);
 
   return (
@@ -62,7 +61,7 @@ export default function ComptesSuspendus() {
         <div className="page-header">
       <div className="eyebrow">Supervision · Étudiants</div>
           <h1>Comptes suspendus</h1>
-          <p>Liste des étudiants suspendus, avec motif et durée (règle anti-abus, section 6 du CDC)</p>
+          <p>Liste des étudiants suspendus par l&apos;administration, avec motif et durée</p>
         </div>
 
         <div className="kpi-grid">
@@ -89,11 +88,10 @@ export default function ComptesSuspendus() {
         <div className="card">
           <div className="card-title">Étudiants suspendus</div>
           {/* Lecture seule : la levée de suspension est une action de
-              modération réservée à l'Admin web (voir CDC 9.2 — Supervision
-              n'a pas ce droit ; le backend le refuse explicitement,
-              403 "La supervision est en lecture seule sur les comptes
-              utilisateurs"). Traiter une suspension se fait depuis
-              l'espace Admin. */}
+              modération réservée à l'Admin web (la Supervision n'a pas ce
+              droit ; le backend le refuse explicitement, 403 "La supervision
+              est en lecture seule sur les comptes utilisateurs"). Traiter
+              une suspension se fait depuis l'espace Admin. */}
           <div className="card-sub">Consultation uniquement — la levée de suspension se fait depuis l&apos;espace Admin</div>
           <div className="table-scroll">
             <table>

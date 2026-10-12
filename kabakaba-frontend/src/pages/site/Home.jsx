@@ -10,7 +10,7 @@ import '../../styles/site.css';
 
 const FEATURES = [
   { icon: Ticket, tone: 'peach', title: 'Paiement anticipé simple', text: 'Recharge via Moov Flooz ou Mixx by Yas, sans complication.' },
-  { icon: ShieldCheck, tone: 'indigo', title: 'Séquestre sécurisé', text: 'Tes tickets ne sont débités qu\u2019une fois ta commande prête.' },
+  { icon: ShieldCheck, tone: 'indigo', title: 'Paiement sécurisé', text: 'Tes tickets sont débités à la confirmation et remboursés intégralement si la commande est annulée.' },
   { icon: Bell, tone: 'peach', title: 'Suivi en temps réel', text: 'Notifications à chaque étape, jusqu\u2019à la confirmation de réception.' },
 ];
 
