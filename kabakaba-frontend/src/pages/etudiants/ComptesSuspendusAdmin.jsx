@@ -89,7 +89,7 @@ export default function ComptesSuspendusAdmin() {
         <div className="page-header">
       <div className="eyebrow">Admin web · Étudiants</div>
           <h1>Comptes suspendus</h1>
-          <p>Étudiants bloqués pour comportement abusif — {rows.length} actif{rows.length === 1 ? '' : 's'}</p>
+          <p>Étudiants suspendus par l&apos;administration — {rows.length} actif{rows.length === 1 ? '' : 's'}</p>
         </div>
 
         {error && <p style={{ color: '#DC2626', fontSize: 14, marginBottom: 16 }}>{error}</p>}

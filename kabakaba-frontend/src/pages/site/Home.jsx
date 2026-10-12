@@ -11,7 +11,7 @@ import '../../styles/site.css';
 const FEATURES = [
   { icon: Ticket, tone: 'peach', title: 'Paiement anticipé simple', text: 'Recharge via Moov Flooz ou Mixx by Yas, sans complication.' },
   { icon: ShieldCheck, tone: 'indigo', title: 'Paiement sécurisé', text: 'Tes tickets sont débités à la confirmation et remboursés intégralement si la commande est annulée.' },
-  { icon: Bell, tone: 'peach', title: 'Suivi en temps réel', text: 'Notifications à chaque étape, jusqu\u2019à la confirmation de réception.' },
+  { icon: Bell, tone: 'peach', title: 'Suivi en temps réel', text: 'Tu es notifié quand ta commande est confirmée, en préparation et prête.' },
 ];
 
 
@@ -82,7 +82,7 @@ export default function Home() {
             <h3>Tu ne fais plus jamais la queue</h3>
             <p className="desc">
               Tu précommandes ton repas quand ça t&apos;arrange, avant le cours, entre deux
-              amphis, ou la veille au soir. Tu payes directement dans l&apos;app, sans avoir
+              amphis, ou jusqu&apos;à 24 heures à l&apos;avance. Tu payes directement dans l&apos;app, sans avoir
               à chercher de la monnaie, sans attendre au comptoir. Ta commande t&apos;attend,
               prête, dès que tu arrives.
             </p>
@@ -94,7 +94,7 @@ export default function Home() {
             <h3>Vous servez plus vite, vous vendez plus</h3>
             <p className="desc">
               Chaque commande est déjà payée et préparée avant l&apos;arrivée du client, donc
-              plus de file d&apos;attente qui bloque votre cuisine. Vous écoulez vos plats plus
+              plus de file d&apos;attente qui bloque votre cuisine. Vous écoulez vos repas plus
               vite et vous servez beaucoup plus d&apos;étudiants sur la même plage horaire.
               Résultat, vous gagnez plus, tout simplement.
             </p>
