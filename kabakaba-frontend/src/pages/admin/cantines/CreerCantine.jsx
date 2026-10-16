@@ -7,6 +7,14 @@ import Toast from '../../../components/Toast';
 import { createVendor } from '../../../services/domain/vendorsService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
 
+function toVendorPhone(raw) {
+  let digits = String(raw || '').replace(/\D/g, '');
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.startsWith('228') && digits.length === 11) return `+${digits}`;
+  if (digits.length === 8) return `+228${digits}`;
+  return null;
+}
+
 export default function CreerCantine() {
   const navigate = useNavigate();
 
@@ -54,7 +62,9 @@ export default function CreerCantine() {
     if (!vendorName.trim() || !firstName || !lastName) {
       return 'Merci de renseigner le prénom ET le nom du vendeur (ex : "Akosua Mensah").';
     }
-    if (!phone.trim()) return 'Le téléphone de contact est requis.';
+    if (!toVendorPhone(phone)) {
+      return 'Le téléphone doit être un numéro togolais à 8 chiffres (ex. 90 12 34 56).';
+    }
     if (!email.trim()) return "L'email de connexion est requis.";
     if (tempPassword.length < 8) return 'Le mot de passe temporaire doit contenir au moins 8 caractères.';
     if (tempPassword !== confirmPassword) return 'Les mots de passe ne correspondent pas.';
@@ -72,7 +82,7 @@ export default function CreerCantine() {
     setToast(null);
     try {
       await createVendor(
-        { firstName, lastName, phone: phone.trim(), email: email.trim(), temporaryPassword: tempPassword },
+        { firstName, lastName, phone: toVendorPhone(phone), email: email.trim(), temporaryPassword: tempPassword },
         { canteenName: canteenName.trim(), campusIds: selectedCampusIds },
       );
       navigate('/admin/cantines');
