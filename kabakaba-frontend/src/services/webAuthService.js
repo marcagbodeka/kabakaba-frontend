@@ -50,12 +50,16 @@ export function logout() {
   return apiFetch('/web-auth/logout', { method: 'POST' });
 }
 
-// ─── Réinitialisation de mot de passe (TOTP ou clé de secours) ──────
-// Facteur unique volontaire : voir web-auth.service.ts côté backend pour
-// le détail du compromis de sécurité (pas de canal externe email/SMS).
+export function startPasswordReset(email) {
+  return apiFetch('/web-auth/password-reset/start', { method: 'POST', body: { email }, auth: false });
+}
 
-export function verifyPasswordReset(email, code) {
-  return apiFetch('/web-auth/password-reset/verify', { method: 'POST', body: { email, code }, auth: false });
+export function verifyPasswordReset(email, smsCode, code) {
+  return apiFetch('/web-auth/password-reset/verify', {
+    method: 'POST',
+    body: { email, smsCode, code },
+    auth: false,
+  });
 }
 
 export function confirmPasswordReset(resetSessionToken, newPassword) {

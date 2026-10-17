@@ -23,7 +23,7 @@ export default function AccountFormModal({ role, roleLabel, onClose, onCreated }
     setError(null);
 
     const phone = form.phone.trim();
-    if (phone && !PHONE_REGEX.test(phone)) {
+    if (!PHONE_REGEX.test(phone)) {
       setError('Numéro invalide — utilisez le format international, ex. +22890000000 (pas de 00, pas d\'espaces).');
       return;
     }
@@ -36,7 +36,7 @@ export default function AccountFormModal({ role, roleLabel, onClose, onCreated }
       // @IsPhoneNumber() même quand le champ est censé être facultatif.
       const result = await provisionWebUser({
         ...form,
-        phone: phone || undefined,
+        phone,
         role,
         temporaryPassword: tempPassword,
       });
@@ -84,13 +84,15 @@ export default function AccountFormModal({ role, roleLabel, onClose, onCreated }
                 <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               </div>
               <div className="acct-field">
-                <label>Téléphone <span className="acct-optional">(optionnel)</span></label>
+                <label>Téléphone</label>
                 <input
                   type="tel"
+                  required
                   placeholder="+22890000000"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 />
+                <p className="acct-hint">Requis pour réinitialiser le mot de passe par SMS.</p>
               </div>
               <div className="acct-field">
                 <label>Mot de passe temporaire</label>

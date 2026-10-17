@@ -37,7 +37,7 @@ function ForgotPasswordShell({ theme, onToggleTheme, children }) {
           <div className={styles.illuCopy}>
             <div className={styles.illuEyebrow}>Accès restreint</div>
             <div className={styles.illuTitle}>
-              Votre application d'authentification suffit à prouver qui vous êtes — aucun email n'est envoyé.
+              Un SMS et votre application d'authentification sont tous les deux nécessaires.
             </div>
           </div>
         </div>
@@ -74,7 +74,8 @@ export default function ForgotPassword({ onBackToLogin }) {
   const [step, setStep] = useState('email'); // 'email' | 'code' | 'password' | 'done'
 
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(''));
+  const [sms, setSms] = useState(Array(OTP_LENGTH).fill(''));
+  const [authenticatorCode, setAuthenticatorCode] = useState('');
   const [resetSessionToken, setResetSessionToken] = useState(null);
   const [warning, setWarning] = useState(null);
 
@@ -84,31 +85,39 @@ export default function ForgotPassword({ onBackToLogin }) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const otpRefs = useRef([]);
+  const smsRefs = useRef([]);
 
   const strength = checkPasswordStrength(newPw);
   const passwordsMatch = newPw.length > 0 && newPw === confirmPw;
 
   useEffect(() => {
-    if (step === 'code') setTimeout(() => otpRefs.current[0]?.focus(), 50);
+    if (step === 'code') setTimeout(() => smsRefs.current[0]?.focus(), 50);
   }, [step]);
 
-  const handleOtpChange = (index, value) => {
+  const handleSmsChange = (index, value) => {
     const digit = value.replace(/\D/g, '').slice(-1);
-    const next = [...otp];
+    const next = [...sms];
     next[index] = digit;
-    setOtp(next);
-    if (digit && index < OTP_LENGTH - 1) otpRefs.current[index + 1]?.focus();
+    setSms(next);
+    if (digit && index < OTP_LENGTH - 1) smsRefs.current[index + 1]?.focus();
   };
 
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) otpRefs.current[index - 1]?.focus();
+  const handleSmsKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !sms[index] && index > 0) smsRefs.current[index - 1]?.focus();
   };
 
-  const handleEmailSubmit = (e) => {
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    setStep('code');
+    setLoading(true);
+    try {
+      await webAuth.startPasswordReset(email);
+      setStep('code');
+    } catch (err) {
+      setError(err.message || 'Impossible d’envoyer le code.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCodeSubmit = async (e) => {
@@ -116,8 +125,8 @@ export default function ForgotPassword({ onBackToLogin }) {
     setError(null);
     setLoading(true);
     try {
-      const code = otp.join('');
-      const result = await webAuth.verifyPasswordReset(email, code);
+      const smsCode = sms.join('');
+      const result = await webAuth.verifyPasswordReset(email, smsCode, authenticatorCode.trim());
       setResetSessionToken(result.resetSessionToken);
       if (result.warning) setWarning(result.warning);
       setStep('password');
@@ -160,7 +169,7 @@ export default function ForgotPassword({ onBackToLogin }) {
           Mot de passe oublié<span className={styles.accent}>.</span>
         </div>
         <div className={styles.formSub}>
-          Entrez votre email, puis le code de votre application d'authentification.
+          Si le compte peut être réinitialisé, un SMS part vers le téléphone enregistré. Le code d'authentification sera demandé ensuite.
         </div>
         <form onSubmit={handleEmailSubmit} className={styles.formStep}>
           <div className={styles.field}>
@@ -176,8 +185,9 @@ export default function ForgotPassword({ onBackToLogin }) {
               />
             </div>
           </div>
-          <button type="submit" className={styles.btnPrimary}>
-            Continuer
+          {error && <div className={styles.fieldError}>{error}</div>}
+          <button type="submit" className={styles.btnPrimary} disabled={loading}>
+            {loading ? 'Envoi...' : 'Continuer'}
           </button>
         </form>
         <a className={styles.linkCenter} onClick={onBackToLogin}>
@@ -195,26 +205,37 @@ export default function ForgotPassword({ onBackToLogin }) {
           Vérification<span className={styles.accent}>.</span>
         </div>
         <div className={styles.formSub}>
-          Entrez le code à 6 chiffres de votre application d'authentification, ou l'une de vos clés de secours.
+          Entrez le code reçu par SMS, puis le code de votre application d'authentification ou une clé de secours.
         </div>
         <form onSubmit={handleCodeSubmit} className={styles.formStep}>
+          <div className={styles.fieldHint} style={{ marginBottom: 8 }}>Code SMS</div>
           <div className={styles.otpRow}>
-            {otp.map((digit, i) => (
+            {sms.map((digit, i) => (
               <input
                 key={i}
-                ref={(el) => (otpRefs.current[i] = el)}
+                ref={(el) => (smsRefs.current[i] = el)}
                 className={`${styles.otpBox} ${digit ? styles.filled : ''}`}
                 type="text"
                 inputMode="numeric"
                 maxLength={1}
                 value={digit}
-                onChange={(e) => handleOtpChange(i, e.target.value)}
-                onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                onChange={(e) => handleSmsChange(i, e.target.value)}
+                onKeyDown={(e) => handleSmsKeyDown(i, e)}
               />
             ))}
           </div>
-          <div style={{ fontSize: 12, color: 'var(--auth-muted)', marginBottom: 16, textAlign: 'center' }}>
-            Vous pouvez aussi coller une clé de secours (ex. A1B2-C3D4-E5F6-G7H8) dans le premier champ.
+          <div className={styles.field} style={{ marginTop: 16 }}>
+            <div className={styles.inputWrap}>
+              <ShieldCheck size={16} />
+              <input
+                type="text"
+                required
+                autoComplete="one-time-code"
+                value={authenticatorCode}
+                onChange={(e) => setAuthenticatorCode(e.target.value)}
+                placeholder="Code d'authentification ou clé de secours"
+              />
+            </div>
           </div>
           {error && <div className={styles.fieldError}>{error}</div>}
           <button type="submit" className={styles.btnPrimary} disabled={loading}>
