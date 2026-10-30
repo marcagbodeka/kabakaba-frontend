@@ -41,9 +41,9 @@ function RankTable({ rows, valueLabel, valueKey, loading, emptyText }) {
           <tr><th>Rang</th><th>Composant</th><th>Cantine</th><th>{valueLabel}</th></tr>
         </thead>
         <tbody>
-          {loading && <tr><td colSpan={4} style={{ color: 'var(--muted)', padding: '24px 0' }}>Chargement…</td></tr>}
+          {loading && <tr><td colSpan={4} style={{ color: 'var(--muted)' }}>Chargement…</td></tr>}
           {!loading && rows.length === 0 && (
-            <tr><td colSpan={4} style={{ color: 'var(--muted)', padding: '24px 0' }}>{emptyText}</td></tr>
+            <tr><td colSpan={4} style={{ color: 'var(--muted)' }}>{emptyText}</td></tr>
           )}
           {!loading && rows.map((row, i) => (
             <tr key={row.componentId} className={i === 0 ? 'rank1' : ''}>

@@ -121,8 +121,8 @@ export default function Retraits() {
                 </tr>
               </thead>
               <tbody>
-                {loading && <tr><td colSpan={8} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
-                {!loading && withdrawals.length === 0 && <tr><td colSpan={8} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun retrait ne correspond à ce filtre.</td></tr>}
+                {loading && <tr><td colSpan={8} style={{ color: 'var(--muted)' }}>Chargement…</td></tr>}
+                {!loading && withdrawals.length === 0 && <tr><td colSpan={8} style={{ color: 'var(--muted)' }}>Aucun retrait ne correspond à ce filtre.</td></tr>}
                 {!loading && withdrawals.map((w) => (
                   <tr key={w.id} onClick={() => navigate(`/admin/retraits/${encodeURIComponent(w.id)}`)} style={{ cursor: 'pointer' }}>
                     <td style={{ fontWeight: 600 }}>

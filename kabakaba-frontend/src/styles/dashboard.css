@@ -321,33 +321,40 @@
 /* ── Tableaux denses ─────────────────────────────────── */
 .table-scroll {
   overflow-x: auto;
-  margin: -2px -2px 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 13.5px;
 }
 
 table th {
   text-align: left;
   font-size: 11px;
   font-weight: 700;
-  color: var(--muted-light);
+  color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 0 12px 10px;
+  padding: 14px 18px;
+  background: #F8FAFC;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
 table td {
-  padding: 11px 12px;
+  padding: 13px 18px;
   border-bottom: 1px solid var(--border);
   color: var(--text);
   white-space: nowrap;
   vertical-align: middle;
+}
+
+table td[colspan] {
+  padding: 22px 18px;
+  white-space: normal;
+  color: var(--muted);
 }
 
 table tr:last-child td {
@@ -360,6 +367,10 @@ tbody tr {
 
 tbody tr:hover {
   background: var(--indigo-soft);
+}
+
+tbody tr:has(td[colspan]):hover {
+  background: transparent;
 }
 
 table tr.rank1 td {
@@ -399,10 +410,16 @@ table tr.rank1 td {
   color: #fff;
 }
 
-.name-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* Reste une cellule de tableau : display:flex sur un td le sort de la grille
+   et décale les colonnes par rapport aux en-têtes. */
+.name-cell > .initials {
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.name-cell > div {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 /* ── Statuts ponctuels ────────────────────────────────── */

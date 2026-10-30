@@ -163,10 +163,10 @@ export default function FileSignalements() {
                 </tr>
               </thead>
               <tbody>
-                {loading && <tr><td colSpan={10} style={{ padding: '24px 0', color: 'var(--muted)' }}>Chargement…</td></tr>}
-                {error && <tr><td colSpan={10} style={{ padding: '24px 0', color: '#DC2626' }}>{error}</td></tr>}
+                {loading && <tr><td colSpan={10} style={{ color: 'var(--muted)' }}>Chargement…</td></tr>}
+                {error && <tr><td colSpan={10} style={{ color: '#DC2626' }}>{error}</td></tr>}
                 {!loading && !error && reports.length === 0 && (
-                  <tr><td colSpan={10} style={{ padding: '24px 0', color: 'var(--muted)' }}>Aucun signalement ne correspond à ces filtres.</td></tr>
+                  <tr><td colSpan={10} style={{ color: 'var(--muted)' }}>Aucun signalement ne correspond à ces filtres.</td></tr>
                 )}
                 {!loading && !error && reports.map((l) => {
                   const studentName = `${l.student?.firstName ?? ''} ${l.student?.lastName ?? ''}`.trim() || '—';
