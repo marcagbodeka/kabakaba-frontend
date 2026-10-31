@@ -36,3 +36,8 @@ export function getVendorForAdmin(id) {
 export function updateVendor(id, patch) {
   return apiFetch(`/vendors/${id}`, { method: 'PATCH', body: patch });
 }
+
+// POST /vendors/:id/reset-access — mot de passe temporaire affiché une seule fois.
+export function resetVendorAccess(id) {
+  return apiFetch(`/vendors/${id}/reset-access`, { method: 'POST', body: {} });
+}

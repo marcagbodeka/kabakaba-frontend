@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Utensils, X, Building2 } from 'lucide-react';
 import Topbar from '../../../components/Topbar';
 import PageContent from '../../../components/PageContent';
-import { getVendorForAdmin, updateVendor } from '../../../services/domain/vendorsService';
+import { getVendorForAdmin, resetVendorAccess, updateVendor } from '../../../services/domain/vendorsService';
 import { findAllCampuses } from '../../../services/domain/campusesService';
 import { CAPACITY_LABEL } from '../../../utils/vendorCapacity';
 
@@ -32,6 +32,11 @@ export default function CantineFiche() {
   const [canteenName, setCanteenName] = useState('');
   const [savingName, setSavingName] = useState(false);
   const [nameError, setNameError] = useState(null);
+
+  const [resetting, setResetting] = useState(false);
+  const [resetPassword, setResetPassword] = useState(null);
+  const [resetError, setResetError] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [motif, setMotif] = useState('');
@@ -66,6 +71,21 @@ export default function CantineFiche() {
     const affiliatedIds = new Set((vendor?.campuses ?? []).map((c) => c.id));
     return allCampuses.filter((c) => !affiliatedIds.has(c.id));
   }, [allCampuses, vendor]);
+
+  async function handleResetAccess() {
+    setResetting(true);
+    setResetError(null);
+    setCopied(false);
+    try {
+      const result = await resetVendorAccess(id);
+      setResetPassword(result?.temporaryPassword || '');
+    } catch (err) {
+      setResetPassword(null);
+      setResetError(err.message || 'Réinitialisation impossible.');
+    } finally {
+      setResetting(false);
+    }
+  }
 
   async function handleSaveName() {
     setSavingName(true);
@@ -229,11 +249,41 @@ export default function CantineFiche() {
                   <label className="fg-label">Mot de passe</label>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <input className="fg-input" type="password" value="••••••••••" disabled style={{ flex: 1, background: '#F8FAFC' }} />
-                    <button className="btn-secondary-sm" disabled title="Pas encore disponible : aucun mécanisme de réinitialisation de mot de passe vendeur n'existe côté backend">Réinitialiser</button>
+                    <button type="button" className="btn-secondary-sm" disabled={resetting} onClick={handleResetAccess}>
+                      {resetting ? '…' : 'Réinitialiser'}
+                    </button>
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
-                    La réinitialisation du mot de passe vendeur n&apos;est pas encore disponible.
-                  </div>
+                  {resetError ? (
+                    <div style={{ fontSize: 12, color: 'var(--red, #b42318)', marginTop: 4 }}>{resetError}</div>
+                  ) : null}
+                  {resetPassword ? (
+                    <div style={{ marginTop: 10, padding: '12px 14px', background: '#FFF7ED', borderRadius: 10, border: '1px solid #FDBA74' }}>
+                      <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>
+                        Mot de passe temporaire, affiché une seule fois. L’ancien code PIN ne marche plus : la vendeuse se reconnecte avec ce mot de passe, le SMS, puis un nouveau code PIN.
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <strong style={{ fontSize: 18, letterSpacing: '0.04em' }}>{resetPassword}</strong>
+                        <button
+                          type="button"
+                          className="btn-secondary-sm"
+                          onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText(resetPassword);
+                              setCopied(true);
+                            } catch {
+                              setCopied(false);
+                            }
+                          }}
+                        >
+                          {copied ? 'Copié' : 'Copier'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+                      Génère un mot de passe temporaire et coupe les sessions ouvertes.
+                    </div>
+                  )}
                 </div>
               </div>
               <div style={{ marginTop: 14, display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
